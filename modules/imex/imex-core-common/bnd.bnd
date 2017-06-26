@@ -1,0 +1,4 @@
+Bundle-Activator: com.liferay.imex.core.common.util.ImexCoreCommonActivator
+Bundle-Name: imex-core-common
+Bundle-SymbolicName: com.liferay.imex.core.common.util
+Bundle-Version: 1.0.0

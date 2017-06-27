@@ -19,32 +19,7 @@
 	<meta http-equiv="pragma" content="no-cache" />	
 	
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800%7CShadows+Into+Light" rel="stylesheet" type="text/css">
-	
-	<!-- Theme CSS -->
-	<link rel="stylesheet" href="${css_folder}/template/font-awesome/css/font-awesome.min.css">
-
-	<link rel="stylesheet" href="${css_folder}/template/theme.css">
-	<link rel="stylesheet" href="${css_folder}/template/theme-elements.css">
-	<link rel="stylesheet" href="${css_folder}/template/theme-blog.css">
-	<link rel="stylesheet" href="${css_folder}/template/theme-shop.css">
-	<link rel="stylesheet" href="${css_folder}/template/theme-animate.css">
-	<link rel="stylesheet" href="${css_folder}/template/skins/default.css">	
-	<link rel="stylesheet" href="${css_folder}/template/rs-plugin/css/settings.css">
-	<link rel="stylesheet" href="${css_folder}/template/bootstrap-multiselect.css">
-	<link rel="stylesheet" href="${css_folder}/template/custom.css">
-	
-	<link rel="stylesheet" href="${javascript_folder}/template/morris.js/morris.css" />
-	<link rel="stylesheet" href="${javascript_folder}/template/chartist/chartist.min.css" />
-	
-	<link rel="stylesheet" href="${css_folder}/template/select2/css/select2.css" />
-	<link rel="stylesheet" href="${css_folder}/template/select2-bootstrap-theme/select2-bootstrap.css" />
-	<link rel="stylesheet" href="${javascript_folder}/template/jquery-datatables-bs3/assets/css/datatables.css" />	
-
-	<link rel="stylesheet" href="${css_folder}/template/circle-flip-slideshow/css/component.css" media="screen">
-	
-	<link rel="stylesheet" href="${javascript_folder}/template/owl.carousel/assets/owl.carousel.min.css">
-	<link rel="stylesheet" href="${javascript_folder}/template/owl.carousel/assets/owl.theme.default.min.css">	
-	
+		
 	<script src="${javascript_folder}/template/modernizr.min.js"></script>	
 	
 	<@liferay_util["include"] page=top_head_include />
@@ -191,7 +166,7 @@
 							<div class="input-group">
 								<input class="form-control" placeholder="Email Address" name="newsletterEmail" id="newsletterEmail" type="text">
 								<span class="input-group-btn">
-									<button class="btn btn-default" type="submit">Go!</button>
+									<button class="btn btn-primary" type="submit">Go!</button>
 								</span>
 							</div>
 						</form>
@@ -229,7 +204,8 @@
 					<div class="col-md-8">
 						<p class="powered-by">
 							<@liferay.language key="powered-by" /> <a href="http://www.liferay.com" rel="external">Liferay</a>
-						</p>							</div>
+						</p>							
+					</div>
 					<div class="col-md-4">
 						<nav id="sub-menu">
 							<ul>

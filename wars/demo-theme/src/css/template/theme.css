@@ -2295,7 +2295,7 @@ section.section-custom-map-2 section.section {
 }
 /* Home Concept */
 .home-concept {
-	background: transparent url(../../images/template/home-concept.png) no-repeat center 0;
+	background: transparent url(../images/template/home-concept.png) no-repeat center 0 / contain;
 	width: 100%;
 	overflow: hidden;
 }
@@ -2314,7 +2314,7 @@ section.section-custom-map-2 section.section {
 }
 
 .home-concept .process-image {
-	background: transparent url(../../images/template/home-concept-item.png) no-repeat 0 0;
+	background: transparent url(../images/template/home-concept-item.png) no-repeat 0 0;
 	width: 160px;
 	margin: 135px auto 0 auto;
 	padding-bottom: 50px;
@@ -2337,7 +2337,7 @@ section.section-custom-map-2 section.section {
 }
 
 .home-concept .project-image {
-	background: transparent url(../../images/template/home-concept-item.png) no-repeat 100% 0;
+	background: transparent url(../images/template/home-concept-item.png) no-repeat 100% 0;
 	width: 350px;
 	margin: 15px 0 0 -30px;
 	padding-bottom: 45px;
@@ -2346,7 +2346,7 @@ section.section-custom-map-2 section.section {
 }
 
 .home-concept .sun {
-	background: transparent url(../../images/template/home-concept-icons.png) no-repeat 0 0;
+	background: transparent url(../images/template/home-concept-icons.png) no-repeat 0 0;
 	width: 60px;
 	height: 56px;
 	display: block;
@@ -2356,7 +2356,7 @@ section.section-custom-map-2 section.section {
 }
 
 .home-concept .cloud {
-	background: transparent url(../../images/template/home-concept-icons.png) no-repeat 100% 0;
+	background: transparent url(../images/template/home-concept-icons.png) no-repeat 100% 0;
 	width: 116px;
 	height: 56px;
 	display: block;

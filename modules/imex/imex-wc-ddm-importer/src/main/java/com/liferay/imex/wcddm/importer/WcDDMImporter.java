@@ -10,7 +10,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 		immediate = true,
 		property = {
 			"imex.component.description=Web Content DDM importer",
-			"imex.component.priority=1"
+			"service.ranking:Integer=20"
 		},
 		service = Importer.class
 	)

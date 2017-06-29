@@ -1,4 +1,4 @@
-package com.liferay.imex.core.service.importer.tracker;
+package com.liferay.imex.core.service.exporter.tracker;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,35 +13,35 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.liferay.imex.core.api.importer.Importer;
-import com.liferay.imex.core.api.importer.ImporterTracker;
+import com.liferay.imex.core.api.exporter.Exporter;
+import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.osgi.util.ServiceTrackerFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 
-@Component(immediate = true, service = ImporterTracker.class)
-public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer, com.liferay.imex.core.api.importer.Importer>, ImporterTracker {
+@Component(immediate = true, service = ExporterTracker.class)
+public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter, com.liferay.imex.core.api.exporter.Exporter>, ExporterTracker {
 	
-	private static final Log _log = LogFactoryUtil.getLog(ImporterTrackerService.class);
+	private static final Log _log = LogFactoryUtil.getLog(ExporterTrackerService.class);
 
 	private BundleContext _bundleContext;
 	
-	private ServiceTracker<Importer, com.liferay.imex.core.api.importer.Importer> _serviceTracker;
+	private ServiceTracker<Exporter, com.liferay.imex.core.api.exporter.Exporter> _serviceTracker;
 	
-	private Map<String, ServiceReference<Importer>> _serviceReferences = new ConcurrentHashMap<>();;
+	private Map<String, ServiceReference<Exporter>> _serviceReferences = new ConcurrentHashMap<>();;
 
 	@Override
-	public Importer addingService(ServiceReference<Importer> serviceReference) {
+	public Exporter addingService(ServiceReference<Exporter> serviceReference) {
 		
 		addServiceReference(serviceReference);
 		
-		Importer importer = _bundleContext.getService(serviceReference);
+		Exporter exporter = _bundleContext.getService(serviceReference);
 		
-		return importer;
+		return exporter;
 	}
 	
-	public synchronized void addServiceReference(ServiceReference<Importer> serviceReference) {
+	public synchronized void addServiceReference(ServiceReference<Exporter> serviceReference) {
 		
 		Bundle bundle = serviceReference.getBundle();
 		String key = bundle.getSymbolicName();
@@ -51,7 +51,7 @@ public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer
 	}
 
 	@Override
-	public void modifiedService(ServiceReference<Importer> serviceReference, Importer service) {
+	public void modifiedService(ServiceReference<Exporter> serviceReference, Exporter service) {
 		
 		removedService(serviceReference, service);
 		addingService(serviceReference);
@@ -59,7 +59,7 @@ public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer
 	}
 
 	@Override
-	public void removedService(ServiceReference<Importer> serviceReference, Importer service) {
+	public void removedService(ServiceReference<Exporter> serviceReference, Exporter service) {
 		
 		Bundle bundle = serviceReference.getBundle();
 		String key = bundle.getSymbolicName();
@@ -77,7 +77,8 @@ public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer
 
 		_bundleContext = bundleContext;
 
-		_serviceTracker = ServiceTrackerFactory.open(_bundleContext, Importer.class, this);
+		_serviceTracker = ServiceTrackerFactory.open(bundleContext, Exporter.class, this);
+
 	}
 	
 	@Deactivate
@@ -87,14 +88,14 @@ public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer
 		_serviceTracker = null;
 
 		_bundleContext = null;
-		
+
 		if (_log.isDebugEnabled()) {
 			_log.debug("Deactivated");
 		}
 	}
 
 	@Override
-	public Map<String, ServiceReference<Importer>> getImporters() {
+	public Map<String, ServiceReference<Exporter>> getExporters() {
 		return _serviceReferences;
 	}
 

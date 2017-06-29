@@ -10,7 +10,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 		immediate = true,
 		property = {
 			"imex.component.description=Roles importer",
-			"imex.component.priority=1"
+			"service.ranking:Integer=10"
 		},
 		service = Importer.class
 	)

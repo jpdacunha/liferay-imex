@@ -25,11 +25,11 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 		)
 public class ImportCommand extends ImportTrackerCommand implements ImexCommand {
 	
-	private static final Log _log = LogFactoryUtil.getLog(ListImporterCommand.class);
+	private static final Log _log = LogFactoryUtil.getLog(ImportCommand.class);
 	
 	public void im() {
 		
-		System.out.println(":> Starting import : please show logs for status");
+		System.out.println(":> Starting import : please view logs for status");
 		
 		Map<String, ServiceReference<Importer>> importers = trackerService.getImporters();
 		

@@ -23,6 +23,12 @@
 	<script src="${javascript_folder}/template/modernizr.min.js"></script>	
 	
 	<@liferay_util["include"] page=top_head_include />
+	
+	<style>
+		${demo_main_css}
+	
+	</style>
+	
 </head>
 
 <body class="${css_class}">
@@ -112,7 +118,7 @@
 					</div>
 		</header>
 	
-		<#if is_regular_page = "true">
+		<#if demo_is_regular_page = "true">
 			<section class="theme-page-header">
 				<div class="container">
 					<div class="row">

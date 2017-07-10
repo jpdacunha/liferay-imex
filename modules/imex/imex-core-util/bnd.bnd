@@ -1,5 +1,5 @@
 Bundle-Name: imex-core-util
-Bundle-SymbolicName: com.liferay.imex.core.util
+Bundle-SymbolicName: imex.core.util
 Bundle-Version: 1.0.0
 Export-Package: \
 	com.liferay.imex.core.util.configuration,\

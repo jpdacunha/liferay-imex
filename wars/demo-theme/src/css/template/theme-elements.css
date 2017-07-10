@@ -5019,6 +5019,7 @@ section.timeline {
 	position: relative;
 	float: left;
 	padding-bottom: 120px;
+	padding-left:0px;
 }
 
 section.timeline:after {
@@ -5106,6 +5107,19 @@ section.timeline .timeline-box {
 	background: #FFF;
 }
 
+section.timeline .timeline-box .img-thumbnail {
+	display:block;
+	margin-bottom: 14px;
+}
+
+section.timeline .timeline-box .img-thumbnail img {
+	margin:0 auto;
+}
+
+section.timeline .timeline-box .thumb-info {
+	border-width:0px;	
+}
+
 section.timeline .timeline-box.left {
 	clear: both;
 }
@@ -5119,7 +5133,7 @@ section.timeline .timeline-box.left:before {
 	height: 7px;
 	margin-right: -5px;
 	position: absolute;
-	right: -6.8%;
+	right: -7%;
 	top: 22px;
 	width: 8px;
 }

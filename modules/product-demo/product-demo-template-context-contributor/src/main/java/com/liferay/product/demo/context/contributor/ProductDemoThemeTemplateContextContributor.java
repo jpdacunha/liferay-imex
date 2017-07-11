@@ -27,6 +27,7 @@ import com.liferay.product.demo.context.contributor.util.UrlUtil;
 public class ProductDemoThemeTemplateContextContributor implements TemplateContextContributor {
 	
 	private static Log _log = LogFactoryUtil.getLog(ProductDemoThemeTemplateContextContributor.class);
+	private static final String CUSTOM_THEME_MAIN_COLOR = "custom-theme-main-color";
 	
 	@Override
 	public void prepare(Map<String, Object> contextObjects, HttpServletRequest request) {
@@ -39,10 +40,10 @@ public class ProductDemoThemeTemplateContextContributor implements TemplateConte
 			contextObjects.put("demo_is_regular_page", !isHomePage(td.getLayout()) + "");
 			
 			//Color variation CSS
-			String css = ThemeCssUtil.getInstance().getCss("");
+			String css = ThemeCssUtil.getInstance().getCss(td.getThemeSetting(CUSTOM_THEME_MAIN_COLOR));
 			contextObjects.put("demo_main_css", css);
 			
-		} catch (SystemException | PortalException | IOException e) {
+		} catch (SystemException | PortalException e) {
 			_log.error(e,e);
 		}
 		

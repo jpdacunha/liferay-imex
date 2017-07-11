@@ -7,6 +7,9 @@
 	</compatibility>
 	<theme id="demo-theme" name="Demo Theme">
 		<template-extension>ftl</template-extension>
+		<settings>
+		   <setting key="custom-theme-main-color" value="" type="text" configurable="true"/>
+		</settings>
 		<portlet-decorator id="barebone" name="Barebone">
 			<portlet-decorator-css-class>portlet-barebone</portlet-decorator-css-class>
 		</portlet-decorator>
@@ -17,5 +20,6 @@
 			<default-portlet-decorator>true</default-portlet-decorator>
 			<portlet-decorator-css-class>portlet-decorate</portlet-decorator-css-class>
 		</portlet-decorator>
+
 	</theme>
 </look-and-feel>

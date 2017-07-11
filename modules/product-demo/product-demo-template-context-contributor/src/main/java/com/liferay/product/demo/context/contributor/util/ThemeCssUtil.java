@@ -27,23 +27,40 @@ public class ThemeCssUtil {
 		return INSTANCE;
 	}
 	
-	public String getCss(String mainColorValue) throws IOException {
+	public String getCss(String mainColorValue) {
 		
-		String templateFileName = "/content/templates/main-css.ftl";
-		
-		String mainColor = "red";
-		String mainColorLight = "blue";
-		String mainColorLight2  = "green";
-		String mainColorDark = "yellow";
-		String colorDisabled = "silver";
-			
-		String content = this.getReplacedContent(
-					templateFileName, 
-					new String[] {"$main-color", "$main-color-light", "$main-color-light2", "$main-color-dark", "$color-disabled"}, 
-					new String[] {mainColor, mainColorLight, mainColorLight2, mainColorDark, colorDisabled}
-					);
-		
-		return content;
+		try {
+			if (Validator.isNotNull(mainColorValue)) {
+				
+				String templateFileName = "/content/templates/main-css.ftl";
+				
+				String mainColor = mainColorValue;
+				String mainColorLight = ColorUtil.lighter(mainColor, 1);
+				String mainColorLight2  = ColorUtil.lighter(mainColorLight, 1);
+				String mainColorDark = ColorUtil.darker(mainColor, 1);
+				String colorDisabled = "silver";
+				
+				if(_log.isDebugEnabled()) {
+					_log.info("mainColor : " + mainColor);
+					_log.info("mainColorLight : " + mainColorLight);
+					_log.info("mainColorLight2 : " + mainColorLight2);
+					_log.info("mainColorDark : " + mainColorDark);
+					_log.info("colorDisabled : " + colorDisabled);
+				}
+					
+				String content = this.getReplacedContent(
+							templateFileName, 
+							new String[] {"[$main-color$]", "[$main-color-light$]", "[$main-color-light2$]", "[$main-color-dark$]", "[$color-disabled$]"}, 
+							new String[] {mainColor, mainColorLight, mainColorLight2, mainColorDark, colorDisabled}
+							);
+				
+				return content;
+				
+			}
+		} catch (Exception e) {
+			_log.error(e,e);
+		}
+		return StringPool.BLANK;
 		
 	}
 	

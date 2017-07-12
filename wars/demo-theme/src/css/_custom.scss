@@ -15,9 +15,5 @@
 
 @import "template/circle-flip-slideshow/css/component";
 
-@import "template/owl.carousel/assets/owl.carousel";
-@import "template/owl.carousel/assets/owl.theme.default";
-
-.aui {
-	
-}
+@import url("template/owl.carousel/assets/owl.carousel.min.css");
+@import url("template/owl.carousel/assets/owl.theme.default.css");

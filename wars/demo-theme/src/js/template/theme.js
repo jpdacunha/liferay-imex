@@ -7,6 +7,33 @@ Theme Version:	4.5.1
 // Theme
 window.theme = {};
 
+//Theme Common Functions
+window.theme.fn = {
+
+	getOptions: function(opts) {
+
+		if (typeof(opts) == 'object') {
+
+			return opts;
+
+		} else if (typeof(opts) == 'string') {
+
+			try {
+				return JSON.parse(opts.replace(/'/g,'"').replace(';',''));
+			} catch(e) {
+				return {};
+			}
+
+		} else {
+
+			return {};
+
+		}
+
+	}
+
+};
+
 // Animate
 (function(theme, $) {
 
@@ -2810,8 +2837,8 @@ window.theme = {};
 			},
 
 			setOptions: function(opts) {
-				this.options = $.extend(true, {}, this.defaults, opts, this.$wrapper.data('plugin-options'));
-
+				this.options = $.extend(true, {}, this.defaults, opts, theme.fn.getOptions(this.$wrapper.data('plugin-options')));
+				this.options.stickyEnableOnBoxed;
 				return this;
 			},
 

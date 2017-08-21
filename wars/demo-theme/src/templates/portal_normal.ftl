@@ -25,8 +25,7 @@
 	<@liferay_util["include"] page=top_head_include />
 	
 	<style>
-		${demo_main_css}
-	
+		${demo_main_css}	
 	</style>
 	
 </head>
@@ -41,19 +40,13 @@
 
 <div class="container-fluid" id="wrapper">
 	<div id="demo-wrapper">
-		<header id="header">
+		<header id="header" data-plugin-options="{'stickyEnabled': true, 'stickyEnableOnBoxed': true, 'stickyEnableOnMobile': true, 'stickyStartAt': 57, 'stickySetTop': '-57px', 'stickyChangeLogo': true}">
 					<div class="header-body">
 						<div class="header-container container">
 							<div class="header-row">
 								<div class="header-column">
 									<div class="header-logo">
-										<a href="#">
-											<#if site_logo?? && site_logo?has_content>
-											<img alt="${logo_description}" height="${site_logo_height}" src="${site_logo}" width="${site_logo_width}" />
-											<#else>
-											<img alt="Porto" width="111" height="54" src="${images_folder}/template/logo.png">
-											</#if>
-										</a>
+										<#include "${full_templates_path}/includes/logo.ftl" />
 									</div>
 								</div>
 								<div class="header-column">
@@ -97,7 +90,9 @@
 													/></li>
 												</#if>
 												<li>
+													<#assign VOID = freeMarkerPortletPreferences.setValue("portletSetupPortletDecoratorId", "barebone")>
 													<@liferay.languages default_preferences="${freeMarkerPortletPreferences}" />
+													<#assign VOID = freeMarkerPortletPreferences.reset()>
 												</li>
 											</ul>
 										</nav>
@@ -274,7 +269,7 @@
 
 		<script src="${javascript_folder}/template/view.home.js"></script>	
 		<script src="${javascript_folder}/template/common.min.js"></script>
-		
+
 		<script src="${javascript_folder}/template/theme.js"></script>	
 		<script src="${javascript_folder}/template/theme.init.js"></script>			
 		

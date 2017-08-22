@@ -2,6 +2,8 @@
 	
 	margin-bottom: 20px;
     margin-top: 20px;
+<<<<<<< HEAD
+    text-align: center;
    
    	.tile_stats_count:before {
 	    border-left: 2px solid #adb2b5;
@@ -11,6 +13,21 @@
 	    margin-top: 10px;
 	    position: absolute;    	
    	}
+   	
+   	.tile_stats_count:first-child:before {
+    	border-left: 0 none;
+	}
+=======
+   
+   	.tile_stats_count:before {
+	    border-left: 2px solid #adb2b5;
+	    content: "";
+	    height: 65px;
+	    left: 0;
+	    margin-top: 10px;
+	    position: absolute;    	
+   	}
+>>>>>>> refs/remotes/origin/master
    	
    	.tile_stats_count {
    	

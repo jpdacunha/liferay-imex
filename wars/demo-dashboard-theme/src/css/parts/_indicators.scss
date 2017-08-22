@@ -1,0 +1,48 @@
+#top-indicator {
+	
+	margin-bottom: 20px;
+    margin-top: 20px;
+   
+   	.tile_stats_count:before {
+	    border-left: 2px solid #adb2b5;
+	    content: "";
+	    height: 65px;
+	    left: 0;
+	    margin-top: 10px;
+	    position: absolute;    	
+   	}
+   	
+   	.tile_stats_count {
+   	
+   	 	color: #73879c;
+	    font-family: "Helvetica Neue",Roboto,Arial,"Droid Sans",sans-serif;
+	    font-weight: 400;
+	    line-height: 1.471;
+	    border-bottom: 0 none;
+	    margin-bottom: 10px;
+	    padding-bottom: 10px;
+	    
+	    .count {
+		    font-weight: 600;
+		    line-height: 47px;
+		    font-size: 40px;
+		}
+	    
+   	}
+    
+    .green {
+	    color: #1abb9c;
+	}
+    
+    .red {
+	    color: #e74c3c;
+	}
+    
+    .tile_count .tile_stats_count, 
+    ul.quick-list li {
+    	white-space: nowrap;
+	}
+	
+	
+	
+}

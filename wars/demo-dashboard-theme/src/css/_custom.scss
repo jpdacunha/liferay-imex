@@ -45,6 +45,7 @@ html body {
   #_com_liferay_portal_search_web_portlet_SearchPortlet_keywords {
     border: 1px solid #ccc;
     height: 30px;
+    background-color:white;
   }
   .portlet-content form .field-wrapper {
     position: absolute;
@@ -57,9 +58,7 @@ html body {
 }
 
 html {
-  .navbar .btn {
-    margin-top: 15px;
-  }
+
   .navbar-fixed-top {
     z-index: 9999;
   }
@@ -729,7 +728,7 @@ html {
     }
   }
   select, input[type="file"] {
-    margin-bottom: 10px;
+    /*margin-bottom: 10px;*/
   }
   #_83_fieldSet {
     margin-top: 10px;

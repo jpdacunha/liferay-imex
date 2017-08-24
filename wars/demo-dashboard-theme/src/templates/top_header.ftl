@@ -20,21 +20,21 @@
 						<li title="<@liferay.language key="custom-theme-mails" />">
 							<a href="javascript:;" class="info-number">
 			                    <i class="fa fa-envelope-o"></i>
-			                    <span class="badge bg-green">6</span>
+			                    <span class="badge bg-green animated flash">6</span>
 		                    </a>
 	                    </li>
 	                    
 	                    <li title="<@liferay.language key="custom-theme-calendar-events" />">
 							<a href="javascript:;" class="info-number">
 			                    <i class="fa fa-calendar"></i>
-			                    <span class="badge bg-green">2</span>
+			                    <span class="badge bg-green animated flash">2</span>
 		                    </a>
 	                    </li>
 			            		            
 		            	<li title="<@liferay.language key="custom-theme-tasks" />">
 							<a href="javascript:;" class="info-number">
 						         <i class="fa fa-tasks"></i>
-						         <span class="badge bg-green">9</span>
+						         <span class="badge bg-green animated flash">9</span>
 						     </a>
 						</li>
 						<li title="${sign_out_text}">
@@ -55,7 +55,11 @@
     </div>
 
 	<#if is_signed_in>
+<<<<<<< HEAD
+		<div id="top-indicator" class="row tile_count animated slideInDown">
+=======
 		<div id="top-indicator" class="row tile_count animated fadeInDownBig">
+>>>>>>> refs/remotes/origin/master
 		
 	            <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
 	              <span class="count_top"><i class="fa fa-user"></i> Total Users</span>

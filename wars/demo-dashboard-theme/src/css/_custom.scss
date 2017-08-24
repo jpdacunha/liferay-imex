@@ -590,6 +590,15 @@ html {
 
 /************** Dockbar portlet **************/
 
+html {
+	body.site-body {
+		#_com_liferay_product_navigation_product_menu_web_portlet_ProductMenuPortlet_sidenavSliderId {
+			right: 100%;
+    		top: 0;
+		}
+	}
+}
+
 #p_p_id_145_ {
   display: inline-block;
   padding-top: 15px;
@@ -1288,12 +1297,19 @@ html {
       padding-left: 0;
     }
   }
+  
   .portlet-title-text {
-    color: #293846;
-    font-weight: 400;
-    font-size: 21px;
-    line-height: 27px;
+		line-height: 27px;
+		border-bottom: 2px solid #d9dee4;
+		color: #73879c;
+		font-size: 21px;
+		font-weight: 400;
+		line-height: 27px;
+		width: auto;
+		max-width:100%;
+		display:block
   }
+  
   #portlet_3 form {
     position: relative;
     input {

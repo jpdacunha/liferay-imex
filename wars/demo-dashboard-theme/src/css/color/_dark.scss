@@ -300,6 +300,11 @@ html {
 	      background-color: #23c6c8;
 	      background: #23c6c8;
 	      color: #FFFFFF;
+	      
+	      .icon-monospaced {
+	      		color: #FFFFFF;	      
+	      }
+	      
 	    }
 	    input {
 	      &[type="reset"], &[type="submit"] {

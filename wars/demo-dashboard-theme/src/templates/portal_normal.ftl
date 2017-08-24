@@ -20,10 +20,6 @@
     </script>
 	
 	<script src="${themeDisplay.getPathThemeRoot()}/js/plugins/metisMenu/jquery.metisMenu.js"></script>
-<<<<<<< HEAD
-=======
-	<script src="${themeDisplay.getPathThemeRoot()}/js/custom.js"></script>
->>>>>>> refs/remotes/origin/master
 
 	<script>
          window.define = window.__define;
@@ -33,11 +29,7 @@
     </script>	
 </head>
 
-<<<<<<< HEAD
 <body class="${css_class} site-body skin-2 pace-done">
-=======
-<body class="${css_class} site-body skin-2">
->>>>>>> refs/remotes/origin/master
 
 <@liferay_ui["quick-access"] contentId="#main-content" />
 
@@ -64,6 +56,8 @@
 			</@>
 		</#if>
 		
+		<#include "${full_templates_path}/footer.ftl" />
+		
 	</div>
 </div>
 
@@ -74,7 +68,6 @@
      window.require = undefined;
 </script>
 
-<<<<<<< HEAD
 <script src="${themeDisplay.getPathThemeRoot()}/js/demo-dashboard-menu.js"></script>
 
 <script>
@@ -83,18 +76,6 @@
      window.__define = undefined;
      window.__require = undefined;
 </script>
-=======
-<script src="${themeDisplay.getPathThemeRoot()}/js/demo-dashboard.js"></script>
-
-<script>
-     window.define = window.__define;
-     window.require = window.__require;
-     window.__define = undefined;
-     window.__require = undefined;
-</script>
-
-<#include "${full_templates_path}/liferay_settings.ftl" />
->>>>>>> refs/remotes/origin/master
 
 <@liferay_util["include"] page=body_bottom_include />
 

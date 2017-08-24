@@ -15,7 +15,7 @@ import com.liferay.product.demo.portlet.orderslist.facade.OrderListFacade;
 @Component(
 		immediate = true,
 		property = {
-			"com.liferay.portlet.display-category=category.sample",
+			"com.liferay.portlet.display-category=category.main.demo",
 			"com.liferay.portlet.instanceable=false",
 			"com.liferay.portlet.header-portlet-javascript=/ordersperformance/js/chart.js",
 			"com.liferay.portlet.css-class-wrapper=order-performance-portlet",

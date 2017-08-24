@@ -22,32 +22,25 @@
 						    </a>
 						   
 						    <ul class="dropdown-menu animated fadeInRight m-t-xs">
-						        <#if getterUtil.getBoolean(theme_settings['custom-profile-left-header-menu']!"", false)  == false>
-							    	<#assign user_profile = theme_display.getPortalURL()+"/web/"+user.getScreenName() />
-							    	<li><a href="${user_profile}"> <@liferay.language key="My profile" /></a></li>
-							    	
-							    	<#assign user_dash = theme_display.getPortalURL()+"/user/"+user.getScreenName() />
-							    	<li><a href="${user_dash}"> <@liferay.language key="My Dashboard" /></a></li>
-							    	
-							    	<#if my_account_url??>
-							    		<li><a href="${my_account_url}">${my_account_text}</a></li>
-						    		</#if>
-						    	<#else>
-						         	<#if journalContentUtil??>
-										${nav_header_profile_menu}
-									<#else>
-										<#assign VOID = freeMarkerPortletPreferences.setValue("portletSetupShowBorders", "false")>
-										<@liferay_portlet["runtime"]
-											defaultPreferences="${freeMarkerPortletPreferences}"
-											portletName="com_liferay_journal_content_web_portlet_JournalContentPortlet" 
-											instanceId="header_profile"
-										/>
-										${freeMarkerPortletPreferences.reset()}
-									</#if>
-									
-					         	</#if>
+						    
+						    	<#assign user_profile = theme_display.getPortalURL()+"/web/"+user.getScreenName() />
+						    	<li>
+						    		<a href="${user_profile}"> <i class="fa fa-tags"></i> <@liferay.language key="My profile" /></a>
+						    	</li>
+						    	
+						    	<#assign user_dash = theme_display.getPortalURL()+"/user/"+user.getScreenName() />
+						    	<li>						    		
+						    		<a href="${user_dash}"> <i class="fa fa-area-chart"></i> <@liferay.language key="My Dashboard" /></a>
+						    	</li>
+						    	
+						    	<#if my_account_url??>
+						    		<li>						    			
+						    			<a href="${my_account_url}"> <i class="fa fa-user"></i> ${my_account_text}</a>
+						    		</li>
+					    		</#if>
+
 					         	
-						        <li><a data-redirect="false" href="${sign_out_url}" rel="nofollow">${sign_out_text} </a> </li>
+						        <li><a data-redirect="false" href="${sign_out_url}" rel="nofollow"><i class="fa fa-power-off"></i> ${sign_out_text} </a> </li>
 						    </ul>
 						</div>               
 		            </li>

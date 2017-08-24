@@ -15,7 +15,7 @@ import com.liferay.product.demo.portlet.topcustomers.facade.TopCustomerFacade;
 @Component(
 		immediate = true,
 		property = {
-			"com.liferay.portlet.display-category=category.sample",
+			"com.liferay.portlet.display-category=category.main.demo",
 			"com.liferay.portlet.instanceable=false",
 			"javax.portlet.display-name=Top Customers Portlet",
 			"javax.portlet.init-param.template-path=/topcustomers/",

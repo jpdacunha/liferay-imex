@@ -94,14 +94,6 @@ html {
   }
 }
 
-#_145_dockbar .collapse, #_145_editLayoutPanelSidebar .collapse {
-  display: inherit !important;
-}
-
-#_145_dockbar {
-  margin-bottom: 0;
-}
-
 span.welcome-message {
   line-height: 60px;
 }
@@ -192,10 +184,6 @@ html {
   }
   .modal {
     display: none;
-  }
-  #_145_dockbarMessages .footer {
-    padding: 0 20px;
-    position: inherit;
   }
   .timeline-item {
     .content, .date {
@@ -491,9 +479,6 @@ html {
       margin: 0;
     }
   }
-  #_145_dockbarMessages .footer {
-    border: none;
-  }
 }
 
 a#_145_navAccountControlsNavbarBtn img {
@@ -604,15 +589,6 @@ html {
   padding-top: 15px;
 }
 
-#_145_dockbar {
-  background: transparent;
-  z-index: 9999;
-  .navbar-inner {
-    box-shadow: none;
-    background: transparent;
-    border: none;
-  }
-}
 
 html .dockbar .navbar-inner {
   padding: 0;
@@ -621,32 +597,7 @@ html .dockbar .navbar-inner {
   }
 }
 
-#_145_navAddControlsNavbarCollapse, #_145_dockbar .collapse, #_145_navAccountControlsNavbarCollapse, #_145_navAccountControls, #_145_navAddControls {
-  margin: 0;
-  display: inline-block  !important;
-}
-
 html {
-  #_145_dockbar {
-    .nav > li {
-      > a {
-        padding: 10px 7px;
-        outline: none !important;
-        color: #555;
-      }
-      &#_2_WAR_notificationsportlet_userNotifications > a {
-        padding-left: 17px;
-        padding-top: 0px;
-      }
-      > a i {
-        margin-right: 0px;
-      }
-    }
-    .divider-vertical {
-      margin: 0 3px;
-      border: none;
-    }
-  }
   .navbar .nav.navbar-top-links {
     margin-top: 0px;
     margin-right: 0;
@@ -1189,18 +1140,30 @@ html {
     }
   }
   .contacts-portlet {
-    .portlet .portlet-content {
+    /*.portlet .portlet-content {
       background: #F5F5F5;
-    }
+    }*/
     .portlet-content-container {
       border: 1px solid #D6D2D2;
       border-radius: 5px 5px 0 0;
+      
+      form {
+      
+      	.toolbar {
+			border-bottom-width: 0;
+		    margin-left: 0;
+		    padding-left: 0;
+		    padding-right: 0;
+		    padding-top: 10px;
+      	}
+      	
+      }
     }
     .layout.toolbar {
       border: none;
     }
     .contact-group-filter {
-      height: 40px;
+      height: auto;
       border-right: 1px solid #D6D2D2;
     }
     .contacts-result-container-content .contacts-list .contacts-search {
@@ -1364,6 +1327,7 @@ html {
 }
 
 html {
+	
   .notifications-portlet {
     .nav a {
       &.selected {
@@ -1613,31 +1577,43 @@ html {
   .activity-item .user-portrait .icon {
     display: none;
   }
+  
   .contacts-portlet {
+  
     .portlet .portlet-content .portlet-body form {
       background: #1ab394;
     }
     .contact-group-filter {
       border-right: none;
     }
-    .contacts-result-container-content .contacts-list .contacts-search {
-      border-bottom: none;
-      .search-input {
-        background: white;
-      }
-      .icon-search {
-        background: #1ab394;
-        width: 28px;
-        height: 30px;
-        top: 4px;
-        right: 6px;
-        border-radius: 0 2px 2px 0;
-        text-align: center;
-        line-height: 28px;
-        color: white;
-      }
-    }
+	.contacts-result-container {
+		.contacts-list { 
+	    
+	    	padding:0px;
+	    	 
+		    .contacts-search {
+		    
+		      border-bottom: none;
+		      .search-input {
+		        background: white;
+		      }
+		      .icon-search {
+		        width: 28px;
+		        height: 30px;
+		        top: 4px;
+		        right: 6px;
+		        border-radius: 0 2px 2px 0;
+		        text-align: center;
+		        line-height: 28px;
+		        color: #c9c9c9;
+		      }
+		      
+		    }
+		}
+	}
+	
   }
+
   [class="lfr-contact-name"] a {
     color: black;
   }
@@ -2038,9 +2014,6 @@ html {
     /*********End sites menu******************/
     /*********admin menu******************/
     /*********End admin menu******************/
-    #_145_navAddControlsNavbarCollapse, #_145_dockbar .collapse, #_145_navAccountControlsNavbarCollapse, #_145_navAccountControls, #_145_navAddControls {
-      height: inherit;
-    }
     .nav-collapse {
       > ul > li {
         .icon-caret-down, .nav-item-label {
@@ -2225,9 +2198,6 @@ html {
     #p_p_id_145_ {
       padding-top: 5px;
     }
-    #_145_dockbar {
-      min-height: inherit;
-    }
     .header-right.right {
       float: right;
     }
@@ -2369,9 +2339,6 @@ html {
   html #_145_navAddControls li a span.nav-item-label {
     font-size: 0;
   }
-  #_145_navAddControlsNavbarCollapse, #_145_dockbar .collapse, #_145_navAccountControlsNavbarCollapse, #_145_navAccountControls, #_145_navAddControls {
-    height: 64px;
-  }
 }
 
 @media (max-width: 1300px) {
@@ -2385,10 +2352,6 @@ html {
       /*********End sites menu******************/
       /*********admin menu******************/
       /*********End admin menu******************/
-      #_145_navAddControlsNavbarCollapse, #_145_dockbar .collapse, #_145_navAccountControlsNavbarCollapse, #_145_navAccountControls, #_145_navAddControls {
-        overflow: visible;
-        height: inherit;
-      }
       .nav-collapse {
         > ul > li {
           .icon-caret-down, .nav-item-label {
@@ -2738,18 +2701,8 @@ html {
       margin-top: 5px;
     }
   }
-  #_145_dockbar .container {
-    margin-left: 10px;
-  }
+
   html {
-    #_145_dockbar .nav-collapse #_2_WAR_notificationsportlet_userNotifications .dropdown-menu {
-      max-width: 280px;
-      right: auto;
-      &:before, &:after {
-        right: inherit;
-        left: 0;
-      }
-    }
     #p_p_id_145_ .open .dropdown-menu, body.collapsed-menu #p_p_id_145_ .open .dropdown-menu, #_145_navAccountControls li.dockbar-item ul.dropdown-menu {
       left: 0;
       right: inherit;
@@ -2757,12 +2710,6 @@ html {
     }
     .header-right.right {
       float: left;
-    }
-    .horiz-menu {
-      #_145_dockbar .nav-collapse #_2_WAR_notificationsportlet_userNotifications .dropdown-menu, #p_p_id_145_ .open .dropdown-menu {
-        right: 0;
-        left: inherit;
-      }
     }
     body.collapsed-menu .horiz-menu #p_p_id_145_ .open .dropdown-menu {
       right: 0;
@@ -2829,9 +2776,6 @@ html {
       right: -37px;
       padding: 6px 5px;
     }
-  }
-  #_145_dockbar .container {
-    margin-left: 0;
   }
   html {
     .navbar-header.navbar-search {
@@ -2949,10 +2893,6 @@ html {
         padding: 3px 10px 3px 0px;
       }
     }
-    #_145_dockbar .nav-collapse #_2_WAR_notificationsportlet_userNotifications .dropdown-menu {
-      max-width: 190px;
-      right: 10px;
-    }
     #portlet_58 {
       .portlet-content {
         min-width: inherit;
@@ -2987,17 +2927,6 @@ html {
         .control-label, input, select, textarea {
           width: 100%;
         }
-      }
-    }
-    #_145_dockbar .nav-collapse #_2_WAR_notificationsportlet_userNotifications .dropdown-menu, #p_p_id_145_ .open#_145_userAvatar .dropdown-menu, body.collapsed-menu #p_p_id_145_ .open#_145_userAvatar .dropdown-menu {
-      left: -55px;
-      right: inherit;
-    }
-    .horiz-menu {
-      #_145_dockbar .nav-collapse #_2_WAR_notificationsportlet_userNotifications .dropdown-menu, #p_p_id_145_ .open .dropdown-menu {
-        margin: 0;
-        right: -60px;
-        left: inherit;
       }
     }
     body.collapsed-menu .horiz-menu #p_p_id_145_ .open .dropdown-menu {

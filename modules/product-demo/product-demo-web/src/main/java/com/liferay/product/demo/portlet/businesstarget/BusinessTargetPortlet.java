@@ -16,7 +16,7 @@ import com.liferay.product.demo.portlet.businesstarget.model.BusinessTargetUI;
 @Component(
 		immediate = true,
 		property = {
-			"com.liferay.portlet.display-category=category.sample",
+			"com.liferay.portlet.display-category=category.main.demo",
 			"com.liferay.portlet.instanceable=false",
 			"javax.portlet.display-name=Business Target Portlet",
 			"javax.portlet.init-param.template-path=/businesstarget/",

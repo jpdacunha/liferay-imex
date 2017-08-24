@@ -19,6 +19,7 @@
          window.require = undefined;
     </script>
 	
+	<script src="${themeDisplay.getPathThemeRoot()}/js/plugins/chartJs/Chart.min.js"></script>
 	<script src="${themeDisplay.getPathThemeRoot()}/js/plugins/metisMenu/jquery.metisMenu.js"></script>
 
 	<script>

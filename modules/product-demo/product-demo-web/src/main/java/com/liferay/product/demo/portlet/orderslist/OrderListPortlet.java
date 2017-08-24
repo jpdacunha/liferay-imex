@@ -16,7 +16,7 @@ import com.liferay.product.demo.portlet.orderslist.model.OrderSearchContainer;
 @Component(
 		immediate = true,
 		property = {
-			"com.liferay.portlet.display-category=category.sample",
+			"com.liferay.portlet.display-category=category.main.demo",
 			"com.liferay.portlet.instanceable=false",
 			"javax.portlet.display-name=Order List Portlet",
 			"javax.portlet.init-param.template-path=/orderlist/",

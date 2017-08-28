@@ -27,7 +27,11 @@
          window.require = window.__require;
          window.__define = undefined;
          window.__require = undefined;
-    </script>	
+    </script>
+    
+    <link href="${themeDisplay.getPathThemeRoot()}/css/template/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+	<link href="${themeDisplay.getPathThemeRoot()}/css/template/animate/animate.css" rel="stylesheet" />  
+    	
 </head>
 
 <body class="${css_class} site-body skin-2 pace-done">

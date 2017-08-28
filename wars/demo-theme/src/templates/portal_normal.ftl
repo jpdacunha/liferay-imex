@@ -18,6 +18,10 @@
 	<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
 	<meta http-equiv="pragma" content="no-cache" />	
 	
+	<link href="${themeDisplay.getPathThemeRoot()}/css/template/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+	<link href="${themeDisplay.getPathThemeRoot()}/css/template/owl.carousel/assets/owl.carousel.min.css" rel="stylesheet" /> 
+	<link href="${themeDisplay.getPathThemeRoot()}/css/template/owl.carousel/assets/owl.theme.default.css" rel="stylesheet" />  
+	
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800%7CShadows+Into+Light" rel="stylesheet" type="text/css">
 		
 	<script src="${javascript_folder}/template/modernizr.min.js"></script>	

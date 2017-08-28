@@ -1,6 +1,0 @@
-Bundle-Name: product-demo-api
-Bundle-SymbolicName: product.demo.api
-Bundle-Version: 1.0.0
-Export-Package: \
-	com.liferay.product.demo.api.model,\
-	com.liferay.product.demo.api.converter

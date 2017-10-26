@@ -23,9 +23,11 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 		    "osgi.command.scope=imex"
 		  }
 		)
-public class ImportCommand extends ImportTrackerCommand implements ImexCommand {
+public class ImportCommand implements ImexCommand {
 	
 	private static final Log _log = LogFactoryUtil.getLog(ImportCommand.class);
+	
+	protected ImporterTracker trackerService;
 	
 	public void im() {
 		

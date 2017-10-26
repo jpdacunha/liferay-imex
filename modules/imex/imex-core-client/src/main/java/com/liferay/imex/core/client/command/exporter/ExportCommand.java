@@ -1,11 +1,11 @@
 package com.liferay.imex.core.client.command.exporter;
 
+import com.liferay.imex.core.api.ImexExportService;
+import com.liferay.imex.core.client.ImexCommand;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
-
-import com.liferay.imex.core.api.ImexExportService;
-import com.liferay.imex.core.client.ImexCommand;
 
 @Component(
 		  immediate=true,
@@ -15,7 +15,7 @@ import com.liferay.imex.core.client.ImexCommand;
 		    "osgi.command.scope=imex"
 		  }
 		)
-public class ExportCommand extends ExportTrackerCommand implements ImexCommand {
+public class ExportCommand implements ImexCommand {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexExportService imexExportService;

@@ -38,6 +38,7 @@ public class ImexExportServiceImpl implements ImexExportService {
 		Map<String, ServiceReference<Exporter>> exporters = trackerService.getExporters();
 		
 		if (exporters != null && exporters.size() > 0) {
+			
 			for (Map.Entry<String ,ServiceReference<Exporter>> entry  : exporters.entrySet()) {
 				
 				ServiceReference<Exporter> reference = entry.getValue();
@@ -51,6 +52,7 @@ public class ImexExportServiceImpl implements ImexExportService {
 				_log.info(MessageUtil.getEndMessage(exporter.getProcessDescription(), 1));
 				
 			}
+			
 		} else {
 			_log.info(MessageUtil.getMessage("No registered exporters"));
 		}

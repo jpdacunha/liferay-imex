@@ -1,6 +1,8 @@
 package com.liferay.imex.wcddm.exporter;
 
+import java.io.File;
 import java.util.List;
+import java.util.Properties;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -25,12 +27,13 @@ public class WcDDMExporter implements Exporter {
 	
 	public static final String DESCRIPTION = "Web Content DDM exporter";
 	
-	public static final String DIR_WCONTENT = "/wcontent";
+	public static final String DIR = "/wcontent";
+	public static final String FILENAME = "template-structure.xml";
 	
 	private static final Log _log = LogFactoryUtil.getLog(WcDDMExporter.class);
 
 	@Override
-	public void doExport() {
+	public void doExport(Properties config, File destDir, long companyId) {
 		
 		_log.info("Do Wc export ....");
 		
@@ -38,7 +41,7 @@ public class WcDDMExporter implements Exporter {
 
 	@Override
 	public String getDirectoryName() {
-		return  DIR_WCONTENT;
+		return  DIR;
 	}
 	
 	@Override
@@ -57,6 +60,12 @@ public class WcDDMExporter implements Exporter {
 		List<Group> groups = GroupLocalServiceUtil.getGroups(QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 		return groups;
 
+	}
+
+	@Override
+	public String getFileName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

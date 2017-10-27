@@ -4,4 +4,5 @@ dependencies {
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.0.0"
 	
 	compileOnly project(":modules:imex:imex-core-api")
+	compileOnly project(":modules:imex:imex-core-util")
 }

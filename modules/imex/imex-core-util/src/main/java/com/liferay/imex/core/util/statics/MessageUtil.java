@@ -3,6 +3,8 @@ package com.liferay.imex.core.util.statics;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
+import org.osgi.framework.Bundle;
+
 public class MessageUtil {
 	
 	private final static String PREFIX = "[IMEX] : ";
@@ -21,6 +23,14 @@ public class MessageUtil {
 		
 		return pad(rootMessage, nbPadLeft);
 		
+	}
+	
+	public static String getErrorMessage(Exception e) {
+		return PREFIX + "An unexpected error occured : " + e.getMessage();
+	}
+	
+	public static String getMessage(Bundle bundle, String description) {
+		return PREFIX + "[" + bundle.getSymbolicName() + "] " + description;
 	}
 	
 	public static String getMessage(String description) {

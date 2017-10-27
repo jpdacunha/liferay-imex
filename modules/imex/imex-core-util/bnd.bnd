@@ -3,4 +3,5 @@ Bundle-SymbolicName: imex.core.util
 Bundle-Version: 1.0.0
 Export-Package: \
 	com.liferay.imex.core.util.configuration,\
-	com.liferay.imex.core.util.statics
+	com.liferay.imex.core.util.statics,\
+	com.liferay.imex.core.util.exception

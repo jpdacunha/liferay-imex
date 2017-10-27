@@ -1,23 +1,29 @@
 package com.liferay.imex.core.service;
 
-import java.io.File;
-import java.util.Map;
+import com.liferay.imex.core.api.ImexConfigurationService;
+import com.liferay.imex.core.api.ImexExportService;
+import com.liferay.imex.core.api.exporter.Exporter;
+import com.liferay.imex.core.api.exporter.ExporterTracker;
+import com.liferay.imex.core.util.exception.ImexException;
+import com.liferay.imex.core.util.statics.MessageUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.util.FileUtil;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-
-import com.liferay.imex.core.api.ImexExportService;
-import com.liferay.imex.core.api.exporter.Exporter;
-import com.liferay.imex.core.api.exporter.ExporterTracker;
-import com.liferay.imex.core.util.configuration.ImExPropsKeys;
-import com.liferay.imex.core.util.configuration.ImExPropsValues;
-import com.liferay.imex.core.util.statics.MessageUtil;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.util.PrefsPropsUtil;
 
 @Component(immediate = true, service = ImexExportService.class)
 public class ImexExportServiceImpl implements ImexExportService {
@@ -26,16 +32,77 @@ public class ImexExportServiceImpl implements ImexExportService {
 	
 	private ExporterTracker trackerService;
 
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected CompanyLocalService companyLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexConfigurationService configurationService;
+
 	@Override
 	public void doExport() {
 		
 		_log.info(MessageUtil.getStartMessage("export process"));
 		
-		File deployDir = new File(PrefsPropsUtil.getString(ImExPropsKeys.DEPLOY_DIR, ImExPropsValues.DEPLOY_DIR));
 		
-		_log.info(MessageUtil.getPropertyMessage("deployDir", deployDir.toString()));
+		try {
+			File exportDir = initializeExportDirectory();
+			
+			_log.info(MessageUtil.getPropertyMessage("IMEX export path", exportDir.toString()));
+			
+			Map<String, ServiceReference<Exporter>> exporters = trackerService.getExporters();
+			
+			List<Company> companies = companyLocalService.getCompanies();
+			
+			for (Company company : companies) {
+				
+				long companyId = company.getCompanyId();
+				
+				File companyDir = initializeCompanyExportDirectory(exportDir, company);
+				
+				executeRegisteredExporters(exporters, companyDir, companyId);
+				
+			}
+			
+		} catch (ImexException e) {
+			_log.error(e,e);
+		}
 		
-		Map<String, ServiceReference<Exporter>> exporters = trackerService.getExporters();
+		_log.info(MessageUtil.getEndMessage("export process"));
+
+	}
+
+	private File initializeCompanyExportDirectory(File exportDir, Company company) throws ImexException {
+		
+		String webId = company.getWebId();
+		File companyDir = new File(exportDir, webId);
+		boolean success = companyDir.mkdirs();
+		if (!success) {
+			throw new ImexException("Failed to create directory " + companyDir);
+		}
+		
+		return companyDir;
+		
+	}
+	
+	private File initializeExportDirectory() throws ImexException {
+				
+		String exportFilePath = configurationService.getImexDataPath();
+		
+		File exportFile = new File(exportFilePath);
+		
+		if (exportFile.exists()) {
+			FileUtil.deltree(exportFile);
+		}
+		boolean success = exportFile.mkdirs();
+		if (!success) {
+			throw new ImexException("Failed to create directory " + exportFile);
+		}
+		
+		return exportFile;
+			
+	}
+	
+	private void executeRegisteredExporters(Map<String, ServiceReference<Exporter>> exporters, File destDir, long companyId) {
 		
 		if (exporters != null && exporters.size() > 0) {
 			
@@ -43,12 +110,23 @@ public class ImexExportServiceImpl implements ImexExportService {
 				
 				ServiceReference<Exporter> reference = entry.getValue();
 				
-				Exporter exporter = reference.getBundle().getBundleContext().getService(reference);
+				Bundle bundle = reference.getBundle();
+				
+				Exporter exporter = bundle.getBundleContext().getService(reference);
 				
 				_log.info(MessageUtil.getStartMessage(exporter.getProcessDescription(), 1));
 				
-				exporter.doExport();
+				//Loading configuration for each exporter
+				Properties config = configurationService.loadExporterConfiguration(bundle);
 				
+				if (config == null) {
+					_log.warn(MessageUtil.getMessage(bundle, "has no defined configuration. Aborting execution ..."));
+				}
+				
+				displayProperties(config, bundle);
+			
+				exporter.doExport(config, destDir, companyId);
+									
 				_log.info(MessageUtil.getEndMessage(exporter.getProcessDescription(), 1));
 				
 			}
@@ -57,8 +135,20 @@ public class ImexExportServiceImpl implements ImexExportService {
 			_log.info(MessageUtil.getMessage("No registered exporters"));
 		}
 		
-		_log.info(MessageUtil.getEndMessage("export process"));
-
+	}
+	
+	public void displayProperties(Properties props, Bundle bundle) {
+        
+		if (props != null) {
+			
+			List<String> strings = Arrays.asList(props.toString().split(","));
+			
+			for (String value : strings) {
+				_log.info(MessageUtil.getMessage(":> " + value,3));
+			}
+			
+		} 
+	                               
 	}
 	
 	@Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)

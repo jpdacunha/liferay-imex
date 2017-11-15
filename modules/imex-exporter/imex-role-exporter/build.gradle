@@ -1,7 +1,3 @@
-liferayOSGi {
-    expandCompileInclude = false
-}
-
 dependencies {
 
 	compileOnly group: "org.osgi", name: "org.osgi.core", version: "6.0.0"
@@ -11,7 +7,5 @@ dependencies {
 	
 	compileOnly project(":modules:imex:imex-core-api")
 	compileOnly project(":modules:imex:imex-core-util")
-	
-	compileInclude group: "org.simpleframework", name: "simple-xml", version: "2.7.1"
-	
+
 }

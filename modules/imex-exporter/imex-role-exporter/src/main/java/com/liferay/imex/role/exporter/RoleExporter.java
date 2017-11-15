@@ -1,10 +1,10 @@
 package com.liferay.imex.role.exporter;
 
 import com.liferay.imex.core.api.exporter.Exporter;
+import com.liferay.imex.core.api.processor.ImexSerializer;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.imex.role.exporter.xml.ImexRole;
-import com.liferay.imex.role.exporter.xml.SimpleXmlProcessor;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Role;
@@ -39,6 +39,9 @@ public class RoleExporter implements Exporter {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected RoleLocalService roleLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexSerializer serializer;
 
 	@Override
 	public void doExport(Properties config, File destDir, long companyId) {
@@ -51,6 +54,7 @@ public class RoleExporter implements Exporter {
 			
 			List<Role> roles = roleLocalService.getRoles(companyId);
 			for (Role role : roles) {
+				_log.info(MessageUtil.getMessage(role.getName(), 4));
 				this.doRoleExport(role, rolesDir);
 			}
 			
@@ -73,10 +77,9 @@ public class RoleExporter implements Exporter {
 		int type = role.getType();
 		String description = role.getDescription(locale);
 		String friendlyURL = StringPool.BLANK;
-		
-		SimpleXmlProcessor<ImexRole> processor = new SimpleXmlProcessor<ImexRole>(ImexRole.class, roleDir, getFileName());
+	
 		try {
-			processor.write(new ImexRole(uuid, name, type, description, friendlyURL));
+			serializer.write(new ImexRole(uuid, name, type, description, friendlyURL), roleDir, getFileName());
 		} catch (Exception e) {
 			_log.error(e,e);
 			throw new ImexException(e);
@@ -96,7 +99,6 @@ public class RoleExporter implements Exporter {
 	private File initializeSingleRoleExportDirectory(File rolesDir, Role role) throws ImexException {
 		
 		String roleDirName = role.getName();
-		//String roleDirName = Normalizer.normalizeToAscii(role.getName());
 		File roleDir = new File(rolesDir, roleDirName);
 		boolean success = roleDir.mkdirs();
 		if (!success) {

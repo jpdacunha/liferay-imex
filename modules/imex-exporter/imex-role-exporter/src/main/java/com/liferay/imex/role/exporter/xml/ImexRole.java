@@ -1,18 +1,18 @@
 package com.liferay.imex.role.exporter.xml;
 
-import org.simpleframework.xml.Element;
+import java.io.Serializable;
 
-public class ImexRole {
+public class ImexRole implements Serializable {
 	
-	@Element(required=false)
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8967108660532685046L;
+	
 	private String uuid;
-	@Element
 	private String name;
-	@Element
 	private RoleType roleType;
-	@Element(required=false)
 	private String description;
-	@Element(required=false)
 	private String friendlyURL;
 
 	public ImexRole() {

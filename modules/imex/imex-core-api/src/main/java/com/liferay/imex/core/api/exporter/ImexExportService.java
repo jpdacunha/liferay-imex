@@ -1,4 +1,4 @@
-package com.liferay.imex.core.api;
+package com.liferay.imex.core.api.exporter;
 
 public interface ImexExportService {
 	

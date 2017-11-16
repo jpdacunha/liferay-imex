@@ -1,5 +1,6 @@
 package com.liferay.imex.core.util.configuration;
 
+import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -7,6 +8,10 @@ import com.liferay.portal.kernel.util.Validator;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
+import java.util.Map.Entry;
+
+import org.osgi.framework.Bundle;
 
 public class ImexPropsUtil {
 	
@@ -47,6 +52,23 @@ public class ImexPropsUtil {
 		}
 	
 		return false;
+	}
+	
+	/**
+	 * Display humane readable properties
+	 * @param props
+	 * @param bundle
+	 */
+	public static void displayProperties(Properties props, Bundle bundle) {
+        
+		if (props != null) {
+				
+			for (Entry<Object,Object> value : props.entrySet()) {
+				_log.info(MessageUtil.getMessage(":> " + value.getKey() + " = " + value.getValue(),3));
+			}
+			
+		} 
+	                               
 	}
 
 }

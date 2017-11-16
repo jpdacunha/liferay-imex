@@ -38,11 +38,6 @@ public class WcDDMExporter implements Exporter {
 		_log.info("Do Wc export ....");
 		
 	}
-
-	@Override
-	public String getDirectoryName() {
-		return  DIR;
-	}
 	
 	@Override
 	public String getProcessDescription() {

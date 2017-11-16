@@ -1,4 +1,4 @@
-package com.liferay.imex.role.exporter.xml;
+package com.liferay.imex.role.model;
 
 import java.util.LinkedList;
 

@@ -7,5 +7,6 @@ dependencies {
 	
 	compileOnly project(":modules:imex:imex-core-api")
 	compileOnly project(":modules:imex:imex-core-util")
+	compileOnly project(":modules:imex-exporter-importer-service:imex-role-service")
 
 }

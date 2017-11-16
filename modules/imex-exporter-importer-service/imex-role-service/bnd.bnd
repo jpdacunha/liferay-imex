@@ -1,0 +1,6 @@
+Bundle-Name: imex-role-service
+Bundle-SymbolicName: imex.role.service
+Bundle-Version: 1.0.0
+Export-Package: \
+	com.liferay.imex.role.model,\
+	com.liferay.imex.role

@@ -1,6 +1,6 @@
 package com.liferay.imex.core.client.command.exporter;
 
-import com.liferay.imex.core.api.ImexExportService;
+import com.liferay.imex.core.api.exporter.ImexExportService;
 import com.liferay.imex.core.client.ImexCommand;
 
 import org.osgi.service.component.annotations.Component;

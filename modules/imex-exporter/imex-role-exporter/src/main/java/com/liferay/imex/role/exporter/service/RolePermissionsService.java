@@ -1,6 +1,6 @@
 package com.liferay.imex.role.exporter.service;
 
-import com.liferay.imex.role.exporter.xml.RolePermissions;
+import com.liferay.imex.role.model.RolePermissions;
 
 /**
  * 

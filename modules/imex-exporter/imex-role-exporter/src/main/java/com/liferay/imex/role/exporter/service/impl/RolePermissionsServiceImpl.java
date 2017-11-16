@@ -1,11 +1,11 @@
 package com.liferay.imex.role.exporter.service.impl;
 
 import com.liferay.imex.role.exporter.service.RolePermissionsService;
-import com.liferay.imex.role.exporter.xml.Action;
-import com.liferay.imex.role.exporter.xml.PortletPermissions;
-import com.liferay.imex.role.exporter.xml.Resource;
-import com.liferay.imex.role.exporter.xml.RolePermissions;
-import com.liferay.imex.role.exporter.xml.Scope;
+import com.liferay.imex.role.model.Action;
+import com.liferay.imex.role.model.PortletPermissions;
+import com.liferay.imex.role.model.Resource;
+import com.liferay.imex.role.model.RolePermissions;
+import com.liferay.imex.role.model.Scope;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;

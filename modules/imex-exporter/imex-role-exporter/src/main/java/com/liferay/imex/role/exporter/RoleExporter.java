@@ -1,14 +1,15 @@
 package com.liferay.imex.role.exporter;
 
 import com.liferay.imex.core.api.exporter.Exporter;
-import com.liferay.imex.core.api.processor.ImexSerializer;
+import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.util.configuration.ImexPropsUtil;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.MessageUtil;
+import com.liferay.imex.role.FileNames;
 import com.liferay.imex.role.exporter.configuration.ImExRolePropsKeys;
 import com.liferay.imex.role.exporter.service.RolePermissionsService;
-import com.liferay.imex.role.exporter.xml.ImexRole;
-import com.liferay.imex.role.exporter.xml.RolePermissions;
+import com.liferay.imex.role.model.ImexRole;
+import com.liferay.imex.role.model.RolePermissions;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Role;
@@ -38,15 +39,11 @@ public class RoleExporter implements Exporter {
 	
 	private static final Log _log = LogFactoryUtil.getLog(RoleExporter.class);
 	
-	public static final String DIR_ROLE = "/role";
-	public static final String FILENAME = "role";
-	public static final String PERMISSION_FILENAME = "role-permissions";
-	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected RoleLocalService roleLocalService;
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
-	protected ImexSerializer processor;
+	protected ImexProcessor processor;
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected RolePermissionsService rolePermissionServive;
@@ -56,9 +53,11 @@ public class RoleExporter implements Exporter {
 		
 		_log.info(MessageUtil.getStartMessage("ROLE export process"));
 		
+		//FIXME : manage export.role.enabled parameter
+		
 		try {
 			
-			File rolesDir = initializeRolesExportDirectory( destDir);
+			File rolesDir = initializeRolesExportDirectory(destDir);
 			
 			List<Role> roles = roleLocalService.getRoles(companyId);
 			for (Role role : roles) {
@@ -75,8 +74,7 @@ public class RoleExporter implements Exporter {
 	}
 	
 	private void doRoleExport(Properties config, Role role, File rolesDir, boolean debug) throws ImexException {
-		
-		
+				
 		if (role != null) {
 			
 			File roleDir = initializeSingleRoleExportDirectory(rolesDir, role);
@@ -98,11 +96,11 @@ public class RoleExporter implements Exporter {
 				try {
 					
 					//Writing role file
-					processor.write(new ImexRole(uuid, name, type, description, friendlyURL), roleDir, FILENAME + processor.getFileExtension());
+					processor.write(new ImexRole(uuid, name, type, description, friendlyURL), roleDir, FileNames.ROLE_FILENAME + processor.getFileExtension());
 				
 					//Writing role permission file
 					RolePermissions source =  rolePermissionServive.getRolePermissions(companyId, roleId);
-					processor.write(source, roleDir, PERMISSION_FILENAME + processor.getFileExtension());
+					processor.write(source, roleDir, FileNames.ROLE_PERMISSION_FILENAME + processor.getFileExtension());
 					
 					_log.info(MessageUtil.getOK(role.getName()));
 				
@@ -151,7 +149,7 @@ public class RoleExporter implements Exporter {
 	 */
 	private File initializeRolesExportDirectory(File exportDir) throws ImexException {
 		
-		File rolesDir = new File(exportDir, getDirectoryName());
+		File rolesDir = new File(exportDir, FileNames.DIR_ROLE);
 		boolean success = rolesDir.mkdirs();
 		if (!success) {
 			throw new ImexException("Failed to create directory " + rolesDir);
@@ -159,11 +157,6 @@ public class RoleExporter implements Exporter {
 		
 		return rolesDir;
 		
-	}
-
-	@Override
-	public String getDirectoryName() {
-		return DIR_ROLE;
 	}
 
 	@Override

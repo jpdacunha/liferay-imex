@@ -1,9 +1,10 @@
-package com.liferay.imex.core.service;
+package com.liferay.imex.core.service.exporter.impl;
 
 import com.liferay.imex.core.api.ImexConfigurationService;
-import com.liferay.imex.core.api.ImexExportService;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
+import com.liferay.imex.core.api.exporter.ImexExportService;
+import com.liferay.imex.core.util.configuration.ImexPropsUtil;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -15,7 +16,6 @@ import com.liferay.portal.kernel.util.FileUtil;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.osgi.framework.Bundle;
@@ -123,9 +123,7 @@ public class ImexExportServiceImpl implements ImexExportService {
 					_log.warn(MessageUtil.getMessage(bundle, "has no defined configuration. Aborting execution ..."));
 				}
 				
-	
-				displayProperties(config, bundle);
-				
+				ImexPropsUtil.displayProperties(config, bundle);
 			
 				//FIXME : manage debug param
 				exporter.doExport(config, destDir, companyId, true);
@@ -138,18 +136,6 @@ public class ImexExportServiceImpl implements ImexExportService {
 			_log.info(MessageUtil.getMessage("No registered exporters"));
 		}
 		
-	}
-	
-	public void displayProperties(Properties props, Bundle bundle) {
-        
-		if (props != null) {
-				
-			for (Entry<Object,Object> value : props.entrySet()) {
-				_log.info(MessageUtil.getMessage(":> " + value.getKey() + " = " + value.getValue(),3));
-			}
-			
-		} 
-	                               
 	}
 	
 	@Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)

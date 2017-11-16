@@ -1,8 +1,14 @@
 package com.liferay.imex.role.exporter.xml;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public class RolePermissions {
+public class RolePermissions implements Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1800339614585916828L;
 	
 	private LinkedList<PortletPermissions> portletPermissionsList = new LinkedList<PortletPermissions>();
 

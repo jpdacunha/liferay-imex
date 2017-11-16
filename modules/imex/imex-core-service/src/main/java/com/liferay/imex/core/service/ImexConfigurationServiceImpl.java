@@ -89,7 +89,7 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 		if (props != null) {
 			_log.info(MessageUtil.getMessage(bundle, "is using default configuration loaded from [" + fileName + "]"));
 		} else {
-			_log.info(MessageUtil.getMessage(bundle, "has no default configuration to loads. Make sure "));
+			_log.info(MessageUtil.getMessage(bundle, "has no default configuration to loads. Make sure a [" + fileName + "] exists on your classpath."));
 		}
 		
 		return props;

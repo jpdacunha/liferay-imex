@@ -13,9 +13,9 @@ import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.FileUtil;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.osgi.framework.Bundle;
@@ -123,9 +123,12 @@ public class ImexExportServiceImpl implements ImexExportService {
 					_log.warn(MessageUtil.getMessage(bundle, "has no defined configuration. Aborting execution ..."));
 				}
 				
+	
 				displayProperties(config, bundle);
+				
 			
-				exporter.doExport(config, destDir, companyId);
+				//FIXME : manage debug param
+				exporter.doExport(config, destDir, companyId, true);
 									
 				_log.info(MessageUtil.getEndMessage(exporter.getProcessDescription(), 1));
 				
@@ -140,11 +143,9 @@ public class ImexExportServiceImpl implements ImexExportService {
 	public void displayProperties(Properties props, Bundle bundle) {
         
 		if (props != null) {
-			
-			List<String> strings = Arrays.asList(props.toString().split(","));
-			
-			for (String value : strings) {
-				_log.info(MessageUtil.getMessage(":> " + value,3));
+				
+			for (Entry<Object,Object> value : props.entrySet()) {
+				_log.info(MessageUtil.getMessage(":> " + value.getKey() + " = " + value.getValue(),3));
 			}
 			
 		} 

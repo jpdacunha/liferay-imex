@@ -5,12 +5,10 @@ import java.util.Properties;
 
 public interface Exporter {
 	
-	public void doExport(Properties config, File destDir, long companyId);
+	public void doExport(Properties config, File destDir, long companyId, boolean debug);
 	
 	public String getDirectoryName();
 	
 	public String getProcessDescription();
-	
-	public String getFileName();
 
 }

@@ -37,5 +37,10 @@ public class SimpleXmlProcessor implements ImexSerializer {
 	public void write(Serializable source, File directory, String fileName) throws Exception {
 		serializer.write(source, new File(directory, fileName));
 	}
+
+	@Override
+	public String getFileExtension() {
+		return ".xml";
+	}
 	
 }

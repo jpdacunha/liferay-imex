@@ -1,11 +1,5 @@
 package com.liferay.imex.wcddm.exporter;
 
-import java.io.File;
-import java.util.List;
-import java.util.Properties;
-
-import org.osgi.service.component.annotations.Component;
-
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -13,6 +7,12 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+
+import java.io.File;
+import java.util.List;
+import java.util.Properties;
+
+import org.osgi.service.component.annotations.Component;
 
 @Component(
 		immediate = true,
@@ -33,7 +33,7 @@ public class WcDDMExporter implements Exporter {
 	private static final Log _log = LogFactoryUtil.getLog(WcDDMExporter.class);
 
 	@Override
-	public void doExport(Properties config, File destDir, long companyId) {
+	public void doExport(Properties config, File destDir, long companyId, boolean debug) {
 		
 		_log.info("Do Wc export ....");
 		
@@ -60,12 +60,6 @@ public class WcDDMExporter implements Exporter {
 		List<Group> groups = GroupLocalServiceUtil.getGroups(QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 		return groups;
 
-	}
-
-	@Override
-	public String getFileName() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

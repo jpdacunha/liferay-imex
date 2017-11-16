@@ -25,6 +25,18 @@ public class MessageUtil {
 		
 	}
 	
+	public static String getSkipped(String name) {
+		return getMessage(name + " [SKIPPED]", 4);
+	}
+	
+	public static String getOK(String name) {
+		return getMessage(name + " [   OK  ]", 4);
+	}
+	
+	public static String getError(String name, String error) {
+		return getMessage(name + " [ ERROR ] : " + error, 4);
+	}
+	
 	public static String getErrorMessage(Exception e) {
 		return PREFIX + "An unexpected error occured : " + e.getMessage();
 	}

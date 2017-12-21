@@ -2,18 +2,19 @@ package com.liferay.imex.role.importer;
 
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.processor.ImexProcessor;
-import com.liferay.imex.core.util.exception.ImexException;
+import com.liferay.imex.core.util.configuration.ImexPropsUtil;
+import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.imex.role.FileNames;
+import com.liferay.imex.role.importer.configuration.ImExRoleImporterPropsKeys;
+import com.liferay.imex.role.importer.service.ImportRoleService;
 import com.liferay.imex.role.model.ImexRole;
-import com.liferay.imex.role.model.RolePermissions;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.Role;
-import com.liferay.portal.kernel.service.RoleLocalService;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.io.File;
-import java.util.List;
 import java.util.Properties;
 
 import org.osgi.service.component.annotations.Component;
@@ -36,82 +37,88 @@ public class RoleImporter implements Importer {
 	protected ImexProcessor processor;
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
-	protected RoleLocalService roleLocalService;
+	protected ImportRoleService importService;
 
 	@Override
-	public void doImport(Properties config, File companyDir, long companyId, boolean debug) {
+	public void doImport(User user, Properties config, File companyDir, long companyId, boolean debug) {
 		
 		_log.info(MessageUtil.getStartMessage("ROLE import process"));
 		
-		//FIXME : manage import.role.enabled parameter
+		boolean enabled = GetterUtil.getBoolean(config.get(ImExRoleImporterPropsKeys.IMPORT_ROLE_ENABLED));
 		
-		try {
-			
-			File rolesDir = getRolesImportDirectory(companyDir);
-			
-			List<Role> roles = roleLocalService.getRoles(companyId);
-			for (Role role : roles) {
-				this.doRoleImport(config, role, rolesDir, debug);
+		if (enabled) {
+		
+			try {
+				
+				File rolesDir = getRolesImportDirectory(companyDir);
+				
+				File[] rolesDirs = FileUtil.listFiles(rolesDir);
+				for (File roleDir : rolesDirs) {
+					this.doRoleImport(companyId, user, config, roleDir, debug);
+				}
+				
+				
+			} catch (Exception e) {
+				_log.error(e,e);
+				_log.error(MessageUtil.getErrorMessage(e)); 
 			}
 			
-			
-		} catch (Exception e) {
-			_log.error(e,e);
-			_log.error(MessageUtil.getErrorMessage(e)); 
+		} else {
+			_log.info(MessageUtil.getDisabled("ROLE import"));
 		}
 		
 		_log.info(MessageUtil.getEndMessage("ROLE import process"));
 		
 	}
 	
-	private void doRoleImport(Properties config, Role role, File rolesDir, boolean debug) {
+	private void doRoleImport(long companyId, User user, Properties config, File roleDir, boolean debug) {
 		
-		if (role != null) {
+		if (roleDir != null) {
 			
-			File roleDir = getSingleRoleImportDirectory(rolesDir, role);
+			if (roleDir.exists()) {
+			
+				String roleName = roleDir.getName();				
+				String roleList = config.get(ImExRoleImporterPropsKeys.IMPORT_ROLES_IGNORE_LIST).toString();
+	
+				if (ImexPropsUtil.contains(roleName, roleList)) {
 					
-			try {
-				
-				if (roleDir != null) {
-					
-					File roleFile = new File(roleDir, FileNames.ROLE_FILENAME + processor.getFileExtension());
-					
-					if (roleFile.exists()) {
-						ImexRole imexRole = (ImexRole)processor.read(ImexRole.class, roleDir, FileNames.ROLE_FILENAME + processor.getFileExtension());
-						_log.info(MessageUtil.getOK(imexRole.getName()));
-					} else {
-						_log.warn("[" + roleFile.getAbsolutePath() + "] does not exists");
+					try {
+						
+						if (roleDir != null) {
+							
+							File roleFile = new File(roleDir, FileNames.ROLE_FILENAME + processor.getFileExtension());
+							
+							if (roleFile.exists()) {
+								ImexRole imexRole = (ImexRole)processor.read(ImexRole.class, roleDir, FileNames.ROLE_FILENAME + processor.getFileExtension());
+								importService.importRole(companyId, user, imexRole);
+								_log.info(MessageUtil.getOK(imexRole.getName()));
+							} else {
+								_log.warn(MessageUtil.getDNE(roleFile.getAbsolutePath()));
+							}
+							
+							//Fixme JDA : Update roles and permissions here
+						}
+						
+					} catch (Exception e) {
+						_log.error(MessageUtil.getError(roleName, e.getMessage()));
+						if (debug) {
+							_log.error(e,e);
+						}
 					}
 					
-					//Update roles and permissions here
+				} else {
+					_log.info(MessageUtil.getSkipped(roleName));
 				}
 				
-			} catch (Exception e) {
-				_log.error(MessageUtil.getError(role.getName(), e.getMessage()));
-				if (debug) {
-				_log.error(e,e);
-				}
+			} else {
+				_log.warn(MessageUtil.getDNE(roleDir.getAbsolutePath()));
 			}
 			
 			
 		} else {
-			_log.error("Skipping null role ...");
+			_log.error("Skipping null roleDir ...");
 		}
 
-	}
-
-	private File getSingleRoleImportDirectory(File rolesDir, Role role) {
-		
-		String roleDirName = role.getName();
-		File roleDir = new File(rolesDir, roleDirName);
-		if (roleDir.exists()) {
-			return roleDir;
-		} else {
-			_log.warn("[" + roleDir.getAbsolutePath() + "] does not exists");
-		}
-		
-		return null;
-		
 	}
 
 	private File getRolesImportDirectory(File companyDir) {

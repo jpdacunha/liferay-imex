@@ -1,6 +1,6 @@
 package com.liferay.imex.role.exporter.configuration;
 
-public interface ImExRolePropsKeys {
+public interface ImExRoleExporterPropsKeys {
 	
 	public final static String EXPORT_ROLE_ENABLED = "export.role.enabled";
 	

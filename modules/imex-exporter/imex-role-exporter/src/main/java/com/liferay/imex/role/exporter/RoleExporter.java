@@ -6,14 +6,15 @@ import com.liferay.imex.core.util.configuration.ImexPropsUtil;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.imex.role.FileNames;
-import com.liferay.imex.role.exporter.configuration.ImExRolePropsKeys;
-import com.liferay.imex.role.exporter.service.RolePermissionsService;
+import com.liferay.imex.role.exporter.configuration.ImExRoleExporterPropsKeys;
+import com.liferay.imex.role.exporter.service.ExportRolePermissionsService;
 import com.liferay.imex.role.model.ImexRole;
 import com.liferay.imex.role.model.RolePermissions;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.service.RoleLocalService;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringPool;
 
@@ -46,27 +47,33 @@ public class RoleExporter implements Exporter {
 	protected ImexProcessor processor;
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
-	protected RolePermissionsService rolePermissionServive;
+	protected ExportRolePermissionsService rolePermissionServive;
 
 	@Override
 	public void doExport(Properties config, File destDir, long companyId, boolean debug) {
 		
 		_log.info(MessageUtil.getStartMessage("ROLE export process"));
 		
-		//FIXME : manage export.role.enabled parameter
+		boolean enabled = GetterUtil.getBoolean(config.get(ImExRoleExporterPropsKeys.EXPORT_ROLE_ENABLED));
 		
-		try {
-			
-			File rolesDir = initializeRolesExportDirectory(destDir);
-			
-			List<Role> roles = roleLocalService.getRoles(companyId);
-			for (Role role : roles) {
-				this.doRoleExport(config, role, rolesDir, debug);
+		if (enabled) {
+		
+			try {
+				
+				File rolesDir = initializeRolesExportDirectory(destDir);
+				
+				List<Role> roles = roleLocalService.getRoles(companyId);
+				for (Role role : roles) {
+					this.doRoleExport(config, role, rolesDir, debug);
+				}
+				
+			} catch (ImexException e) {
+				_log.error(e,e);
+				_log.error(MessageUtil.getErrorMessage(e)); 
 			}
 			
-		} catch (ImexException e) {
-			_log.error(e,e);
-			_log.error(MessageUtil.getErrorMessage(e)); 
+		} else {
+			_log.info(MessageUtil.getDisabled("ROLE export"));
 		}
 		
 		_log.info(MessageUtil.getEndMessage("ROLE export process"));
@@ -76,8 +83,6 @@ public class RoleExporter implements Exporter {
 	private void doRoleExport(Properties config, Role role, File rolesDir, boolean debug) throws ImexException {
 				
 		if (role != null) {
-			
-			File roleDir = initializeSingleRoleExportDirectory(rolesDir, role);
 			
 			Locale locale = LocaleUtil.getDefault();
 			String uuid = role.getUuid();
@@ -89,26 +94,40 @@ public class RoleExporter implements Exporter {
 			long roleId = role.getRoleId();
 			
 			//No null control here because this param cannot be null
-			String roleList = config.get(ImExRolePropsKeys.EXPORT_ROLES_IGNORE_LIST).toString();
+			String roleList = config.get(ImExRoleExporterPropsKeys.EXPORT_ROLES_IGNORE_LIST).toString();
 
 			if (ImexPropsUtil.contains(role.getName(), roleList)) {
 				
-				try {
-					
-					//Writing role file
-					processor.write(new ImexRole(uuid, name, type, description, friendlyURL), roleDir, FileNames.ROLE_FILENAME + processor.getFileExtension());
+				File roleDir = initializeSingleRoleExportDirectory(rolesDir, role);
 				
-					//Writing role permission file
-					RolePermissions source =  rolePermissionServive.getRolePermissions(companyId, roleId);
-					processor.write(source, roleDir, FileNames.ROLE_PERMISSION_FILENAME + processor.getFileExtension());
+				if (roleDir != null) {
+									
+					if (roleDir.exists()) {
 					
-					_log.info(MessageUtil.getOK(role.getName()));
-				
-				} catch (Exception e) {
-					_log.error(MessageUtil.getError(role.getName(), e.getMessage()));
-					if (debug) {
-					_log.error(e,e);
+						try {
+							
+							//Writing role file
+							processor.write(new ImexRole(uuid, name, type, description, friendlyURL), roleDir, FileNames.ROLE_FILENAME + processor.getFileExtension());
+						
+							//Writing role permission file
+							RolePermissions source =  rolePermissionServive.getRolePermissions(companyId, roleId);
+							processor.write(source, roleDir, FileNames.ROLE_PERMISSION_FILENAME + processor.getFileExtension());
+							
+							_log.info(MessageUtil.getOK(role.getName()));
+						
+						} catch (Exception e) {
+							_log.error(MessageUtil.getError(role.getName(), e.getMessage()));
+							if (debug) {
+							_log.error(e,e);
+							}
+						}
+						
+					} else {
+						_log.warn(MessageUtil.getDNE(roleDir.getAbsolutePath()));
 					}
+					
+				} else {
+					_log.error("roleDir is null ...");
 				}
 				
 			} else {

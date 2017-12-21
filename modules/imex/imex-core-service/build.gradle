@@ -1,7 +1,3 @@
-liferayOSGi {
-    expandCompileInclude = false
-}
-
 dependencies {
 
 	compileOnly group: "org.osgi", name: "org.osgi.core", version: "6.0.0"

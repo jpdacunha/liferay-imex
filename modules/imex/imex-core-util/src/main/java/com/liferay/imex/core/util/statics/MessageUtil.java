@@ -25,16 +25,32 @@ public class MessageUtil {
 		
 	}
 	
+	public static String getDNE(String name) {
+		return getMessage("[" + name + "] does not exists", 4);
+	}
+	
+	public static String getDisabled(String name) {
+		return getMessage("[" + name + "] is currently [DISABLED]", 4);
+	}
+	
 	public static String getSkipped(String name) {
-		return getMessage(name + " [SKIPPED]", 4);
+		return getMessage("[" +name + "] [SKIPPED]", 4);
+	}
+	
+	public static String getUpdate(String name) {
+		return getMessage("[" +name + "] [UPDATED]", 4);
+	}
+	
+	public static String getCreate(String name) {
+		return getMessage("[" +name + "] [CREATED]", 4);
 	}
 	
 	public static String getOK(String name) {
-		return getMessage(name + " [   OK  ]", 4);
+		return getMessage("[" + name + "] [   OK  ]", 4);
 	}
 	
 	public static String getError(String name, String error) {
-		return getMessage(name + " [ ERROR ] : " + error, 4);
+		return getMessage("[" + name + "] [ ERROR ] : " + error, 4);
 	}
 	
 	public static String getErrorMessage(Exception e) {
@@ -114,5 +130,6 @@ public class MessageUtil {
 		}
 		
 	}
+
 
 }

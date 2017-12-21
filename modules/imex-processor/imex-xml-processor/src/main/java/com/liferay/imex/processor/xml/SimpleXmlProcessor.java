@@ -29,8 +29,8 @@ public class SimpleXmlProcessor implements ImexProcessor {
 		this.serializer = new Persister(format); 
 	}
 	
-	public Serializable read(Class<?> source, File directory, String fileName) throws Exception {
-		return serializer.read((Serializable)source, new File(directory, fileName));
+	public Object read(Class<?> source, File directory, String fileName) throws Exception {
+		return (Object)serializer.read(source, new File(directory, fileName));
 	}
 	
 	public void write(Serializable source, File directory, String fileName) throws Exception {

@@ -43,7 +43,6 @@ public class ImexExportServiceImpl implements ImexExportService {
 		
 		_log.info(MessageUtil.getStartMessage("export process"));
 		
-		
 		try {
 			File exportDir = initializeExportDirectory();
 			

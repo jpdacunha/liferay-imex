@@ -8,7 +8,7 @@ import com.liferay.imex.role.model.RolePermissions;
  * 
  *
  */
-public interface RolePermissionsService {
+public interface ExportRolePermissionsService {
 	
 	public RolePermissions getRolePermissions(
 			long companyId, 

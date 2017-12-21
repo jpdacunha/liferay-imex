@@ -1,6 +1,6 @@
 package com.liferay.imex.role.exporter.service.impl;
 
-import com.liferay.imex.role.exporter.service.RolePermissionsService;
+import com.liferay.imex.role.exporter.service.ExportRolePermissionsService;
 import com.liferay.imex.role.model.Action;
 import com.liferay.imex.role.model.PortletPermissions;
 import com.liferay.imex.role.model.Resource;
@@ -40,9 +40,9 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
  *
  */
 @Component
-public class RolePermissionsServiceImpl implements RolePermissionsService {
+public class ExportRolePermissionsServiceImpl implements ExportRolePermissionsService {
 	
-	private static Log _log = LogFactoryUtil.getLog(RolePermissionsServiceImpl.class);
+	private static Log _log = LogFactoryUtil.getLog(ExportRolePermissionsServiceImpl.class);
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	private GroupLocalService groupLocalService;

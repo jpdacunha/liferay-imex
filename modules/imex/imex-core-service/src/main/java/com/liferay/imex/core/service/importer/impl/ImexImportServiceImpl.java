@@ -7,9 +7,12 @@ import com.liferay.imex.core.api.importer.ImporterTracker;
 import com.liferay.imex.core.util.configuration.ImexPropsUtil;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.MessageUtil;
+import com.liferay.imex.core.util.statics.UserUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 
 import java.io.File;
@@ -55,16 +58,17 @@ public class ImexImportServiceImpl implements ImexImportService {
 			for (Company company : companies) {
 				
 				long companyId = company.getCompanyId();
+				String companyName = company.getName();
 				
 				File companyDir = getCompanyImportDirectory(importDir, company);
 				
 				if (companyDir != null) {
-					executeRegisteredImporters(Importers, companyDir, companyId);
+					executeRegisteredImporters(Importers, companyDir, companyId, companyName);
 				}
 				
 			}
 			
-		} catch (ImexException e) {
+		} catch (ImexException | PortalException e) {
 			_log.error(e,e);
 		}
 		
@@ -100,9 +104,19 @@ public class ImexImportServiceImpl implements ImexImportService {
 		
 	}
 	
-	private void executeRegisteredImporters(Map<String, ServiceReference<Importer>> importers, File companyDir, long companyId) {
+	private void executeRegisteredImporters(Map<String, ServiceReference<Importer>> importers, File companyDir, long companyId, String companyName) {
 		
 		if (importers != null && importers.size() > 0) {
+			
+			User user = UserUtil.getDefaultAdmin(companyId);
+			
+			if (user == null) {
+				_log.info(MessageUtil.getError("Company [" + companyName + "]", "Missing omni admin user"));
+				return;
+			}
+			
+			_log.info(MessageUtil.getStartMessage("[" + companyName + "] import process"));
+			_log.info(MessageUtil.getMessage("Using user [" + user.getEmailAddress() + "] as default user"));
 			
 			for (Map.Entry<String ,ServiceReference<Importer>> entry  : importers.entrySet()) {
 				
@@ -120,16 +134,17 @@ public class ImexImportServiceImpl implements ImexImportService {
 				if (config == null) {
 					_log.warn(MessageUtil.getMessage(bundle, "has no defined configuration. Aborting execution ..."));
 				}
-				
 	
 				ImexPropsUtil.displayProperties(config, bundle);
 				
 				//FIXME : manage debug param
-				Importer.doImport(config, companyDir, companyId, true);
+				Importer.doImport(user, config, companyDir, companyId, true);
 									
 				_log.info(MessageUtil.getEndMessage(Importer.getProcessDescription(), 1));
 				
 			}
+			
+			_log.info(MessageUtil.getEndMessage("[" + companyName + "] import process"));
 			
 		} else {
 			_log.info(MessageUtil.getMessage("No registered Importers"));

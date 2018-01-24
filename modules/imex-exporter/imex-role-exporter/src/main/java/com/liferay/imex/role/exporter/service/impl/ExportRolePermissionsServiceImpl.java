@@ -99,54 +99,54 @@ public class ExportRolePermissionsServiceImpl implements ExportRolePermissionsSe
 	private Resource getModelResource(long companyId, long roleId, String modelResource, boolean allActions) throws PortalException, SystemException {
 		List<String> actions = ResourceActionsUtil.getModelResourceActions(modelResource);
 		return getResource(companyId, roleId, modelResource, actions, allActions);
+		
 	}
 	
 	private Resource getResource(long companyId, long roleId, String resource, List<String> actions, boolean allActions) throws PortalException, SystemException {
-		
+	
 		Resource r = new Resource();
 		r.setResourceName(resource);
 		Company company = CompanyLocalServiceUtil.getCompany(companyId);
 		Role role = RoleLocalServiceUtil.getRole(roleId);
 		
-		for (String actionId : actions) {
+		for (String actionId : actions) {			
 			
-			Action action = new Action();
-			action.setActionId(actionId);
-			Scope scope = getScope(company, role, resource, actionId);
-			action.setScope(scope);
-			
-			if (allActions || !scope.equals(Scope.NONE)){
-				
-				r.getActionList().add(action);
-				
-				if (scope.equals(Scope.GROUP)) {
+				Action action = new Action();
+				action.setActionId(actionId);
+				Scope scope = getScope(company, role, resource, actionId);
+				action.setScope(scope);							
+								
+				if (allActions || !scope.equals(Scope.NONE)){
 					
-					LinkedHashMap<String, Object> groupParams = new LinkedHashMap<String, Object>();
-
-					@SuppressWarnings("rawtypes")
-					List<Comparable> rolePermissions = new ArrayList<Comparable>();
-	
-					rolePermissions.add(resource);
-					rolePermissions.add(new Integer(ResourceConstants.SCOPE_GROUP));
-					rolePermissions.add(actionId);
-					rolePermissions.add(new Long(role.getRoleId()));
-	
-					groupParams.put("rolePermissions", rolePermissions);
+					r.getActionList().add(action);
+					
+					if (scope.equals(Scope.GROUP)) {
 						
-					List<Group> groups = groupLocalService.search(company.getCompanyId(), null, null, groupParams, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
-				
-					for (Group group : groups) {
-						if (group.isSite()) {
-							action.getSitesNames().add(group.getName());
-						} /*else {
-							_log.error("Group identified by [" + group.getFriendlyURL() + "] is not a site");
-							throw new IllegalStateException();
-						}*/
-					}
+						LinkedHashMap<String, Object> groupParams = new LinkedHashMap<String, Object>();
+	
+						@SuppressWarnings("rawtypes")
+						List<Comparable> rolePermissions = new ArrayList<Comparable>();
+		
+						rolePermissions.add(resource);
+						rolePermissions.add(new Integer(ResourceConstants.SCOPE_GROUP));
+						rolePermissions.add(actionId);
+						rolePermissions.add(new Long(role.getRoleId()));
+		
+						groupParams.put("rolePermissions", rolePermissions);
+							
+						List<Group> groups = groupLocalService.search(company.getCompanyId(), null, null, groupParams, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 					
-				}
-				
-			}
+						for (Group group : groups) {
+							if (group.isSite()) {
+								action.getSitesNames().add(group.getName());
+							} /*else {
+								_log.error("Group identified by [" + group.getFriendlyURL() + "] is not a site");
+								throw new IllegalStateException();
+							}*/
+						}
+						
+					}
+				}	
 			
 		}
 		return r;
@@ -177,5 +177,17 @@ public class ExportRolePermissionsServiceImpl implements ExportRolePermissionsSe
 		return result;
 		
 	}
+	
+	private boolean isGuestRoleId(long companyId, long roleId) throws PortalException {
+
+		Role guestRole = RoleLocalServiceUtil.getRole(
+			companyId, RoleConstants.GUEST);
+
+		if (roleId == guestRole.getRoleId()) {
+			return true;
+		}
+
+		return false;
+		}
 
 }

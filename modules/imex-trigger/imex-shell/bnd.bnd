@@ -1,0 +1,11 @@
+Bundle-Activator: com.liferay.imex.core.client.ImexCoreClientActivator
+Bundle-Name: imex-shell
+Bundle-SymbolicName: imex.shell
+Bundle-Version: 1.0.0
+
+Bundle-ClassPath:\
+  .,\
+  lib/commons-lang.jar
+  
+-includeresource:\
+  lib/commons-lang.jar=commons-lang=[0-9]*.jar

@@ -40,12 +40,13 @@ public class ImportRoleServiceImpl implements ImportRoleService {
 				if (role != null) {
 					
 					String roleName = role.getName();
-					//if role name is different of name defined in imex file update roleName
+					//if role name is different of name defined in imex file then update roleName
 					if ((roleName == null ) || (roleName != null && !roleName.equalsIgnoreCase(imexRole.getName()))){
 						
 						role.setName(imexRole.getName());
 						RoleLocalServiceUtil.updateRole(role);
-						_log.info("[" + imexRole.getName() + ", uuid = " + role.getUuid() + " ] updated successfully.");
+						_log.info(MessageUtil.getOK("[" + imexRole.getName() + ", uuid = " + role.getUuid() + " ]"));
+						
 					}
 				}
 				

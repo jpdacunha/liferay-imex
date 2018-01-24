@@ -96,7 +96,7 @@ public class RoleExporter implements Exporter {
 			//No null control here because this param cannot be null
 			String roleList = config.get(ImExRoleExporterPropsKeys.EXPORT_ROLES_IGNORE_LIST).toString();
 
-			if (ImexPropsUtil.contains(role.getName(), roleList)) {
+			if (!ImexPropsUtil.contains(role.getName(), roleList)) {
 				
 				File roleDir = initializeSingleRoleExportDirectory(rolesDir, role);
 				

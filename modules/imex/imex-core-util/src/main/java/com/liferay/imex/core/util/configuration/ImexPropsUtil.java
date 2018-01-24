@@ -46,7 +46,7 @@ public class ImexPropsUtil {
 			
 			List<String> roleNames = getList(list);
 			
-			return !roleNames.contains(name);
+			return roleNames.contains(name);
 			
 		} else {
 			_log.warn("Some of imput params are null");

@@ -14,6 +14,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 
 import java.io.File;
 import java.util.List;
@@ -137,8 +138,12 @@ public class ImexImportServiceImpl implements ImexImportService {
 	
 				ImexPropsUtil.displayProperties(config, bundle);
 				
-				//FIXME : manage debug param
-				Importer.doImport(user, config, companyDir, companyId, true);
+				try {
+					Company company = CompanyLocalServiceUtil.getCompany(companyId);
+					Importer.doImport(user, config, companyDir, companyId, company.getLocale(), true);
+				} catch (PortalException e) {
+					_log.error(e,e);
+				}
 									
 				_log.info(MessageUtil.getEndMessage(Importer.getProcessDescription(), 1));
 				

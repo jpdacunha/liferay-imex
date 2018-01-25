@@ -4,6 +4,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 
 public class FileUtil {
@@ -24,6 +25,24 @@ public class FileUtil {
 				_log.warn("No files exists in directory [" + file.getCanonicalPath() + "]");
 			}
 			
+		}
+		return result;
+		
+	}
+	
+	public static File[] listFiles(File file, String startwithPattern) throws IOException {
+		
+		File[] result = new File[0];
+		if (file != null && file.isDirectory()) {
+			result = file.listFiles(new FilenameFilter() {
+				
+				@Override
+				public boolean accept(File dir, String name) {
+					
+					return name.startsWith(startwithPattern);
+					
+				}
+			});
 		}
 		return result;
 		

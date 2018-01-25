@@ -8,6 +8,7 @@ import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.util.exception.ImexException;
+import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.core.util.statics.ImexNormalizer;
 import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.imex.wcddm.FileNames;
@@ -25,7 +26,6 @@ import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.File;
 import java.util.List;
@@ -102,62 +102,68 @@ public class WcDDMExporter implements Exporter {
 		
 		if (group != null) {
 			
-			String groupName = getGroupName(group, locale);
+			String groupName = GroupUtil.getGroupName(group, locale);
 			
-			File groupDir = initializeSingleGroupDirectory(groupsDir, group, locale);
+			long classNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);					
+			List<DDMStructure> ddmStructures = DDMStructureLocalServiceUtil.getStructures(group.getGroupId(), classNameId);
 			
-			if (groupDir != null) {
+			if (ddmStructures != null && ddmStructures.size() > 0) {
+			
+				File groupDir = initializeSingleGroupDirectory(groupsDir, group);
 				
-				if (groupDir.exists()) {
-			
-					long classNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);					
-					List<DDMStructure> ddmStructures = DDMStructureLocalServiceUtil.getStructures(group.getGroupId(), classNameId);
+				if (groupDir != null) {
 					
-					//Iterate over structures
-					for(DDMStructure ddmStructure : ddmStructures){
-											
-						File structureDir = initializeSingleWCDDMExportDirectory(groupDir, ddmStructure, locale);
-						
-						if (structureDir != null) {
+					if (groupDir.exists()) {
+				
+						//Iterate over structures
+						for(DDMStructure ddmStructure : ddmStructures){
+												
+							File structureDir = initializeSingleWCDDMExportDirectory(groupDir, ddmStructure);
 							
-							if (structureDir.exists()) {
-						
-								try {
-									
-									processor.write(new ImExStructure(ddmStructure), structureDir, getStructureFileName(ddmStructure, group, locale));
-									_log.info(MessageUtil.getOK(groupName, ddmStructure.getName(locale)));
-									
-									List<DDMTemplate> ddmTemplates = DDMTemplateLocalServiceUtil.getTemplatesByClassPK(ddmStructure.getGroupId(), ddmStructure.getPrimaryKey());
-									
-									//Iterate over templates
-									for(DDMTemplate ddmTemplate : ddmTemplates){
-										processor.write(new ImExTemplate(ddmTemplate), structureDir, getTemplateFileName(ddmTemplate, group, locale));
+							if (structureDir != null) {
+								
+								if (structureDir.exists()) {
+							
+									try {
+										
+										processor.write(new ImExStructure(ddmStructure), structureDir, FileNames.getStructureFileName(ddmStructure, group, locale, processor.getFileExtension()));
 										_log.info(MessageUtil.getOK(groupName, ddmStructure.getName(locale)));
+										
+										List<DDMTemplate> ddmTemplates = DDMTemplateLocalServiceUtil.getTemplatesByClassPK(ddmStructure.getGroupId(), ddmStructure.getPrimaryKey());
+										
+										//Iterate over templates
+										for(DDMTemplate ddmTemplate : ddmTemplates){
+											processor.write(new ImExTemplate(ddmTemplate), structureDir, FileNames.getTemplateFileName(ddmTemplate, group, locale, processor.getFileExtension()));
+											_log.info(MessageUtil.getOK(groupName, ddmStructure.getName(locale)));
+										}
+										
+									} catch (Exception e) {
+										_log.error(MessageUtil.getError(ddmStructure.getName(locale), e.getMessage()));
+										if (debug) {
+										_log.error(e,e);
+										}
 									}
-									
-								} catch (Exception e) {
-									_log.error(MessageUtil.getError(ddmStructure.getName(locale), e.getMessage()));
-									if (debug) {
-									_log.error(e,e);
-									}
+							
+								} else {
+									_log.warn(MessageUtil.getDNE(structureDir.getAbsolutePath()));
 								}
-						
+								
 							} else {
-								_log.warn(MessageUtil.getDNE(structureDir.getAbsolutePath()));
+								_log.error("structureDir is null ...");						
 							}
 							
-						} else {
-							_log.error("structureDir is null ...");						
 						}
 						
+					} else {
+						_log.warn(MessageUtil.getDNE(groupDir.getAbsolutePath()));
 					}
 					
 				} else {
-					_log.warn(MessageUtil.getDNE(groupDir.getAbsolutePath()));
+					_log.error("groupDir is null ...");
 				}
 				
 			} else {
-				_log.error("groupDir is null ...");
+				_log.info(MessageUtil.getEmpty(groupName));				
 			}
 			
 		} else {
@@ -165,35 +171,10 @@ public class WcDDMExporter implements Exporter {
 		}
 		
 	}
-
-	private String getTemplateFileName(DDMTemplate ddmTemplate, Group group, Locale locale) {
-		return FileNames.TEMPLATE_FILENAME + StringPool.MINUS + ddmTemplate.getTemplateKey() + processor.getFileExtension();
-	}
-
-	private String getStructureFileName(DDMStructure ddmStructure, Group group, Locale locale) {
-		return FileNames.STRUCTURE_FILENAME + StringPool.MINUS + ddmStructure.getStructureKey() + processor.getFileExtension();
-	}
 	
 	@Override
 	public String getProcessDescription() {
 		return "Web Content DDM export";
-	}
-	
-	/**
-	 * Return the group name
-	 * @param group
-	 * @param locale
-	 * @return
-	 */
-	private String getGroupName(Group group, Locale locale) {
-		
-		String name = group.getName(locale);
-		if (group.isCompany()) {
-			name = FileNames.DIR_GLOBAL;
-		}
-		
-		return ImexNormalizer.convertToKey(name);
-		
 	}
 	
 	/**
@@ -203,9 +184,14 @@ public class WcDDMExporter implements Exporter {
 	 * @return
 	 * @throws ImexException
 	 */
-	private File initializeSingleGroupDirectory(File groupsDir, Group group, Locale locale) throws ImexException {
+	private File initializeSingleGroupDirectory(File groupsDir, Group group) throws ImexException {
 		
-		String name = getGroupName(group, locale);
+		String name = group.getFriendlyURL();
+		if (group.isCompany()) {
+			name = GroupUtil.GLOBAL;
+		}
+		
+		name = ImexNormalizer.getDirNameByFriendlyURL(name);
 		File dir = new File(groupsDir, name);
 		dir.mkdirs();		
 		return dir;
@@ -219,9 +205,9 @@ public class WcDDMExporter implements Exporter {
 	 * @return
 	 * @throws ImexException
 	 */
-	private File initializeSingleWCDDMExportDirectory(File groupDir, DDMStructure structure, Locale locale) throws ImexException {
+	private File initializeSingleWCDDMExportDirectory(File groupDir, DDMStructure structure) throws ImexException {
 		
-		String name = ImexNormalizer.convertToKey(structure.getName(locale));
+		String name = ImexNormalizer.convertToKey(structure.getStructureKey());
 		File dir = new File(groupDir, name);
 		dir.mkdirs();		
 		return dir;

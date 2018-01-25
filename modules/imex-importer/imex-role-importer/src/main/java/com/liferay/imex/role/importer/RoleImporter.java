@@ -17,6 +17,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.Properties;
 
 import org.osgi.service.component.annotations.Component;
@@ -45,7 +46,7 @@ public class RoleImporter implements Importer {
 	protected ImportRolePermissionsService importPermissionService;
 
 	@Override
-	public void doImport(User user, Properties config, File companyDir, long companyId, boolean debug) {
+	public void doImport(User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
 		
 		_log.info(MessageUtil.getStartMessage("ROLE import process"));
 		
@@ -89,35 +90,31 @@ public class RoleImporter implements Importer {
 					
 					try {
 						
-						if (roleDir != null) {
+						File roleFile = new File(roleDir, FileNames.ROLE_FILENAME + processor.getFileExtension());
+						
+						if (roleFile.exists()) {
 							
-							File roleFile = new File(roleDir, FileNames.ROLE_FILENAME + processor.getFileExtension());
+							//Importing roles
+							ImexRole imexRole = (ImexRole)processor.read(ImexRole.class, roleDir, FileNames.ROLE_FILENAME + processor.getFileExtension());
+							importService.importRole(companyId, user, imexRole);
+						
+							//Importing roles permissions
+							File rolePermissionFile = new File(roleDir, FileNames.ROLE_PERMISSION_FILENAME + processor.getFileExtension());
 							
-							if (roleFile.exists()) {
-								
-								//Importing roles
-								ImexRole imexRole = (ImexRole)processor.read(ImexRole.class, roleDir, FileNames.ROLE_FILENAME + processor.getFileExtension());
-								importService.importRole(companyId, user, imexRole);
-							
-								//Importing roles permissions
-								File rolePermissionFile = new File(roleDir, FileNames.ROLE_PERMISSION_FILENAME + processor.getFileExtension());
-								
-								if (rolePermissionFile.exists()) {
-									boolean reInitPermissions = GetterUtil.getBoolean(config.get(ImExRoleImporterPropsKeys.IMPORT_ROLES_RESET_PERMISSIONS).toString());
-									RolePermissions rolePermissions = (RolePermissions)processor.read(RolePermissions.class, roleDir, FileNames.ROLE_PERMISSION_FILENAME + processor.getFileExtension());
-									importPermissionService.updateRolePermissions(companyId, imexRole, rolePermissions, reInitPermissions);
-								} else {
-									_log.warn(MessageUtil.getDNE(rolePermissionFile.getAbsolutePath()));
-								}
-								
-								_log.info(MessageUtil.getOK(imexRole.getName()));
-								
+							if (rolePermissionFile.exists()) {
+								boolean reInitPermissions = GetterUtil.getBoolean(config.get(ImExRoleImporterPropsKeys.IMPORT_ROLES_RESET_PERMISSIONS).toString());
+								RolePermissions rolePermissions = (RolePermissions)processor.read(RolePermissions.class, roleDir, FileNames.ROLE_PERMISSION_FILENAME + processor.getFileExtension());
+								importPermissionService.updateRolePermissions(companyId, imexRole, rolePermissions, reInitPermissions);
 							} else {
-								_log.warn(MessageUtil.getDNE(roleFile.getAbsolutePath()));
+								_log.warn(MessageUtil.getDNE(rolePermissionFile.getAbsolutePath()));
 							}
 							
-							//Fixme JDA : Update roles and permissions here
+							_log.info(MessageUtil.getOK(imexRole.getName()));
+							
+						} else {
+							_log.warn(MessageUtil.getDNE(roleFile.getAbsolutePath()));
 						}
+						
 						
 					} catch (Exception e) {
 						_log.error(MessageUtil.getError(roleName, e.getMessage()));

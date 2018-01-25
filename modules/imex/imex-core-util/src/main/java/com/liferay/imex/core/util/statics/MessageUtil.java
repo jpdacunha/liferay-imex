@@ -25,6 +25,10 @@ public class MessageUtil {
 		
 	}
 	
+	public static String getEmpty(String name) {
+		return getMessage("[" + name + "] has no elements", 4);
+	}
+	
 	public static String getDNE(String name) {
 		return getMessage("[" + name + "] does not exists", 4);
 	}

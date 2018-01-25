@@ -22,6 +22,35 @@ public class ImexNormalizer {
 		return s;
 	}
 
+	/**
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String getDirNameByFriendlyURL(String s) {
+		
+		//Remove first slashes of urls
+		if (s != null && s.startsWith(StringPool.SLASH)) {
+			s = s.replaceAll(StringPool.SLASH, StringPool.BLANK);
+		}
+		return s;
+		
+	}
+	
+	/**
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String getFriendlyURLByDirName(String s) {
+		
+		//Remove first slashes of urls
+		if (s != null && !s.startsWith(StringPool.SLASH)) {
+			s = StringPool.SLASH + s;
+		}
+		return s;
+		
+	}
 	
 
 }

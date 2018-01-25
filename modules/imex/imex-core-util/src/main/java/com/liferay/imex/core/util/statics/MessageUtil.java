@@ -49,6 +49,10 @@ public class MessageUtil {
 		return getMessage("[" + name + "] [   OK  ]", 4);
 	}
 	
+	public static String getOK(String key, String name) {
+		return getMessage("[" + key + "]=>[" + name + "] [   OK  ]", 4);
+	}
+	
 	public static String getError(String name, String error) {
 		return getMessage("[" + name + "] [ ERROR ] : " + error, 4);
 	}

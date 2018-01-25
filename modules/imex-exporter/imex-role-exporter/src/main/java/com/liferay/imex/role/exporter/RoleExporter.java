@@ -50,7 +50,7 @@ public class RoleExporter implements Exporter {
 	protected ExportRolePermissionsService rolePermissionServive;
 
 	@Override
-	public void doExport(Properties config, File destDir, long companyId, boolean debug) {
+	public void doExport(Properties config, File destDir, long companyId, Locale locale, boolean debug) {
 		
 		_log.info(MessageUtil.getStartMessage("ROLE export process"));
 		

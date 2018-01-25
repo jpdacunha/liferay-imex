@@ -7,10 +7,12 @@ import com.liferay.imex.core.api.exporter.ImexExportService;
 import com.liferay.imex.core.util.configuration.ImexPropsUtil;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.MessageUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 
 import java.io.File;
@@ -124,9 +126,13 @@ public class ImexExportServiceImpl implements ImexExportService {
 				
 				ImexPropsUtil.displayProperties(config, bundle);
 			
-				//FIXME : manage debug param
-				exporter.doExport(config, destDir, companyId, true);
-									
+				try {
+					Company company = CompanyLocalServiceUtil.getCompany(companyId);
+					exporter.doExport(config, destDir, companyId, company.getLocale(), true);
+				} catch (PortalException e) {
+					_log.error(e,e);
+				}
+													
 				_log.info(MessageUtil.getEndMessage(exporter.getProcessDescription(), 1));
 				
 			}

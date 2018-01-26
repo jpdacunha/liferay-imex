@@ -1,5 +1,13 @@
 package com.liferay.imex.shell.client.command.exporter;
 
+import com.liferay.imex.core.api.exporter.Exporter;
+import com.liferay.imex.core.api.exporter.ExporterTracker;
+import com.liferay.imex.core.util.configuration.OSGIServicePropsKeys;
+import com.liferay.imex.shell.client.ImexCommand;
+import com.liferay.imex.shell.client.util.TableBuilder;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+
 import java.util.Map;
 
 import org.osgi.framework.Bundle;
@@ -10,13 +18,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
-import com.liferay.imex.core.api.exporter.Exporter;
-import com.liferay.imex.core.api.exporter.ExporterTracker;
-import com.liferay.imex.shell.client.ImexCommand;
-import com.liferay.imex.shell.client.util.TableBuilder;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-
 @Component(
 		  immediate=true,
 		  service = Object.class,
@@ -26,12 +27,12 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 		  }
 )
 public class ListExporterCommand implements ImexCommand {
-	
+
 	private static final Log _log = LogFactoryUtil.getLog(ListExporterCommand.class);
 	
 	private ExporterTracker trackerService;
 	
-	private final static String[] COLUMN_NAMES = {"Ranking", "Bundle Name", "Description"}; 
+	private final static String[] COLUMN_NAMES = {"Ranking", "Bundle Name", "Description", "Execution priority"}; 
 
 	public void le() {
 		
@@ -47,13 +48,13 @@ public class ListExporterCommand implements ImexCommand {
 				
 				ServiceReference<Exporter> serviceReference = entry.getValue();
 				
-				String priority = (Integer)serviceReference.getProperty("service.ranking") + "";
-				String description = (String)serviceReference.getProperty("imex.component.description");
-				//TODO : JDA vérifier que c pas null
+				String ranking = (Integer)serviceReference.getProperty(OSGIServicePropsKeys.SERVICE_RANKING) + "";
+				String description = (String)serviceReference.getProperty(OSGIServicePropsKeys.IMEX_COMPONENT_DESCRIPTION);
+				String priority = (String)serviceReference.getProperty(OSGIServicePropsKeys.IMEX_COMPONENT_EXECUTION_PRIORITY);
 				Bundle bundle = serviceReference.getBundle();
 				
 				if (bundle != null) {
-					tableBuilder.addRow(priority, bundle.getSymbolicName(), description);
+					tableBuilder.addRow(ranking, bundle.getSymbolicName(), description, priority);
 				}
 				
 			}

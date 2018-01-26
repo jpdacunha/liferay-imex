@@ -12,6 +12,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ImporterTracker;
+import com.liferay.imex.core.util.configuration.OSGIServicePropsKeys;
 import com.liferay.imex.shell.client.ImexCommand;
 import com.liferay.imex.shell.client.util.TableBuilder;
 import com.liferay.portal.kernel.log.Log;
@@ -31,7 +32,7 @@ public class ListImporterCommand implements ImexCommand {
 	
 	private ImporterTracker trackerService;
 	
-	private final static String[] COLUMN_NAMES = {"Ranking", "Bundle Name", "Description"}; 
+	private final static String[] COLUMN_NAMES = {"Ranking", "Bundle Name", "Description", "Execution priority"}; 
 
 	public void li() {
 		
@@ -47,13 +48,13 @@ public class ListImporterCommand implements ImexCommand {
 				
 				ServiceReference<Importer> serviceReference = entry.getValue();
 				
-				String priority = (Integer)serviceReference.getProperty("service.ranking") + "";
-				String description = (String)serviceReference.getProperty("imex.component.description");
-				//TODO : JDA vérifier que c pas null
+				String ranking = (Integer)serviceReference.getProperty(OSGIServicePropsKeys.SERVICE_RANKING) + "";
+				String description = (String)serviceReference.getProperty(OSGIServicePropsKeys.IMEX_COMPONENT_DESCRIPTION);
+				String priority = (String)serviceReference.getProperty(OSGIServicePropsKeys.IMEX_COMPONENT_EXECUTION_PRIORITY);
 				Bundle bundle = serviceReference.getBundle();
 				
 				if (bundle != null) {
-					tableBuilder.addRow(priority, bundle.getSymbolicName(), description);
+					tableBuilder.addRow(ranking, bundle.getSymbolicName(), description, priority);
 				}
 				
 			}

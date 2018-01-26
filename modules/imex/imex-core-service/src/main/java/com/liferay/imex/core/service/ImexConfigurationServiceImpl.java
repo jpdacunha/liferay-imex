@@ -17,8 +17,6 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true, service = ImexConfigurationService.class)
 public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	
-	
-
 	private static final Log _log = LogFactoryUtil.getLog(ImexConfigurationServiceImpl.class);
 	
 	public final static String EXPORTER = "exporter";

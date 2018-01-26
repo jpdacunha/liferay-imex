@@ -2,6 +2,7 @@ package com.liferay.imex.core.service.exporter.tracker;
 
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
+import com.liferay.imex.core.service.model.ImexServiceReferenceMap;
 import com.liferay.imex.core.util.exception.MissingKeyException;
 import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.MessageUtil;
@@ -11,9 +12,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
@@ -33,25 +32,16 @@ public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter
 	
 	private ServiceTracker<Exporter, com.liferay.imex.core.api.exporter.Exporter> _serviceTracker;
 	
-	private Map<String, ServiceReference<Exporter>> _serviceReferences = new ConcurrentHashMap<>();
+	private ImexServiceReferenceMap<Exporter> _serviceReferences = new ImexServiceReferenceMap<Exporter>();
 
 	@Override
 	public Exporter addingService(ServiceReference<Exporter> serviceReference) {
 		
-		addServiceReference(serviceReference);
+		_serviceReferences.addServiceReference(serviceReference);
 		
 		Exporter exporter = _bundleContext.getService(serviceReference);
 		
 		return exporter;
-	}
-	
-	public synchronized void addServiceReference(ServiceReference<Exporter> serviceReference) {
-		
-		Bundle bundle = serviceReference.getBundle();
-		String key = bundle.getSymbolicName();
-		_log.info("# Adding [" + key + "] ...");
-		_serviceReferences.put(key, serviceReference);
-		
 	}
 
 	@Override
@@ -64,17 +54,13 @@ public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter
 
 	@Override
 	public void removedService(ServiceReference<Exporter> serviceReference, Exporter service) {
-		
-		Bundle bundle = serviceReference.getBundle();
-		String key = bundle.getSymbolicName();
-		_log.info("# Removing [" + key + "] ...");
-		_serviceReferences.remove(key);
-		
+		_serviceReferences.removeService(serviceReference);
 	}
 	
 	@Activate
 	@Modified
 	protected void activate(BundleContext bundleContext) {
+		
 		if (_serviceTracker != null) {
 			_serviceTracker.close();
 		}
@@ -87,6 +73,7 @@ public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter
 	
 	@Deactivate
 	protected void deactivate() {
+		
 		_serviceTracker.close();
 
 		_serviceTracker = null;
@@ -96,11 +83,12 @@ public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter
 		if (_log.isDebugEnabled()) {
 			_log.debug("Deactivated");
 		}
+		
 	}
 
 	@Override
 	public Map<String, ServiceReference<Exporter>> getExporters() {
-		return _serviceReferences;
+		return _serviceReferences.getMap();
 	}
 
 	@Override
@@ -108,7 +96,7 @@ public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter
 		
 		Map<String, ServiceReference<Exporter>> filteredServiceReferences = null;
 		try {
-			filteredServiceReferences = CollectionUtil.filterByKeys(bundleNames, _serviceReferences);
+			filteredServiceReferences = CollectionUtil.filterByKeys(bundleNames, getExporters());
 		} catch (MissingKeyException e) {
 			_log.info(MessageUtil.getMessage("There's something wrong in your syntax : " + e.getMessage()));
 		}

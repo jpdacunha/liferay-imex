@@ -30,8 +30,9 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 @Component(
 		immediate = true,
 		property = {
+			"imex.component.execution.priority=20",
 			"imex.component.description=Web Content DDM importer",
-			"service.ranking:Integer=20"
+			"service.ranking:Integer=10"
 		},
 		service = Importer.class
 	)

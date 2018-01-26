@@ -2,6 +2,7 @@ package com.liferay.imex.core.service.importer.tracker;
 
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ImporterTracker;
+import com.liferay.imex.core.service.model.ImexServiceReferenceMap;
 import com.liferay.imex.core.util.exception.MissingKeyException;
 import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.MessageUtil;
@@ -11,9 +12,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
@@ -33,48 +32,33 @@ public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer
 	
 	private ServiceTracker<Importer, com.liferay.imex.core.api.importer.Importer> _serviceTracker;
 	
-	private Map<String, ServiceReference<Importer>> _serviceReferences = new ConcurrentHashMap<>();
+	private ImexServiceReferenceMap<Importer> _serviceReferences = new ImexServiceReferenceMap<Importer>();
 
 	@Override
 	public Importer addingService(ServiceReference<Importer> serviceReference) {
 		
-		addServiceReference(serviceReference);
+		_serviceReferences.addServiceReference(serviceReference);
 		
 		Importer importer = _bundleContext.getService(serviceReference);
 		
 		return importer;
 	}
 	
-	public synchronized void addServiceReference(ServiceReference<Importer> serviceReference) {
-		
-		Bundle bundle = serviceReference.getBundle();
-		String key = bundle.getSymbolicName();
-		_log.info("# Adding [" + key + "] ...");
-		_serviceReferences.put(key, serviceReference);
-		
-	}
-
 	@Override
-	public void modifiedService(ServiceReference<Importer> serviceReference, Importer service) {
-		
+	public void modifiedService(ServiceReference<Importer> serviceReference, Importer service) {		
 		removedService(serviceReference, service);
 		addingService(serviceReference);
-		
 	}
 
 	@Override
-	public void removedService(ServiceReference<Importer> serviceReference, Importer service) {
-		
-		Bundle bundle = serviceReference.getBundle();
-		String key = bundle.getSymbolicName();
-		_log.info("# Removing [" + key + "] ...");
-		_serviceReferences.remove(key);
-		
+	public void removedService(ServiceReference<Importer> serviceReference, Importer service) {		
+		_serviceReferences.removeService(serviceReference);
 	}
 	
 	@Activate
 	@Modified
 	protected void activate(BundleContext bundleContext) {
+		
 		if (_serviceTracker != null) {
 			_serviceTracker.close();
 		}
@@ -82,10 +66,12 @@ public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer
 		_bundleContext = bundleContext;
 
 		_serviceTracker = ServiceTrackerFactory.open(_bundleContext, Importer.class, this);
+		
 	}
 	
 	@Deactivate
 	protected void deactivate() {
+		
 		_serviceTracker.close();
 
 		_serviceTracker = null;
@@ -95,11 +81,12 @@ public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer
 		if (_log.isDebugEnabled()) {
 			_log.debug("Deactivated");
 		}
+		
 	}
 
 	@Override
 	public Map<String, ServiceReference<Importer>> getImporters() {
-		return _serviceReferences;
+		return _serviceReferences.getMap();
 	}
 	
 	@Override
@@ -107,7 +94,7 @@ public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer
 		
 		Map<String, ServiceReference<Importer>> filteredServiceReferences = null;
 		try {
-			filteredServiceReferences = CollectionUtil.filterByKeys(bundleNames, _serviceReferences);
+			filteredServiceReferences = CollectionUtil.filterByKeys(bundleNames, getImporters());
 		} catch (MissingKeyException e) {
 			_log.info(MessageUtil.getMessage("There's something wrong in your syntax : " + e.getMessage()));
 		}

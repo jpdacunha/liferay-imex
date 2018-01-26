@@ -1,4 +1,4 @@
-package com.liferay.imex.core.client.util;
+package com.liferay.imex.shell.client.util;
 
 import java.util.LinkedList;
 import java.util.List;

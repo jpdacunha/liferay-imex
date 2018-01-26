@@ -1,7 +1,7 @@
-package com.liferay.imex.core.client.command.exporter;
+package com.liferay.imex.shell.client.command.exporter;
 
 import com.liferay.imex.core.api.exporter.ImexExportService;
-import com.liferay.imex.core.client.ImexCommand;
+import com.liferay.imex.shell.client.ImexCommand;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -20,9 +20,9 @@ public class ExportCommand implements ImexCommand {
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexExportService imexExportService;
 	
-	public void ex() {
+	public void ex(String ... bundleNames) {
 		
-		imexExportService.doExport();
+		imexExportService.doExport(bundleNames);
 		System.out.println("Done.");
 	
 	}

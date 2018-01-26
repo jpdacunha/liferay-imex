@@ -1,4 +1,4 @@
-package com.liferay.imex.core.client;
+package com.liferay.imex.shell.client;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

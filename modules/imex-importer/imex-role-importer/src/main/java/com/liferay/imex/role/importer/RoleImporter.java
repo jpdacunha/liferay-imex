@@ -2,8 +2,8 @@ package com.liferay.imex.role.importer;
 
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.processor.ImexProcessor;
-import com.liferay.imex.core.util.configuration.ImexPropsUtil;
 import com.liferay.imex.core.util.statics.FileUtil;
+import com.liferay.imex.core.util.statics.ImexPropsUtil;
 import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.imex.role.FileNames;
 import com.liferay.imex.role.importer.configuration.ImExRoleImporterPropsKeys;

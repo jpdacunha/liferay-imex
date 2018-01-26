@@ -4,8 +4,9 @@ import com.liferay.imex.core.api.ImexConfigurationService;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.exporter.ImexExportService;
-import com.liferay.imex.core.util.configuration.ImexPropsUtil;
 import com.liferay.imex.core.util.exception.ImexException;
+import com.liferay.imex.core.util.statics.CollectionUtil;
+import com.liferay.imex.core.util.statics.ImexPropsUtil;
 import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -14,8 +15,10 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -41,26 +44,53 @@ public class ImexExportServiceImpl implements ImexExportService {
 	protected ImexConfigurationService configurationService;
 
 	@Override
-	public void doExport() {
+	public void doExportAll() {
+		doExport(StringPool.BLANK);
+	}
+	
+	@Override
+	public void doExport(String... names) {		
+		doExport(Arrays.asList(names));		
+	}
+
+	@Override
+	public void doExport(List<String> bundleNames) {
 		
-		_log.info(MessageUtil.getStartMessage("export process"));
+		if (bundleNames == null) {
+			_log.info(MessageUtil.getStartMessage("ALL export process"));
+		} else {
+			_log.info(MessageUtil.getStartMessage("PARTIAL export process for [" + bundleNames.toString() + "]"));
+		}
 		
 		try {
 			File exportDir = initializeExportDirectory();
 			
-			_log.info(MessageUtil.getPropertyMessage("IMEX export path", exportDir.toString()));
+			Map<String, ServiceReference<Exporter>> exporters = trackerService.getFilteredExporters(bundleNames);
 			
-			Map<String, ServiceReference<Exporter>> exporters = trackerService.getExporters();
+			if (exporters == null || exporters.size() == 0) {
+				
+				_log.error(MessageUtil.getMessage("There is no exporters to execute. Please check : "));
+				_log.error(MessageUtil.getMessage("- All importers are correctly registered in OSGI container"));
+				if (bundleNames != null) {
+					_log.error(MessageUtil.getMessage("- A registered bundle exists for each typed name [" + bundleNames + "]"));
+				}
+				CollectionUtil.printKeys(trackerService.getExporters(), _log);
+				
+			} else {
+				
+				_log.info(MessageUtil.getPropertyMessage("IMEX export path", exportDir.toString()));
 			
-			List<Company> companies = companyLocalService.getCompanies();
-			
-			for (Company company : companies) {
+				List<Company> companies = companyLocalService.getCompanies();
 				
-				long companyId = company.getCompanyId();
-				
-				File companyDir = initializeCompanyExportDirectory(exportDir, company);
-				
-				executeRegisteredExporters(exporters, companyDir, companyId);
+				for (Company company : companies) {
+					
+					long companyId = company.getCompanyId();
+					
+					File companyDir = initializeCompanyExportDirectory(exportDir, company);
+					
+					executeRegisteredExporters(exporters, companyDir, companyId);
+					
+				}
 				
 			}
 			
@@ -104,43 +134,37 @@ public class ImexExportServiceImpl implements ImexExportService {
 	}
 	
 	private void executeRegisteredExporters(Map<String, ServiceReference<Exporter>> exporters, File destDir, long companyId) {
-		
-		if (exporters != null && exporters.size() > 0) {
+				
+		for (Map.Entry<String ,ServiceReference<Exporter>> entry  : exporters.entrySet()) {
 			
-			for (Map.Entry<String ,ServiceReference<Exporter>> entry  : exporters.entrySet()) {
-				
-				ServiceReference<Exporter> reference = entry.getValue();
-				
-				Bundle bundle = reference.getBundle();
-				
-				Exporter exporter = bundle.getBundleContext().getService(reference);
-				
-				_log.info(MessageUtil.getStartMessage(exporter.getProcessDescription(), 1));
-				
-				//Loading configuration for each exporter
-				Properties config = configurationService.loadExporterConfiguration(bundle);
-				
-				if (config == null) {
-					_log.warn(MessageUtil.getMessage(bundle, "has no defined configuration. Aborting execution ..."));
-				}
-				
-				ImexPropsUtil.displayProperties(config, bundle);
+			ServiceReference<Exporter> reference = entry.getValue();
 			
-				try {
-					Company company = CompanyLocalServiceUtil.getCompany(companyId);
-					exporter.doExport(config, destDir, companyId, company.getLocale(), true);
-				} catch (PortalException e) {
-					_log.error(e,e);
-				}
-													
-				_log.info(MessageUtil.getEndMessage(exporter.getProcessDescription(), 1));
-				
+			Bundle bundle = reference.getBundle();
+			
+			Exporter exporter = bundle.getBundleContext().getService(reference);
+			
+			_log.info(MessageUtil.getStartMessage(exporter.getProcessDescription(), 1));
+			
+			//Loading configuration for each exporter
+			Properties config = configurationService.loadExporterConfiguration(bundle);
+			
+			if (config == null) {
+				_log.warn(MessageUtil.getMessage(bundle, "has no defined configuration. Aborting execution ..."));
 			}
 			
-		} else {
-			_log.info(MessageUtil.getMessage("No registered exporters"));
-		}
+			ImexPropsUtil.displayProperties(config, bundle);
 		
+			try {
+				Company company = CompanyLocalServiceUtil.getCompany(companyId);
+				exporter.doExport(config, destDir, companyId, company.getLocale(), true);
+			} catch (PortalException e) {
+				_log.error(e,e);
+			}
+												
+			_log.info(MessageUtil.getEndMessage(exporter.getProcessDescription(), 1));
+			
+		}
+
 	}
 	
 	@Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)

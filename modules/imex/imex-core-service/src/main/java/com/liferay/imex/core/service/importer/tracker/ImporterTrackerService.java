@@ -1,5 +1,15 @@
 package com.liferay.imex.core.service.importer.tracker;
 
+import com.liferay.imex.core.api.importer.Importer;
+import com.liferay.imex.core.api.importer.ImporterTracker;
+import com.liferay.imex.core.util.exception.MissingKeyException;
+import com.liferay.imex.core.util.statics.CollectionUtil;
+import com.liferay.imex.core.util.statics.MessageUtil;
+import com.liferay.osgi.util.ServiceTrackerFactory;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,12 +23,6 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.liferay.imex.core.api.importer.Importer;
-import com.liferay.imex.core.api.importer.ImporterTracker;
-import com.liferay.osgi.util.ServiceTrackerFactory;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-
 
 @Component(immediate = true, service = ImporterTracker.class)
 public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer, com.liferay.imex.core.api.importer.Importer>, ImporterTracker {
@@ -29,7 +33,7 @@ public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer
 	
 	private ServiceTracker<Importer, com.liferay.imex.core.api.importer.Importer> _serviceTracker;
 	
-	private Map<String, ServiceReference<Importer>> _serviceReferences = new ConcurrentHashMap<>();;
+	private Map<String, ServiceReference<Importer>> _serviceReferences = new ConcurrentHashMap<>();
 
 	@Override
 	public Importer addingService(ServiceReference<Importer> serviceReference) {
@@ -97,6 +101,21 @@ public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer
 	public Map<String, ServiceReference<Importer>> getImporters() {
 		return _serviceReferences;
 	}
+	
+	@Override
+	public Map<String, ServiceReference<Importer>> getFilteredImporters(List<String> bundleNames) {
+		
+		Map<String, ServiceReference<Importer>> filteredServiceReferences = null;
+		try {
+			filteredServiceReferences = CollectionUtil.filterByKeys(bundleNames, _serviceReferences);
+		} catch (MissingKeyException e) {
+			_log.info(MessageUtil.getMessage("There's something wrong in your syntax : " + e.getMessage()));
+		}
+				
+		return filteredServiceReferences;
+		
+	}
+	
 
 
 }

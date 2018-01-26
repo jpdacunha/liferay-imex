@@ -1,7 +1,7 @@
-package com.liferay.imex.core.client.command.importer;
+package com.liferay.imex.shell.client.command.importer;
 
 import com.liferay.imex.core.api.importer.ImexImportService;
-import com.liferay.imex.core.client.ImexCommand;
+import com.liferay.imex.shell.client.ImexCommand;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
@@ -18,15 +18,13 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 		  }
 		)
 public class ImportCommand implements ImexCommand {
-	
-	private static final Log _log = LogFactoryUtil.getLog(ImportCommand.class);
-	
+		
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexImportService imexImportService;
 	
-	public void im() {
+	public void im(String... bundleNames) {
 		
-		imexImportService.doImport();
+		imexImportService.doImport(bundleNames);
 		System.out.println("Done.");
 	
 	}

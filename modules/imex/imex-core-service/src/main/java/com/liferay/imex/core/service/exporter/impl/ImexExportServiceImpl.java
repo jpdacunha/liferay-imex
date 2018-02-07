@@ -84,6 +84,8 @@ public class ImexExportServiceImpl implements ImexExportService {
 				
 				for (Company company : companies) {
 					
+					_log.info(MessageUtil.getStartMessage(company));
+					
 					long companyId = company.getCompanyId();
 					
 					File companyDir = initializeCompanyExportDirectory(exportDir, company);

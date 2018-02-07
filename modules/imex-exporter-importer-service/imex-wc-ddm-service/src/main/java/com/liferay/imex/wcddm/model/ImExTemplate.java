@@ -21,6 +21,7 @@ public class ImExTemplate implements Serializable {
 		data = jt.getScript();
 		langType = jt.getLanguage();
 		templateType = jt.getType();
+		description = jt.getDescription();
 		
 	}
 	
@@ -36,6 +37,16 @@ public class ImExTemplate implements Serializable {
 	
 	private String templateType;
 	
+	private String description;
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public String getKey() {
 		return key;
 	}

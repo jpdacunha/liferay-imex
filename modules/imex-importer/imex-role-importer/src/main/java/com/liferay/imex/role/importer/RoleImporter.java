@@ -14,6 +14,7 @@ import com.liferay.imex.role.model.RolePermissions;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.io.File;
@@ -47,7 +48,7 @@ public class RoleImporter implements Importer {
 	protected ImportRolePermissionsService importPermissionService;
 
 	@Override
-	public void doImport(User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
+	public void doImport(ServiceContext serviceContex, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
 		
 		_log.info(MessageUtil.getStartMessage("ROLE import process"));
 		

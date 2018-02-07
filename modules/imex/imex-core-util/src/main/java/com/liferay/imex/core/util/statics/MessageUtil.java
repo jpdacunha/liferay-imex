@@ -1,16 +1,38 @@
 package com.liferay.imex.core.util.statics;
 
+import com.liferay.imex.core.util.enums.ImexOperationEnum;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
+
+import java.io.File;
+import java.util.Locale;
 
 import org.osgi.framework.Bundle;
 
 public class MessageUtil {
 	
+	private static final Log _log = LogFactoryUtil.getLog(MessageUtil.class);
+	
 	private final static String PREFIX = "[IMEX] : ";
 	
+	public static String getStartMessage(Company company) {
+		return getStartMessage("for COMPANY : " + getCompanyIdentifier(company), 1);
+	}
+	
+
 	public static String getStartMessage(String description) {
 		return getStartMessage(description, 0);
+	}
+	
+	public static String getStartMessage(Group group, Locale locale) {
+		
+		return getStartMessage("for GROUP : " + getGroupIdentifier(group, locale), 2);
+		
 	}
 	
 	public static String getStartMessage(String description, int nbPadLeft) {
@@ -23,6 +45,10 @@ public class MessageUtil {
 		
 		return pad(rootMessage, nbPadLeft);
 		
+	}
+	
+	public static String getEmpty(Group group, Locale locale) {
+		return getEmpty(getGroupIdentifier(group, locale));
 	}
 	
 	public static String getEmpty(String name) {
@@ -57,6 +83,18 @@ public class MessageUtil {
 		return getMessage("[" + key + "]=>[" + name + "] [   OK  ]", 4);
 	}
 	
+	public static String getOK(String key, String name, File file, ImexOperationEnum operation) {
+		
+		String message = "[" + key + "]=>[" + name + "] [" + operation.getValue() + "] [   OK  ]";		
+		if (file != null) {
+			message += " - (" + file.getAbsolutePath() + ")";
+		} else {
+			_log.warn("file is null");
+		}
+		return getMessage(message , 4);
+		
+	}
+	
 	public static String getError(String name, String error) {
 		return getMessage("[" + name + "] [ ERROR ] : " + error, 4);
 	}
@@ -73,6 +111,11 @@ public class MessageUtil {
 		return getMessage(description, 0);
 	}
 	
+	public static String getMessage(String name, String error) {
+		return getMessage("[" + name + "] : " + error, 4);
+	}
+	
+	
 	public static String getMessage(String description, int nbPadLeft) {
 		
 		String rootMessage = StringPool.BLANK;
@@ -87,6 +130,10 @@ public class MessageUtil {
 	
 	public static String getEndMessage(String description) {
 		return getEndMessage(description, 0);
+	}
+	
+	public static String getEndMessage(Group group, Locale locale) {		
+		return getEndMessage("process for GROUP : " + getGroupIdentifier(group, locale));		
 	}
 	
 	public static String getEndMessage(String description, int nbPadLeft) {
@@ -136,6 +183,35 @@ public class MessageUtil {
 		} else {
 			return message;
 		}
+		
+	}
+	
+	private static String getGroupIdentifier(Group group, Locale locale) {
+		
+		if (group == null) {
+			_log.warn("Group is null");
+			return StringPool.BLANK;
+		}
+		
+		String groupName = GroupUtil.getGroupName(group, locale);
+		return " groupFriendlyURL:[" + group.getFriendlyURL() + "] groupName:[" + groupName + "]";
+	}
+	
+	private static String getCompanyIdentifier(Company company) {
+		
+		if (company == null) {
+			_log.warn("company is null");
+			return StringPool.BLANK;
+		}
+		
+		String name = "";
+		try {
+			name = company.getName();
+		} catch (PortalException e) {
+			_log.error(e,e);
+		}
+		
+		return " companyWebId:[" + company.getWebId() + "] companyName:[" + name + "]";
 		
 	}
 

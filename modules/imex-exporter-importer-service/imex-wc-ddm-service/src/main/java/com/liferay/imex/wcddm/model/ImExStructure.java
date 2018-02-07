@@ -19,6 +19,9 @@ public class ImExStructure implements Serializable {
 		uuid = js.getUuid();
 		name = js.getName();
 		data = js.getDefinition();
+		storageType = js.getStorageType();
+		structureType = js.getType();
+		description = js.getDescription();
 		
 	}
 	
@@ -30,6 +33,36 @@ public class ImExStructure implements Serializable {
 	
 	private String data;
 	
+	private String storageType;
+	
+	private int structureType;
+	
+	private String description;
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public int getStructureType() {
+		return structureType;
+	}
+
+	public void setStructureType(int structureType) {
+		this.structureType = structureType;
+	}
+	
+	public String getStorageType() {
+		return storageType;
+	}
+
+	public void setStorageType(String storageType) {
+		this.storageType = storageType;
+	}
+
 	public String getKey() {
 		return key;
 	}

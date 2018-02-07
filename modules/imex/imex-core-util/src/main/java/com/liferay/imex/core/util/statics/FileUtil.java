@@ -11,7 +11,7 @@ public class FileUtil {
 	
 	private static final Log _log = LogFactoryUtil.getLog(FileUtil.class);
 	
-	public static File[] listFiles(File file) throws IOException {
+	public static File[] listFiles(File file) {
 		
 		File[] result = new File[0];
 		
@@ -22,7 +22,11 @@ public class FileUtil {
 			if (directoryFiles != null) {
 				result = directoryFiles;
 			} else {
-				_log.warn("No files exists in directory [" + file.getCanonicalPath() + "]");
+				try {
+					_log.warn("No files exists in directory [" + file.getCanonicalPath() + "]");
+				} catch (IOException e) {
+					_log.error(e,e);
+				}
 			}
 			
 		}
@@ -30,7 +34,7 @@ public class FileUtil {
 		
 	}
 	
-	public static File[] listFiles(File file, String startwithPattern) throws IOException {
+	public static File[] listFiles(File file, String startwithPattern) {
 		
 		File[] result = new File[0];
 		if (file != null && file.isDirectory()) {

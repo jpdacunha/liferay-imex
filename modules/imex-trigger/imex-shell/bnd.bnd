@@ -1,4 +1,3 @@
-Bundle-Activator: com.liferay.imex.shell.client.ImexCoreClientActivator
 Bundle-Name: imex-shell
 Bundle-SymbolicName: imex.shell
 Bundle-Version: 1.0.0

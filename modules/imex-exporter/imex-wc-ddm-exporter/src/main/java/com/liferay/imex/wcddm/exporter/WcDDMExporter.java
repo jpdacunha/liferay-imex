@@ -76,7 +76,11 @@ public class WcDDMExporter implements Exporter {
 
 					boolean isSite = group.isSite() && !group.getFriendlyURL().equals("/control_panel");
 					if (isSite) {
+						
+						_log.info(MessageUtil.getStartMessage(group, locale));
 						doExport(config, group, wcDdmDir, locale, debug);
+						_log.info(MessageUtil.getEndMessage(group, locale));
+						
 					}
 
 				}
@@ -103,7 +107,7 @@ public class WcDDMExporter implements Exporter {
 		
 		if (group != null) {
 			
-			String groupName = GroupUtil.getGroupName(group, locale);
+			//String groupName = GroupUtil.getGroupName(group, locale);
 			
 			long classNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);					
 			List<DDMStructure> ddmStructures = DDMStructureLocalServiceUtil.getStructures(group.getGroupId(), classNameId);
@@ -128,14 +132,14 @@ public class WcDDMExporter implements Exporter {
 									try {
 										
 										processor.write(new ImExStructure(ddmStructure), structureDir, FileNames.getStructureFileName(ddmStructure, group, locale, processor.getFileExtension()));
-										_log.info(MessageUtil.getOK(groupName, ddmStructure.getName(locale)));
+										_log.info(MessageUtil.getOK(ddmStructure.getName(locale)));
 										
 										List<DDMTemplate> ddmTemplates = DDMTemplateLocalServiceUtil.getTemplatesByClassPK(ddmStructure.getGroupId(), ddmStructure.getPrimaryKey());
 										
 										//Iterate over templates
 										for(DDMTemplate ddmTemplate : ddmTemplates){
 											processor.write(new ImExTemplate(ddmTemplate), structureDir, FileNames.getTemplateFileName(ddmTemplate, group, locale, processor.getFileExtension()));
-											_log.info(MessageUtil.getOK(groupName, ddmStructure.getName(locale)));
+											_log.info(MessageUtil.getOK(ddmTemplate.getName(locale)));
 										}
 										
 									} catch (Exception e) {
@@ -164,7 +168,7 @@ public class WcDDMExporter implements Exporter {
 				}
 				
 			} else {
-				_log.info(MessageUtil.getEmpty(groupName));				
+				_log.info(MessageUtil.getEmpty(group, locale));				
 			}
 			
 		} else {

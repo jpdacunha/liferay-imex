@@ -9,6 +9,8 @@ public interface ImexProcessor {
 	
 	public Object read(Class<?> source, File directory, String fileName) throws Exception;
 	
+	public Object read(Class<?> source, File filePath) throws Exception;
+	
 	public String getFileExtension();
 
 }

@@ -41,5 +41,10 @@ public class SimpleXmlProcessor implements ImexProcessor {
 	public String getFileExtension() {
 		return ".xml";
 	}
+
+	@Override
+	public Object read(Class<?> source, File file) throws Exception {
+		return (Object)serializer.read(source, file);
+	}
 	
 }

@@ -4,6 +4,7 @@ dependencies {
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.0.0"
 	compileOnly group: "com.liferay", name: "com.liferay.journal.api", version: "2.12.4"
 	compileOnly group: "com.liferay", name: "com.liferay.dynamic.data.mapping.api", version: "2.0.1"
+	compileOnly group: "com.liferay", name: "com.liferay.dynamic.data.mapping.io", version: "2.0.1"
 	compileOnly project(":modules:imex:imex-core-api")
 	compileOnly project(":modules:imex:imex-core-util")
 	compileOnly project(":modules:imex-exporter-importer-service:imex-wc-ddm-service")

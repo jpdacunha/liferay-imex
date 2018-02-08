@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.File;
 import java.util.List;
@@ -132,15 +133,18 @@ public class WcDDMExporter implements Exporter {
 									try {
 										
 										processor.write(new ImExStructure(ddmStructure), structureDir, FileNames.getStructureFileName(ddmStructure, group, locale, processor.getFileExtension()));
-										_log.info(MessageUtil.getOK(ddmStructure.getName(locale)));
+										
+										String groupName = GroupUtil.getGroupName(group, locale);
+										_log.info(MessageUtil.getOK(groupName, "STRUCTURE : "  + ddmStructure.getName(locale)));
 										
 										List<DDMTemplate> ddmTemplates = DDMTemplateLocalServiceUtil.getTemplatesByClassPK(ddmStructure.getGroupId(), ddmStructure.getPrimaryKey());
 										
 										//Iterate over templates
 										for(DDMTemplate ddmTemplate : ddmTemplates){
 											processor.write(new ImExTemplate(ddmTemplate), structureDir, FileNames.getTemplateFileName(ddmTemplate, group, locale, processor.getFileExtension()));
-											_log.info(MessageUtil.getOK(ddmTemplate.getName(locale)));
+											_log.info(MessageUtil.getOK(groupName, "TEMPLATE : "  + ddmStructure.getName(locale)));
 										}
+										_log.info(StringPool.BLANK);
 										
 									} catch (Exception e) {
 										_log.error(MessageUtil.getError(ddmStructure.getName(locale), e.getMessage()));

@@ -59,10 +59,10 @@ public class ImexImportServiceImpl implements ImexImportService {
 	@Override
 	public void doImport(List<String> bundleNames) {
 				
-		if (bundleNames == null) {
-			_log.info(MessageUtil.getStartMessage("ALL import process"));
-		} else {
+		if (bundleNames != null && bundleNames.size() > 0) {			
 			_log.info(MessageUtil.getStartMessage("PARTIAL import process for [" + bundleNames.toString() + "]"));
+		} else {
+			_log.info(MessageUtil.getStartMessage("ALL import process"));
 		}
 		
 		try {

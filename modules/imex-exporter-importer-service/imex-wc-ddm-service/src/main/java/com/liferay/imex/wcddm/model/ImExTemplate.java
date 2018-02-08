@@ -22,9 +22,18 @@ public class ImExTemplate implements Serializable {
 		langType = jt.getLanguage();
 		templateType = jt.getType();
 		description = jt.getDescription();
+		cacheable = jt.isCacheable();
 		
 	}
 	
+	public boolean isCacheable() {
+		return cacheable;
+	}
+
+	public void setCacheable(boolean cacheable) {
+		this.cacheable = cacheable;
+	}
+
 	private String uuid;
 	
 	private String key;
@@ -38,6 +47,8 @@ public class ImExTemplate implements Serializable {
 	private String templateType;
 	
 	private String description;
+	
+	private boolean cacheable;
 	
 	public String getDescription() {
 		return description;

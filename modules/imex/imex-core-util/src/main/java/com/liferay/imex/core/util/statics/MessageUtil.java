@@ -85,7 +85,7 @@ public class MessageUtil {
 	
 	public static String getOK(String key, String name, File file, ImexOperationEnum operation) {
 		
-		String message = "[" + key + "]=>[" + name + "] [" + operation.getValue() + "] [   OK  ]";		
+		String message = "[" + operation.getValue() + "] [" + key + "]=>[" + name + "] [   OK  ]";		
 		if (file != null) {
 			message += " - (" + file.getAbsolutePath() + ")";
 		} else {

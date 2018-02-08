@@ -19,17 +19,23 @@ public class CollectionUtil {
 		
 		Map<String,K> filteredServiceReferences = new HashMap<String, K>();
 		
-		boolean exists = true;
-		
-		for (String name : keys) {
+		if (keys != null && keys.size() > 0) {
 			
-			exists = toBefiltred.get(name) != null;
-			if (exists) {
-				filteredServiceReferences.put(name, toBefiltred.get(name));
-			} else {
-				throw new MissingKeyException("Undefined value [" + name + "]");
+			boolean exists = true;
+			
+			for (String name : keys) {
+				
+				exists = toBefiltred.get(name) != null;
+				if (exists) {
+					filteredServiceReferences.put(name, toBefiltred.get(name));
+				} else {
+					throw new MissingKeyException("Undefined value [" + name + "]");
+				}
+				
 			}
 			
+		} else {
+			filteredServiceReferences.putAll(toBefiltred);
 		}
 	
 		return filteredServiceReferences;

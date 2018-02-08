@@ -56,10 +56,10 @@ public class ImexExportServiceImpl implements ImexExportService {
 	@Override
 	public void doExport(List<String> bundleNames) {
 		
-		if (bundleNames == null) {
-			_log.info(MessageUtil.getStartMessage("ALL export process"));
-		} else {
+		if (bundleNames != null && bundleNames.size() > 0) {
 			_log.info(MessageUtil.getStartMessage("PARTIAL export process for [" + bundleNames.toString() + "]"));
+		} else {
+			_log.info(MessageUtil.getStartMessage("ALL export process"));
 		}
 		
 		try {

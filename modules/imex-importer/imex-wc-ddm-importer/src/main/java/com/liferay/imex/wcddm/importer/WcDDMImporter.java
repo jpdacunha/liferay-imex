@@ -2,12 +2,15 @@ package com.liferay.imex.wcddm.importer;
 
 import com.liferay.counter.kernel.service.CounterLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.exception.NoSuchStructureException;
+import com.liferay.dynamic.data.mapping.exception.NoSuchTemplateException;
 import com.liferay.dynamic.data.mapping.io.DDMFormJSONDeserializer;
 import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormLayout;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMStructureConstants;
+import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
+import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.util.DDM;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.processor.ImexProcessor;
@@ -20,6 +23,7 @@ import com.liferay.imex.wcddm.FileNames;
 import com.liferay.imex.wcddm.importer.configuration.ImExWCDDmImporterPropsKeys;
 import com.liferay.imex.wcddm.importer.service.ImportWcDDMService;
 import com.liferay.imex.wcddm.model.ImExStructure;
+import com.liferay.imex.wcddm.model.ImExTemplate;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -33,7 +37,7 @@ import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.File;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -117,7 +121,7 @@ public class WcDDMImporter implements Importer {
 						
 						DDMStructure structure = doImportStructure(serviceContext, debug, group, user, locale, structureDir);
 						
-						//DDMTemplate template = doImportTemplate(debug, group, user, locale, structureDir, structure);
+						doImportTemplate(serviceContext, debug, group, user, locale, structureDir, structure);
 						_log.info(StringPool.BLANK);
 						
 					}
@@ -142,6 +146,7 @@ public class WcDDMImporter implements Importer {
 		
 		DDMStructure structure = null;
 		String structurefileBegin = FileNames.getStructureFileNameBegin();
+		ServiceContext serviceContextStr = (ServiceContext)serviceContext.clone();
 		
 		File[] structureFiles = FileUtil.listFiles(structureDir, structurefileBegin);
 	
@@ -149,44 +154,42 @@ public class WcDDMImporter implements Importer {
 			
 			String structureFileName = structureFiles[0].getName();
 			File structureFile = new File(structureDir, structureFileName);
-			Date currentDate = new Date();
 			
 			ImexOperationEnum operation = ImexOperationEnum.UPDATE;
 			
 			try {
 
 				ImExStructure imexStructure = (ImExStructure)processor.read(ImExStructure.class, structureFile);
+				
 				Map<Locale, String> nameMap = LocalizationUtil.getLocalizationMap(imexStructure.getName());
 				Map<Locale, String> descriptionMap = LocalizationUtil.getLocalizationMap(imexStructure.getDescription());
+				long userId = user.getUserId();
+				long groupId = group.getGroupId();
+				serviceContextStr.setUuid(imexStructure.getUuid());
+				serviceContextStr.setAddGroupPermissions(true);
+				serviceContextStr.setAddGuestPermissions(true);
+							
+				DDMForm ddmForm = _ddmFormJSONDeserializer.deserialize(imexStructure.getData());
+				DDMFormLayout ddmFormLayout = _ddm.getDefaultDDMFormLayout(ddmForm);
 				
 				try {
 					
 					structure = DDMStructureLocalServiceUtil.getDDMStructureByUuidAndGroupId(imexStructure.getUuid(), group.getGroupId());
-					// Structure update logic
-					structure.setNameMap(nameMap);
-					structure.setDescriptionMap(descriptionMap);
-					structure.setDefinition(imexStructure.getData());
-					structure.setModifiedDate(currentDate);
 					
-					DDMStructureLocalServiceUtil.updateDDMStructure(structure);
+					long parentStructureId = structure.getParentStructureId();
+					long classNameId = structure.getClassNameId();
+					String structureKey = structure.getStructureKey();
+					
+					structure = DDMStructureLocalServiceUtil.updateStructure(userId, groupId, parentStructureId , classNameId, structureKey, nameMap, descriptionMap, ddmForm, ddmFormLayout, serviceContextStr);
 					
 				} catch (NoSuchStructureException e) {
 						
 					long classNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);
-					long userId = user.getUserId();
-					long groupId = group.getGroupId();
+
 					long parentStructureId = DDMStructureConstants.DEFAULT_PARENT_STRUCTURE_ID;
 					String structureKey = "imex-" + imexStructure.getKey() + "-" + CounterLocalServiceUtil.increment();
 					String storageType = imexStructure.getStorageType();
 					int type = imexStructure.getStructureType();
-
-					
-					serviceContext.setUuid(imexStructure.getUuid());
-					serviceContext.setAddGroupPermissions(true);
-					serviceContext.setAddGuestPermissions(true);
-					
-					DDMForm ddmForm = _ddmFormJSONDeserializer.deserialize(imexStructure.getData());
-					DDMFormLayout ddmFormLayout = _ddm.getDefaultDDMFormLayout(ddmForm);
 					
 					structure = DDMStructureLocalServiceUtil.addStructure(
 							userId, 
@@ -200,7 +203,7 @@ public class WcDDMImporter implements Importer {
 							ddmFormLayout, 
 							storageType, 
 							type,
-							serviceContext);
+							serviceContextStr);
 					
 					operation = ImexOperationEnum.CREATE;
 						
@@ -224,12 +227,13 @@ public class WcDDMImporter implements Importer {
 		
 	}
 	
-	/*private DDMTemplate doImportTemplate(boolean debug, Group group, User user, Locale locale, File structureDir, DDMStructure structure) {
+	private DDMTemplate doImportTemplate(ServiceContext serviceContext, boolean debug, Group group, User user, Locale locale, File structureDir, DDMStructure structure) {
 		
 		DDMTemplate template = null;
 		String templatefileBegin = FileNames.getTemplateFileNameBegin();
 		File[] templateFiles = FileUtil.listFiles(structureDir, templatefileBegin);
-		String groupName = GroupUtil.getGroupName(group, locale);
+		String groupName = GroupUtil.getGroupName(group, locale);	
+		ServiceContext serviceContextTem = (ServiceContext)serviceContext.clone();
 		
 		if (templateFiles != null) {	
 			
@@ -237,42 +241,74 @@ public class WcDDMImporter implements Importer {
 				
 				String templateFileName = matchingTemplateFile.getName();
 				File templateFile = new File(structureDir, templateFileName);
-				Date currentDate = new Date();
+				ImexOperationEnum operation = ImexOperationEnum.UPDATE;
 				
 				try {
 					
 					ImExTemplate imexTemplate = (ImExTemplate)processor.read(ImExTemplate.class, templateFile);
 					
+					Map<Locale, String> nameMap = LocalizationUtil.getLocalizationMap(imexTemplate.getName());
+					Map<Locale, String> descriptionMap = LocalizationUtil.getLocalizationMap(imexTemplate.getDescription());
+					long userId = user.getUserId();
+					String type = imexTemplate.getTemplateType();
+					String mode = null;
+					String language = imexTemplate.getLangType();
+					String script = imexTemplate.getData();
+					boolean cacheable = imexTemplate.isCacheable();
+					long classPK = 0;
+					if (structure != null) {
+						classPK = structure.getStructureId();
+					}
+					
+					serviceContextTem.setAddGroupPermissions(true);
+					serviceContextTem.setAddGuestPermissions(true);
+					serviceContextTem.setUuid(imexTemplate.getUuid());
+					
 					try {
-					template = DDMTemplateLocalServiceUtil.getDDMTemplateByUuidAndGroupId(imexTemplate.getUuid(), group.getGroupId());
+						
+						//Searching for existing template
+						template = DDMTemplateLocalServiceUtil.getDDMTemplateByUuidAndGroupId(imexTemplate.getUuid(), group.getGroupId());
+						
+						long templateId = template.getTemplateId();
+						
+						DDMTemplateLocalServiceUtil.updateTemplate(userId, templateId, classPK, nameMap, descriptionMap, type, mode, language, script, cacheable, serviceContextTem);
+						
 					} catch (NoSuchTemplateException e) {
-						
+												
 						long classNameId = ClassNameLocalServiceUtil.getClassNameId(DDMStructure.class);
+						long resourceClassNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);
+						long groupId = group.getGroupId();
+						String templateKey = "imex-" + imexTemplate.getKey() + "-" + CounterLocalServiceUtil.increment();
 						
-						// New template creation
-						template = DDMTemplateLocalServiceUtil.createDDMTemplate(CounterLocalServiceUtil.increment());
-						template.setUuid(imexTemplate.getUuid());
-						if (structure != null) {
-							template.setClassPK(structure.getStructureId());
-						}
-						template.setCompanyId(group.getCompanyId());
-						template.setGroupId(group.getGroupId());
-						template.setUserId(user.getUserId());
-						template.setTemplateKey("imex-" + imexTemplate.getKey() + "-" + CounterLocalServiceUtil.increment());
-						template.setClassNameId(classNameId);
-						template.setLanguage(imexTemplate.getLangType());
-						template.setCreateDate(currentDate);
-						template.setType(imexTemplate.getTemplateType());
+						boolean smallImage = false;
+						String smallImageURL = null;
+						File smallImageFile = null;
+						
+						template = DDMTemplateLocalServiceUtil.addTemplate(
+								userId, 
+								groupId, 
+								classNameId, 
+								classPK,
+								resourceClassNameId, 
+								templateKey,
+								nameMap, 
+								descriptionMap,
+								type, 
+								mode, 
+								language, 
+								script,
+								cacheable , 
+								smallImage, 
+								smallImageURL,
+								smallImageFile, 
+								serviceContextTem
+						);
+						
+						operation = ImexOperationEnum.CREATE;
 						
 					}
-					// Template update logic
-					template.setName(imexTemplate.getName());
-					template.setScript(imexTemplate.getData());
-					template.setModifiedDate(currentDate);
 					
-					DDMTemplateLocalServiceUtil.updateDDMTemplate(template);
-					
-					_log.info(MessageUtil.getOK(groupName, "[TEMPLATE : " + template.getName(locale) + "=> STRUCTURE : " + structure.getName(locale) + "]", templateFile));
+					_log.info(MessageUtil.getOK(groupName, "[TEMPLATE : " + template.getName(locale) + " => STRUCTURE : " + structure.getName(locale) + "]", templateFile, operation));
 					
 				} catch (Exception e) {
 					_log.error(MessageUtil.getError(templateFile.getName(), e.getMessage()));
@@ -287,7 +323,7 @@ public class WcDDMImporter implements Importer {
 		}
 		
 		return template;
-	}*/
+	}
 	
 
 	private File getWCDDMImportDirectory(File companyDir) {

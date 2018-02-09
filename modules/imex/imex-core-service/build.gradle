@@ -1,3 +1,7 @@
+liferayOSGi {
+    expandCompileInclude = false
+}
+
 dependencies {
 
 	compileOnly group: "org.osgi", name: "org.osgi.core", version: "6.0.0"
@@ -7,5 +11,8 @@ dependencies {
 	
 	compileOnly project(":modules:imex:imex-core-api")
 	compileOnly project(":modules:imex:imex-core-util")
+	
+	compileInclude group: "commons-io", name: "commons-io", version: "2.4"
+	compileInclude group: "commons-lang", name: "commons-lang", version: "2.6"
 	
 }

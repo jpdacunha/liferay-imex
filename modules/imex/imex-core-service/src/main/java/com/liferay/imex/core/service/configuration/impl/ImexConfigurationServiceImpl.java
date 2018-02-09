@@ -1,6 +1,6 @@
-package com.liferay.imex.core.service;
+package com.liferay.imex.core.service.configuration.impl;
 
-import com.liferay.imex.core.api.ImexConfigurationService;
+import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.util.configuration.ImExPropsValues;
 import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.Properties;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Component;
 
 @Component(immediate = true, service = ImexConfigurationService.class)
@@ -21,8 +22,18 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	
 	public final static String EXPORTER = "exporter";
 	public final static String IMPORTER = "importer";
+	public final static String IMEX = "imex";
 	
 	private static final String DEFAULT_FILENAME_PREFIX = "default";
+	
+	@Override
+	public Properties loadCoreConfiguration() {
+		
+		// The core configuration in IMEX is stored in the current core bundle
+		Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+		return loadConfiguration(bundle, IMEX);
+		
+	}
 
 	@Override
 	public Properties loadExporterConfiguration(Bundle bundle) {
@@ -85,7 +96,7 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 		
 		
 		if (props != null) {
-			_log.info(MessageUtil.getMessage(bundle, "is using default configuration loaded from [" + fileName + "]"));
+			_log.info(MessageUtil.getMessage(bundle, "is using default configuration loaded from his embedded [" + fileName + "]."));
 		} else {
 			_log.info(MessageUtil.getMessage(bundle, "has no default configuration to loads. Make sure a [" + fileName + "] exists on your classpath."));
 		}
@@ -102,6 +113,11 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	@Override
 	public String getImexDataPath() {
 		return getImexPath() + "/data";
+	}
+
+	@Override
+	public String getImexArchivePath() {
+		return getImexPath() + "/archive";
 	}
 
 }

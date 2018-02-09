@@ -1,9 +1,12 @@
 package com.liferay.imex.core.service.exporter.impl;
 
-import com.liferay.imex.core.api.ImexConfigurationService;
+import com.liferay.imex.core.api.archiver.ImexArchiverService;
+import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.exporter.ImexExportService;
+import com.liferay.imex.core.api.identifier.ProcessIdentifier;
+import com.liferay.imex.core.service.exporter.model.ExporterProcessIdentifier;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.ImexPropsUtil;
@@ -42,6 +45,9 @@ public class ImexExportServiceImpl implements ImexExportService {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexConfigurationService configurationService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexArchiverService imexArchiverService;
 
 	@Override
 	public void doExportAll() {
@@ -56,14 +62,18 @@ public class ImexExportServiceImpl implements ImexExportService {
 	@Override
 	public void doExport(List<String> bundleNames) {
 		
+		//Generate an unique identifier for this export process
+		ProcessIdentifier identifier = new ExporterProcessIdentifier();
+		String identifierStr = identifier.getUniqueIdentifier();
+		
+		_log.info(MessageUtil.getSeparator());
 		if (bundleNames != null && bundleNames.size() > 0) {
-			_log.info(MessageUtil.getStartMessage("PARTIAL export process for [" + bundleNames.toString() + "]"));
+			_log.info(MessageUtil.getStartMessage("[" + identifierStr + "] PARTIAL export process for [" + bundleNames.toString() + "]"));
 		} else {
-			_log.info(MessageUtil.getStartMessage("ALL export process"));
+			_log.info(MessageUtil.getStartMessage("[" + identifierStr + "] ALL export process"));
 		}
 		
 		try {
-			File exportDir = initializeExportDirectory();
 			
 			Map<String, ServiceReference<Exporter>> exporters = trackerService.getFilteredExporters(bundleNames);
 			
@@ -78,8 +88,14 @@ public class ImexExportServiceImpl implements ImexExportService {
 				
 			} else {
 				
+				//Archive actual files before importing
+				Properties coreConfig = configurationService.loadCoreConfiguration();
+				imexArchiverService.archive(coreConfig, identifier);
+				
+				File exportDir = initializeExportDirectory();
+				
 				_log.info(MessageUtil.getPropertyMessage("IMEX export path", exportDir.toString()));
-			
+				
 				List<Company> companies = companyLocalService.getCompanies();
 				
 				for (Company company : companies) {
@@ -100,7 +116,7 @@ public class ImexExportServiceImpl implements ImexExportService {
 			_log.error(e,e);
 		}
 		
-		_log.info(MessageUtil.getEndMessage("export process"));
+		_log.info(MessageUtil.getEndMessage("[" + identifierStr + "] export process"));
 
 	}
 
@@ -108,8 +124,8 @@ public class ImexExportServiceImpl implements ImexExportService {
 		
 		String webId = company.getWebId();
 		File companyDir = new File(exportDir, webId);
-		boolean success = companyDir.mkdirs();
-		if (!success) {
+		companyDir.mkdirs();
+		if (!companyDir.exists()) {
 			throw new ImexException("Failed to create directory " + companyDir);
 		}
 		
@@ -126,8 +142,8 @@ public class ImexExportServiceImpl implements ImexExportService {
 		if (exportFile.exists()) {
 			FileUtil.deltree(exportFile);
 		}
-		boolean success = exportFile.mkdirs();
-		if (!success) {
+		exportFile.mkdirs();
+		if (!exportFile.exists()) {
 			throw new ImexException("Failed to create directory " + exportFile);
 		}
 		

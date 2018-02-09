@@ -3,7 +3,8 @@ package com.liferay.imex.core.util.enums;
 public enum ImexOperationEnum {
 	
 	   CREATE ("CREATE"),
-	   UPDATE   ("UPDATE");
+	   UPDATE   ("UPDATE"),
+	   DELETE   ("DELETE");
 	
 
     private final String value;

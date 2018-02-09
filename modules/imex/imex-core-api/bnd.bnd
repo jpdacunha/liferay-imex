@@ -5,4 +5,7 @@ Export-Package: \
 	com.liferay.imex.core.api.importer,\
 	com.liferay.imex.core.api.exporter,\
 	com.liferay.imex.core.api,\
-	com.liferay.imex.core.api.processor
+	com.liferay.imex.core.api.processor,\
+	com.liferay.imex.core.api.archiver,\
+	com.liferay.imex.core.api.configuration,\
+	com.liferay.imex.core.api.identifier

@@ -1,4 +1,4 @@
-package com.liferay.imex.core.api;
+package com.liferay.imex.core.api.configuration;
 
 import java.util.Properties;
 
@@ -10,8 +10,12 @@ public interface ImexConfigurationService {
 	
 	public Properties loadImporterConfiguration(Bundle bundle);
 	
+	public Properties loadCoreConfiguration();
+	
 	public String getImexPath();
 	
 	public String getImexDataPath(); 
+	
+	public String getImexArchivePath();
 
 }

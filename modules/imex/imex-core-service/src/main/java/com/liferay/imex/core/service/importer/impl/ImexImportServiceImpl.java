@@ -1,9 +1,12 @@
 package com.liferay.imex.core.service.importer.impl;
 
-import com.liferay.imex.core.api.ImexConfigurationService;
+import com.liferay.imex.core.api.archiver.ImexArchiverService;
+import com.liferay.imex.core.api.configuration.ImexConfigurationService;
+import com.liferay.imex.core.api.identifier.ProcessIdentifier;
 import com.liferay.imex.core.api.importer.ImexImportService;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ImporterTracker;
+import com.liferay.imex.core.service.importer.model.ImporterProcessIdentifier;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.ImexPropsUtil;
@@ -46,6 +49,9 @@ public class ImexImportServiceImpl implements ImexImportService {
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexConfigurationService configurationService;
 	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexArchiverService imexArchiverService;
+	
 	@Override
 	public void doImportAll() {
 		doImport(StringPool.BLANK);
@@ -58,16 +64,19 @@ public class ImexImportServiceImpl implements ImexImportService {
 
 	@Override
 	public void doImport(List<String> bundleNames) {
+		
+		//Generate an unique identifier for this import process
+		ProcessIdentifier identifier = new ImporterProcessIdentifier();
+		String identifierStr = identifier.getUniqueIdentifier();
 				
+		_log.info(MessageUtil.getSeparator());
 		if (bundleNames != null && bundleNames.size() > 0) {			
-			_log.info(MessageUtil.getStartMessage("PARTIAL import process for [" + bundleNames.toString() + "]"));
+			_log.info(MessageUtil.getStartMessage("[" + identifierStr + "] PARTIAL import process for [" + bundleNames.toString() + "]"));
 		} else {
-			_log.info(MessageUtil.getStartMessage("ALL import process"));
+			_log.info(MessageUtil.getStartMessage("[" + identifierStr + "] ALL import process"));
 		}
 		
 		try {
-			
-			File importDir = getImportDirectory();
 			
 			Map<String, ServiceReference<Importer>> importers = trackerService.getFilteredImporters(bundleNames);
 			
@@ -82,6 +91,11 @@ public class ImexImportServiceImpl implements ImexImportService {
 				
 			} else {
 				
+				//Archive actual files before importing
+				Properties coreConfig = configurationService.loadCoreConfiguration();
+				imexArchiverService.archive(coreConfig, identifier);
+				
+				File importDir = getImportDirectory();
 				_log.info(MessageUtil.getPropertyMessage("IMEX import path", importDir.toString()));
 			
 				List<Company> companies = companyLocalService.getCompanies();
@@ -114,13 +128,11 @@ public class ImexImportServiceImpl implements ImexImportService {
 		String webId = company.getWebId();
 		File companyDir = new File(importDir, webId);
 		
-		if (companyDir.exists()) {
-			return companyDir;
-		} else {
+		if (!companyDir.exists()) {
 			_log.warn("[" + companyDir.getAbsolutePath() + "] does not exists");
-		}
+		} 
+		return companyDir;
 		
-		return null;
 	}
 
 	private File getImportDirectory() throws ImexException {
@@ -129,11 +141,10 @@ public class ImexImportServiceImpl implements ImexImportService {
 		
 		File importFile = new File(importFilePath);
 		
-		if (importFile.exists()) {
-			return importFile;
-		} else {
+		if (!importFile.exists()) {
 			throw new ImexException(importFile + " does not exists.");
-		}
+		} 
+		return importFile;
 		
 	}
 	

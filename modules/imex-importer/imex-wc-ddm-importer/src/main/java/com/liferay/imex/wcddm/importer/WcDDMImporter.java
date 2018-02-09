@@ -34,7 +34,6 @@ import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.File;
 import java.util.Arrays;
@@ -329,12 +328,12 @@ public class WcDDMImporter implements Importer {
 
 	private File getWCDDMImportDirectory(File companyDir) {
 		
-		File rolesDir = new File(companyDir, FileNames.DIR_WCDDM);
+		File dir = new File(companyDir, FileNames.DIR_WCDDM);
 		
-		if (rolesDir.exists()) {
-			return rolesDir;
+		if (dir.exists()) {
+			return dir;
 		} else {
-			_log.warn("[" + rolesDir.getAbsolutePath() + "] does not exists");
+			_log.warn("[" + dir.getAbsolutePath() + "] does not exists");
 		}
 		
 		return null;

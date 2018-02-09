@@ -59,6 +59,15 @@ public class MessageUtil {
 		return getMessage("[" + name + "] does not exists", 4);
 	}
 	
+	public static String getDNE(File name) {
+		
+		if (name == null ) {
+			_log.warn("FileName is null");
+			return StringPool.BLANK;
+		}
+		return getDNE(name.getAbsolutePath());
+	}
+	
 	public static String getDisabled(String name) {
 		return getMessage("[" + name + "] is currently [DISABLED]", 4);
 	}

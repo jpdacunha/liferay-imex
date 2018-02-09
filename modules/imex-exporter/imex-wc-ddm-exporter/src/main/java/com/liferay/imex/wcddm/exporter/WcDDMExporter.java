@@ -26,7 +26,6 @@ import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.File;
 import java.util.List;
@@ -144,12 +143,12 @@ public class WcDDMExporter implements Exporter {
 											processor.write(new ImExTemplate(ddmTemplate), structureDir, FileNames.getTemplateFileName(ddmTemplate, group, locale, processor.getFileExtension()));
 											_log.info(MessageUtil.getOK(groupName, "TEMPLATE : "  + ddmStructure.getName(locale)));
 										}
-										_log.info(StringPool.BLANK);
+										_log.info(MessageUtil.getSeparator());
 										
 									} catch (Exception e) {
 										_log.error(MessageUtil.getError(ddmStructure.getName(locale), e.getMessage()));
 										if (debug) {
-										_log.error(e,e);
+											_log.error(e,e);
 										}
 									}
 							

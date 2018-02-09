@@ -21,16 +21,13 @@ import org.osgi.framework.ServiceReference;
 public class ImexServiceReferenceMap<T> {
 
 	private static final Log _log = LogFactoryUtil.getLog(ImexServiceReferenceMap.class);
-	
-	//TODO : JDA Classcats exception if userd like that
-	//private Map<String, ServiceReference<T>> map = Collections.synchronizedMap(new TreeMap<String, ServiceReference<T>>(new ImexServiceReferenceComparator()));
 
 	private Map<String, ServiceReference<T>> map = Collections.synchronizedMap(new TreeMap<String, ServiceReference<T>>());
 	
 	public synchronized ServiceReference<?> addServiceReference(ServiceReference<T> serviceReference) {
 		
 		String key = ImexServiceReferenceMap.getKey(serviceReference);
-		_log.info(MessageUtil.getMessage("Adding [" + key + "] ..."));
+		_log.debug(MessageUtil.getMessage("Adding [" + key + "] ..."));
 		return map.put(key, serviceReference);
 		
 	}
@@ -38,7 +35,7 @@ public class ImexServiceReferenceMap<T> {
 	public void removeService(ServiceReference<T> serviceReference) {
 		
 		String key = ImexServiceReferenceMap.getKey(serviceReference);
-		_log.info(MessageUtil.getMessage("Removing [" + key + "] ..."));
+		_log.debug(MessageUtil.getMessage("Removing [" + key + "] ..."));
 		map.remove(key);
 		
 	}
@@ -50,7 +47,7 @@ public class ImexServiceReferenceMap<T> {
 		return key;
 	}	
 
-	public class ImexServiceReferenceComparator<T> implements Comparator<ServiceReference<T>> {
+	public class ImexServiceReferenceComparator implements Comparator<ServiceReference<T>> {
 
 		@Override
 		public int compare(ServiceReference<T> s1, ServiceReference<T> s2) {
@@ -84,7 +81,7 @@ public class ImexServiceReferenceMap<T> {
 		for (Entry<String, ServiceReference<T>> entry : map.entrySet()) {			
 			list.add(entry.getValue());			
 		}
-		Collections.sort(list, new ImexServiceReferenceComparator<T>());
+		Collections.sort(list, new ImexServiceReferenceComparator());
 		
 		Map<String, ServiceReference<T>> copiedMap = new LinkedHashMap<>();
 		

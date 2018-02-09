@@ -216,4 +216,9 @@ public class MessageUtil {
 	}
 
 
+	public static String getSeparator() {
+		return StringPool.BLANK;
+	}
+
+
 }

@@ -122,7 +122,7 @@ public class WcDDMImporter implements Importer {
 						DDMStructure structure = doImportStructure(serviceContext, debug, group, user, locale, structureDir);
 						
 						doImportTemplate(serviceContext, debug, group, user, locale, structureDir, structure);
-						_log.info(StringPool.BLANK);
+						_log.info(MessageUtil.getSeparator());
 						
 					}
 					
@@ -165,7 +165,6 @@ public class WcDDMImporter implements Importer {
 				Map<Locale, String> descriptionMap = LocalizationUtil.getLocalizationMap(imexStructure.getDescription());
 				long userId = user.getUserId();
 				long groupId = group.getGroupId();
-				serviceContextStr.setUuid(imexStructure.getUuid());
 				serviceContextStr.setAddGroupPermissions(true);
 				serviceContextStr.setAddGuestPermissions(true);
 							
@@ -190,6 +189,8 @@ public class WcDDMImporter implements Importer {
 					String structureKey = "imex-" + imexStructure.getKey() + "-" + CounterLocalServiceUtil.increment();
 					String storageType = imexStructure.getStorageType();
 					int type = imexStructure.getStructureType();
+					//uuid is set only for creation
+					serviceContextStr.setUuid(imexStructure.getUuid());
 					
 					structure = DDMStructureLocalServiceUtil.addStructure(
 							userId, 

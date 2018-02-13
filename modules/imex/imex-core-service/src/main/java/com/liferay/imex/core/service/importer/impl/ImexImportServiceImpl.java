@@ -6,6 +6,7 @@ import com.liferay.imex.core.api.identifier.ProcessIdentifier;
 import com.liferay.imex.core.api.importer.ImexImportService;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ImporterTracker;
+import com.liferay.imex.core.service.ImexImporterExporterServiceBaseImpl;
 import com.liferay.imex.core.service.importer.model.ImporterProcessIdentifier;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.CollectionUtil;
@@ -37,7 +38,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 @Component(immediate = true, service = ImexImportService.class)
-public class ImexImportServiceImpl implements ImexImportService {
+public class ImexImportServiceImpl extends ImexImporterExporterServiceBaseImpl implements ImexImportService {
 	
 	private static final Log _log = LogFactoryUtil.getLog(ImexImportServiceImpl.class);
 	

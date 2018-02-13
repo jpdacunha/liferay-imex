@@ -7,5 +7,7 @@ import java.util.Properties;
 public interface ImexArchiverService {
 	
 	public void archive(Properties coreConfig, ProcessIdentifier processIdentifier);
+	
+	public void archive(int nbArchiveToKeep, ProcessIdentifier processIdentifier);
 
 }

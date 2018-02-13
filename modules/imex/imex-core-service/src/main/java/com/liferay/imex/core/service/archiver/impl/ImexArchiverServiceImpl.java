@@ -53,11 +53,11 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 		
 	}
 	
-	private void archive(int nbArchiveToKeep, ProcessIdentifier processIdentifier) {
+	public void archive(int nbArchiveToKeep, ProcessIdentifier processIdentifier) {
 		
 		_log.info(MessageUtil.getSeparator());
-		_log.info(MessageUtil.getStartMessage("Archiving datas process"));
-		_log.info(MessageUtil.getPropertyMessage("Nb archive history to keep" , nbArchiveToKeep + ""));
+		_log.info(MessageUtil.getStartMessage("Archiving process"));
+		_log.debug(MessageUtil.getPropertyMessage("Nb archive history to keep" , nbArchiveToKeep + ""));
 		
 		if (nbArchiveToKeep > 0) {
 			
@@ -83,10 +83,10 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 			}
 			
 		} else {
-			_log.info(MessageUtil.getMessage("Archive service is currently disabled"));
+			_log.debug(MessageUtil.getMessage("Archive service is currently disabled"));
 		}
 		
-		_log.info(MessageUtil.getEndMessage("Archiving datas process"));
+		_log.info(MessageUtil.getEndMessage("Archiving process"));
 		_log.info(MessageUtil.getSeparator());
 		
 	}

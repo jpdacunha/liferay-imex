@@ -11,6 +11,7 @@ import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import org.osgi.framework.Bundle;
 
@@ -223,7 +224,6 @@ public class MessageUtil {
 		return " companyWebId:[" + company.getWebId() + "] companyName:[" + name + "]";
 		
 	}
-
 
 	public static String getSeparator() {
 		return StringPool.BLANK;

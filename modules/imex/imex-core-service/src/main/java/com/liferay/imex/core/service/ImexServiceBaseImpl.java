@@ -5,7 +5,7 @@ package com.liferay.imex.core.service;
  * @author dev
  *
  */
-public abstract class ImexImporterExporterServiceBaseImpl {
+public abstract class ImexServiceBaseImpl {
 
 
 

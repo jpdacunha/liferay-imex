@@ -6,7 +6,7 @@ import com.liferay.imex.core.api.identifier.ProcessIdentifier;
 import com.liferay.imex.core.api.importer.ImexImportService;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ImporterTracker;
-import com.liferay.imex.core.service.ImexImporterExporterServiceBaseImpl;
+import com.liferay.imex.core.service.ImexServiceBaseImpl;
 import com.liferay.imex.core.service.importer.model.ImporterProcessIdentifier;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.CollectionUtil;
@@ -38,7 +38,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 @Component(immediate = true, service = ImexImportService.class)
-public class ImexImportServiceImpl extends ImexImporterExporterServiceBaseImpl implements ImexImportService {
+public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexImportService {
 	
 	private static final Log _log = LogFactoryUtil.getLog(ImexImportServiceImpl.class);
 	
@@ -94,7 +94,7 @@ public class ImexImportServiceImpl extends ImexImporterExporterServiceBaseImpl i
 				
 				//Archive actual files before importing
 				Properties coreConfig = configurationService.loadCoreConfiguration();
-				imexArchiverService.archive(coreConfig, identifier);
+				imexArchiverService.archiveData(coreConfig, identifier);
 				
 				File importDir = getImportDirectory();
 				_log.info(MessageUtil.getPropertyMessage("IMEX import path", importDir.toString()));

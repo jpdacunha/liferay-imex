@@ -6,7 +6,7 @@ import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.exporter.ImexExportService;
 import com.liferay.imex.core.api.identifier.ProcessIdentifier;
-import com.liferay.imex.core.service.ImexImporterExporterServiceBaseImpl;
+import com.liferay.imex.core.service.ImexServiceBaseImpl;
 import com.liferay.imex.core.service.exporter.model.ExporterProcessIdentifier;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.CollectionUtil;
@@ -35,7 +35,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 @Component(immediate = true, service = ImexExportService.class)
-public class ImexExportServiceImpl extends ImexImporterExporterServiceBaseImpl implements ImexExportService {
+public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexExportService {
 	
 	private static final Log _log = LogFactoryUtil.getLog(ImexExportServiceImpl.class);
 	
@@ -91,7 +91,7 @@ public class ImexExportServiceImpl extends ImexImporterExporterServiceBaseImpl i
 				
 				//Archive actual files before importing
 				Properties coreConfig = configurationService.loadCoreConfiguration();
-				imexArchiverService.archive(coreConfig, identifier);
+				imexArchiverService.archiveData(coreConfig, identifier);
 				
 				File exportDir = initializeExportDirectory();
 				

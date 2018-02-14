@@ -1,6 +1,6 @@
 package com.liferay.imex.shell.client.command.core;
 
-import com.liferay.imex.core.api.configuration.ImexConfigurationService;
+import com.liferay.imex.core.api.ImexService;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -17,12 +17,12 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 public class GenCfgCommand {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
-	protected ImexConfigurationService configurationService;
+	protected ImexService imexService;
 	
 	
 	public void cfggen(String ... bundleNames) {
 		
-		configurationService.generateOverrideFileSystemConfigurationFiles();
+		imexService.generateOverrideFileSystemConfigurationFiles();
 		System.out.println("Done.");
 		
 	}

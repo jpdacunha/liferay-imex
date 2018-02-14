@@ -41,19 +41,40 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexConfigurationService configurationService;
 	
-	/**
-	 * Archive exported files in a zip
-	 * @param rootDirectory
-	 * @param archiveHistory
-	 */
-	public void archive(Properties coreConfig, ProcessIdentifier processIdentifier) {
+
+	@Override
+	public void archiveData(Properties coreConfig, ProcessIdentifier processIdentifier) {
 		
 		int nbArchiveToKeep = GetterUtil.getInteger(coreConfig.get(ImExCorePropsKeys.ARCHIVE_HISTORY_NUMBER));
-		archive(nbArchiveToKeep, processIdentifier);
+		archiveData(nbArchiveToKeep, processIdentifier);
 		
 	}
 	
-	public void archive(int nbArchiveToKeep, ProcessIdentifier processIdentifier) {
+	@Override
+	public void archiveData(int nbArchiveToKeep, ProcessIdentifier processIdentifier) {
+		
+		File dataDirectory = new File(configurationService.getImexDataPath());
+		archive(dataDirectory, nbArchiveToKeep, processIdentifier);
+			
+	}
+	
+	@Override
+	public void archiveCfg(Properties coreConfig, ProcessIdentifier processIdentifier) {
+		
+		int nbArchiveToKeep = GetterUtil.getInteger(coreConfig.get(ImExCorePropsKeys.ARCHIVE_HISTORY_NUMBER));
+		archiveCfg(nbArchiveToKeep, processIdentifier);
+		
+	}
+	
+	@Override
+	public void archiveCfg(int nbArchiveToKeep, ProcessIdentifier processIdentifier) {
+		
+		File cfgDir = new File(configurationService.getImexCfgOverridePath());
+		archive(cfgDir, nbArchiveToKeep, processIdentifier);	
+		
+	}
+
+	private void archive(File toArchiveDirectory, int nbArchiveToKeep, ProcessIdentifier processIdentifier) {
 		
 		_log.info(MessageUtil.getSeparator());
 		_log.info(MessageUtil.getStartMessage("Archiving process"));
@@ -61,27 +82,18 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 		
 		if (nbArchiveToKeep > 0) {
 			
-			File dataDirectory = new File(configurationService.getImexDataPath());
+			File archiveDestinationDirectory = initializeArchiveDestinationDirectory();
 			
-			if (dataDirectory != null && dataDirectory.isDirectory()) {
-			
-				File archiveDestinationDirectory = initializeArchiveDestinationDirectory();
+			if (archiveDestinationDirectory != null && archiveDestinationDirectory.isDirectory()) {
 				
-				if (archiveDestinationDirectory != null && archiveDestinationDirectory.isDirectory()) {
-					
-					if (zip(dataDirectory, archiveDestinationDirectory, processIdentifier)) {
-						cleanup(archiveDestinationDirectory, processIdentifier, nbArchiveToKeep);
-					}
-					
-				} else {
-					_log.error(MessageUtil.getError(ARCHIVAGE_ERROR, "Unable to archive an invalid directory"));
+				if (zip(toArchiveDirectory, archiveDestinationDirectory, processIdentifier)) {
+					cleanup(archiveDestinationDirectory, processIdentifier, nbArchiveToKeep);
 				}
-			
+				
 			} else {
-				String dne = MessageUtil.getDNE("Archive service is currently disabled");
-				_log.error(MessageUtil.getError(ARCHIVAGE_ERROR, dne));
+				_log.error(MessageUtil.getError(ARCHIVAGE_ERROR, "Unable to archive an invalid directory"));
 			}
-			
+		
 		} else {
 			_log.debug(MessageUtil.getMessage("Archive service is currently disabled"));
 		}

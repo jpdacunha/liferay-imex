@@ -1,6 +1,7 @@
 package com.liferay.imex.adt;
 
-import com.liferay.dynamic.data.mapping.kernel.DDMTemplate;
+
+import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.util.StringPool;
 

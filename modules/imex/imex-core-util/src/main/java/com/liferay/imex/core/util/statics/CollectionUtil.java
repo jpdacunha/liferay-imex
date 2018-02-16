@@ -2,7 +2,10 @@ package com.liferay.imex.core.util.statics;
 
 import com.liferay.imex.core.util.exception.MissingKeyException;
 import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.util.StringPool;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +55,23 @@ public class CollectionUtil {
 			logger.info(MessageUtil.getMessage(key, 1));
 		}
 		
+	}
+	
+	public static List<String> getArray(String value) {
+		
+		List<String> retour = new ArrayList<String>();
+		if (value != null && value.contains(StringPool.COMMA)) {
+			
+			String[] array = Arrays.stream(value.split(StringPool.COMMA)).map(String::trim).toArray(String[]::new);
+			
+			if (array != null) {
+				retour.addAll(Arrays.asList(array));
+			}
+			
+		} else {
+			retour.add(value);
+		}
+		return retour;
 	}
 	
 	

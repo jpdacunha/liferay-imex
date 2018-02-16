@@ -1,21 +1,23 @@
 package com.liferay.imex.adt.exporter;
 
 
-import com.liferay.dynamic.data.mapping.model.DDMStructure;
-import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
+import com.liferay.dynamic.data.mapping.model.DDMTemplate;
+import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
 import com.liferay.imex.adt.FileNames;
 import com.liferay.imex.adt.exporter.configuration.ImExWCDDmExporterPropsKeys;
+import com.liferay.imex.adt.model.ImExAdt;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.util.exception.ImexException;
+import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.core.util.statics.ImexNormalizer;
 import com.liferay.imex.core.util.statics.MessageUtil;
-import com.liferay.journal.model.JournalArticle;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.ClassName;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
@@ -56,39 +58,60 @@ public class AdtExporter implements Exporter {
 		
 		_log.info(MessageUtil.getStartMessage("ADT export process"));
 		
-		boolean enabled = GetterUtil.getBoolean(config.get(ImExWCDDmExporterPropsKeys.EXPORT_WCDDM_ENABLED));
+		boolean enabled = GetterUtil.getBoolean(config.get(ImExWCDDmExporterPropsKeys.EXPORT_ADT_ENABLED));
 		
 		if (enabled) {
-		
-			try {
+			
+			String stringList = GetterUtil.getString(config.get(ImExWCDDmExporterPropsKeys.EXPORT_ADT_TYPES_LIST));
+			List<String> types = CollectionUtil.getArray(stringList);
+			
+			if (types != null && types.size() > 0) {
 				
-				Company company = CompanyLocalServiceUtil.getCompany(companyId);
-				
-				File wcDdmDir = initializeAdtExportDirectory(destDir);
-				
-				List<Group> groups = GroupLocalServiceUtil.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
-				
-				for (Group group : groups) {
+				try {
+					
+					Company company = CompanyLocalServiceUtil.getCompany(companyId);
+					
+					File adtDir = initializeAdtExportDirectory(destDir);
+					
+					List<Group> groups = GroupLocalServiceUtil.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+					
+					for (Group group : groups) {
+						
+						for (String classType : types) {
+							
+							boolean isSite = group.isSite() && !group.getFriendlyURL().equals("/control_panel");
+							if (isSite) {
+								
+								_log.info(MessageUtil.getStartMessage(group, locale));
+								doExport(config, group, adtDir, locale, debug, classType);
+								_log.info(MessageUtil.getEndMessage(group, locale));
+								
+							}
+							
+						}
+						
 
-					boolean isSite = group.isSite() && !group.getFriendlyURL().equals("/control_panel");
-					if (isSite) {
-						
-						_log.info(MessageUtil.getStartMessage(group, locale));
-						doExport(config, group, wcDdmDir, locale, debug);
-						_log.info(MessageUtil.getEndMessage(group, locale));
-						
 					}
 
-				}
+					// Global Scope Export
+					Group companyGroup = company.getGroup();
+					_log.info(MessageUtil.getStartMessage(companyGroup, locale));
 
-				// Global Scope Export
-				doExport(config, company.getGroup(), wcDdmDir, locale, debug);
+					for (String classType : types) {			
+						doExport(config, companyGroup, adtDir, locale, debug, classType);	
+					}
+					
+					_log.info(MessageUtil.getEndMessage(companyGroup, locale));
+					
+				} catch (ImexException e) {
+					_log.error(e,e);
+					_log.error(MessageUtil.getErrorMessage(e)); 
+				} catch (PortalException e) {
+					_log.error(e,e);
+				}
 				
-			} catch (ImexException e) {
-				_log.error(e,e);
-				_log.error(MessageUtil.getErrorMessage(e)); 
-			} catch (PortalException e) {
-				_log.error(e,e);
+			} else {
+				_log.info(MessageUtil.getMessage("No configured types to export"));
 			}
 			
 		} else {
@@ -99,16 +122,14 @@ public class AdtExporter implements Exporter {
 		
 	}
 	
-	public void doExport(Properties config, Group group, File groupsDir, Locale locale, boolean debug) throws ImexException {
+	public void doExport(Properties config, Group group, File groupsDir, Locale locale, boolean debug, String classType) throws ImexException {
 		
 		if (group != null) {
 			
-			//String groupName = GroupUtil.getGroupName(group, locale);
+			long classNameId = ClassNameLocalServiceUtil.getClassNameId(classType);			
+			List<DDMTemplate> adts = DDMTemplateLocalServiceUtil.getTemplates(group.getGroupId(), classNameId);
 			
-			long classNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);					
-			List<DDMStructure> ddmStructures = DDMStructureLocalServiceUtil.getStructures(group.getGroupId(), classNameId);
-			
-			if (ddmStructures != null && ddmStructures.size() > 0) {
+			if (adts != null && adts.size() > 0) {
 			
 				File groupDir = initializeSingleGroupDirectory(groupsDir, group);
 				
@@ -117,39 +138,30 @@ public class AdtExporter implements Exporter {
 					if (groupDir.exists()) {
 				
 						//Iterate over structures
-						for(DDMStructure ddmStructure : ddmStructures){
+						for(DDMTemplate ddmTemplate : adts){
 												
-							File structureDir = initializeSingleAdtExportDirectory(groupDir, ddmStructure);
+							File adtDir = initializeSingleAdtExportDirectory(groupDir, classType);
 							
-							if (structureDir != null) {
+							if (adtDir != null) {
 								
-								if (structureDir.exists()) {
+								if (adtDir.exists()) {
 							
-									/*try {
-										
-										processor.write(new ImExStructure(ddmStructure), structureDir, FileNames.getStructureFileName(ddmStructure, group, locale, processor.getFileExtension()));
+									try {
 										
 										String groupName = GroupUtil.getGroupName(group, locale);
-										_log.info(MessageUtil.getOK(groupName, "STRUCTURE : "  + ddmStructure.getName(locale)));
 										
-										List<DDMTemplate> ddmTemplates = DDMTemplateLocalServiceUtil.getTemplatesByClassPK(ddmStructure.getGroupId(), ddmStructure.getPrimaryKey());
-										
-										//Iterate over templates
-										for(DDMTemplate ddmTemplate : ddmTemplates){
-											processor.write(new ImExTemplate(ddmTemplate), structureDir, FileNames.getTemplateFileName(ddmTemplate, group, locale, processor.getFileExtension()));
-											_log.info(MessageUtil.getOK(groupName, "TEMPLATE : "  + ddmStructure.getName(locale)));
-										}
-										_log.info(MessageUtil.getSeparator());
+										processor.write(new ImExAdt(ddmTemplate), adtDir, FileNames.getAdtFileName(ddmTemplate, group, locale, processor.getFileExtension()));
+										_log.info(MessageUtil.getOK(groupName, "ADT : "  + ddmTemplate.getName(locale)));
 										
 									} catch (Exception e) {
-										_log.error(MessageUtil.getError(ddmStructure.getName(locale), e.getMessage()));
+										_log.error(MessageUtil.getError(ddmTemplate.getName(locale), e.getMessage()));
 										if (debug) {
 											_log.error(e,e);
 										}
-									}*/
+									}
 							
 								} else {
-									_log.warn(MessageUtil.getDNE(structureDir.getAbsolutePath()));
+									_log.warn(MessageUtil.getDNE(adtDir.getAbsolutePath()));
 								}
 								
 							} else {
@@ -209,9 +221,9 @@ public class AdtExporter implements Exporter {
 	 * @return
 	 * @throws ImexException
 	 */
-	private File initializeSingleAdtExportDirectory(File groupDir, DDMStructure structure) throws ImexException {
+	private File initializeSingleAdtExportDirectory(File groupDir, String classType) throws ImexException {
 		
-		String name = ImexNormalizer.convertToKey(structure.getStructureKey());
+		String name = ImexNormalizer.convertToKey(classType);
 		File dir = new File(groupDir, name);
 		dir.mkdirs();		
 		return dir;

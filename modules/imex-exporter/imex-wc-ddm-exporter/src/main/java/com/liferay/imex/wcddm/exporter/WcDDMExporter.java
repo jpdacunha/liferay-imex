@@ -86,7 +86,10 @@ public class WcDDMExporter implements Exporter {
 				}
 
 				// Global Scope Export
-				doExport(config, company.getGroup(), wcDdmDir, locale, debug);
+				Group companyGroup = company.getGroup();
+				_log.info(MessageUtil.getStartMessage(companyGroup, locale));
+				doExport(config, companyGroup, wcDdmDir, locale, debug);
+				_log.info(MessageUtil.getEndMessage(companyGroup, locale));
 				
 			} catch (ImexException e) {
 				_log.error(e,e);
@@ -141,7 +144,7 @@ public class WcDDMExporter implements Exporter {
 										//Iterate over templates
 										for(DDMTemplate ddmTemplate : ddmTemplates){
 											processor.write(new ImExTemplate(ddmTemplate), structureDir, FileNames.getTemplateFileName(ddmTemplate, group, locale, processor.getFileExtension()));
-											_log.info(MessageUtil.getOK(groupName, "TEMPLATE : "  + ddmStructure.getName(locale)));
+											_log.info(MessageUtil.getOK(groupName, "TEMPLATE : "  + ddmTemplate.getName(locale)));
 										}
 										_log.info(MessageUtil.getSeparator());
 										

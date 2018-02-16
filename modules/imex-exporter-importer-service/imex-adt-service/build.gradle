@@ -4,6 +4,7 @@ dependencies {
 	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.3.0"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.0.0"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.util.java", version: "2.0.0"
+	compileOnly group: "com.liferay", name: "com.liferay.dynamic.data.mapping.api", version: "2.0.1"
 	
 	compileOnly project(":modules:imex:imex-core-api")
 	compileOnly project(":modules:imex:imex-core-util")

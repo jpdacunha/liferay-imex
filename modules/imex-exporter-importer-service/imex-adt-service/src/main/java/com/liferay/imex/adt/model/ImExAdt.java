@@ -1,18 +1,25 @@
 package com.liferay.imex.adt.model;
 
-import com.liferay.dynamic.data.mapping.kernel.DDMTemplate;
+import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 
-public class ImExAdt {
+import java.io.Serializable;
+
+public class ImExAdt implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3376678498797548471L;
+
 	public ImExAdt(){}
 	
-	public ImExAdt(DDMTemplate jt, String type) throws Exception {
+	public ImExAdt(DDMTemplate jt) throws Exception {
 		
 		uuid = jt.getUuid();
 		name = jt.getName();
 		data = jt.getScript();
 		langType = jt.getLanguage();
-		templateType = type;
+		templateType = jt.getType();
 		
 	}
 	

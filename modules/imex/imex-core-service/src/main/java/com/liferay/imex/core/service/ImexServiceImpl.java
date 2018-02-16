@@ -4,7 +4,7 @@ import com.liferay.imex.core.api.ImexService;
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.identifier.ProcessIdentifier;
-import com.liferay.imex.core.service.configuration.model.ConfigurationProcessIdentifier;
+import com.liferay.imex.core.service.configuration.model.ConfigurationOverrideProcessIdentifier;
 import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -44,7 +44,7 @@ public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService 
 				
 		Map<String,Properties> props = configurationService.loadAllConfigurationMap(bundleNames);
 		
-		ProcessIdentifier processIdentifier = new ConfigurationProcessIdentifier();
+		ProcessIdentifier processIdentifier = new ConfigurationOverrideProcessIdentifier();
 		
 		//Initialisation répertoire de configuration
 		initializeConfigurationtDirectory();

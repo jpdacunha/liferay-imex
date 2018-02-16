@@ -5,5 +5,7 @@ public interface ProcessIdentifier {
 	public String getUniqueIdentifier();
 	
 	public String getProcessType();
+	
+	public String getProcessTypeUniqueIdentifier();
 
 }

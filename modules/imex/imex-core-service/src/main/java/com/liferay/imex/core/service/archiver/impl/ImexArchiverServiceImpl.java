@@ -150,7 +150,7 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 	
 	private String getArchiveFileName(File dataDirectory, ProcessIdentifier processIdentifier) {
 	
-		return ARCHIVE_FILENAME_PREFIX + dataDirectory.getName() + StringPool.PERIOD + processIdentifier.getUniqueIdentifier() + ARCHIVE_FILENAME_SUFFIX;
+		return ARCHIVE_FILENAME_PREFIX + dataDirectory.getName() + StringPool.PERIOD + processIdentifier.getProcessTypeUniqueIdentifier() + ARCHIVE_FILENAME_SUFFIX;
 		
 	}
 

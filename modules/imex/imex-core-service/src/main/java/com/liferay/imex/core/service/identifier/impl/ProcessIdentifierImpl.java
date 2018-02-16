@@ -20,7 +20,11 @@ public abstract class ProcessIdentifierImpl implements ProcessIdentifier {
 	}
 	
 	public String getUniqueIdentifier() {
-		return processType + StringPool.PERIOD + formater.format(new Date()) + StringPool.PERIOD + RandomStringUtils.randomAlphanumeric(8);
+		return formater.format(new Date()) + StringPool.PERIOD + RandomStringUtils.randomAlphanumeric(8);
+	}
+	
+	public String getProcessTypeUniqueIdentifier() {
+		return processType + StringPool.PERIOD + getUniqueIdentifier();
 	}
 
 	public String getProcessType() {

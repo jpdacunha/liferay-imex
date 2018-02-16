@@ -147,7 +147,7 @@ public class RoleImporter implements Importer {
 		if (rolesDir.exists()) {
 			return rolesDir;
 		} else {
-			_log.warn("[" + rolesDir.getAbsolutePath() + "] does not exists");
+			_log.warn(MessageUtil.getDNE(rolesDir));
 		}
 		
 		return null;

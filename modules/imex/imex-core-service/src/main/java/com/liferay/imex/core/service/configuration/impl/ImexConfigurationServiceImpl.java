@@ -12,6 +12,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -174,8 +175,24 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	}
 	
 	private Properties loadFileSystemConfiguration(Bundle bundle, String type) {
-		//TODO : JDA aller chercher les fichiers dans le répertoire deploy/imex/configuration
-		return null;
+		
+		Properties props = null;
+		
+		File overrideCfgFile = getConfigurationOverrideFileName(bundle);
+		
+		if (overrideCfgFile != null && overrideCfgFile.exists()) {
+			
+			props = new Properties();
+			try {
+				props.load(new FileInputStream(overrideCfgFile));
+				_log.info(MessageUtil.getMessage(bundle, "is using configuration loaded from [" + overrideCfgFile.getAbsolutePath() + "]."));
+			} catch (IOException e) {
+				_log.error(e,e);
+			}
+		}
+		
+		return props;
+		
 	}
 	
 	private Properties getDefaultConfiguration(Bundle bundle) {
@@ -190,12 +207,18 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 			
 			if (fileURL != null) {
 				
-				InputStream in = fileURL.openStream();
-				
-				props = new Properties();
-				props.load(in);
-				
-				in.close();
+				InputStream in = null;
+				try {
+					
+					in = fileURL.openStream();					
+					props = new Properties();
+					props.load(in);
+					
+				} finally {
+					if (in != null) {
+						in.close();
+					}
+				}
 				
 		    } else {
 		    	_log.debug("Resource [" + fileName + "] is null.");
@@ -204,11 +227,10 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 			
 		} catch (IOException e) {
 			_log.error(e,e);
-	    }
-		
+	    } 
 		
 		if (props != null) {
-			_log.debug(MessageUtil.getMessage(bundle, "is using default configuration loaded from his embedded [" + fileName + "]."));
+			_log.info(MessageUtil.getMessage(bundle, "is using default configuration loaded from his embedded [" + fileName + "]."));
 		} else {
 			_log.error(MessageUtil.getMessage(bundle, "has no default configuration to loads. Make sure a [" + fileName + "] exists on your classpath."));
 		}

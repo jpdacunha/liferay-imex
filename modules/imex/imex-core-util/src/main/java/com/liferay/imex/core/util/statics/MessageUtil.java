@@ -11,7 +11,6 @@ import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.util.Locale;
-import java.util.logging.Logger;
 
 import org.osgi.framework.Bundle;
 
@@ -63,7 +62,7 @@ public class MessageUtil {
 	public static String getDNE(File name) {
 		
 		if (name == null ) {
-			_log.warn("FileName is null");
+			_log.warn("file is null");
 			return StringPool.BLANK;
 		}
 		return getDNE(name.getAbsolutePath());

@@ -333,7 +333,7 @@ public class WcDDMImporter implements Importer {
 		if (dir.exists()) {
 			return dir;
 		} else {
-			_log.warn("[" + dir.getAbsolutePath() + "] does not exists");
+			_log.warn(MessageUtil.getDNE(dir));
 		}
 		
 		return null;

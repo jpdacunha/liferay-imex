@@ -36,6 +36,8 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 	)
 public class RoleImporter implements Importer {
 	
+	private static final String DESCRIPTION = "Liferay Role Import Process";
+
 	private static final Log _log = LogFactoryUtil.getLog(RoleImporter.class);
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
@@ -156,7 +158,7 @@ public class RoleImporter implements Importer {
 
 	@Override
 	public String getProcessDescription() {
-		return "Liferay Role Import Process";
+		return DESCRIPTION;
 	}
 
 }

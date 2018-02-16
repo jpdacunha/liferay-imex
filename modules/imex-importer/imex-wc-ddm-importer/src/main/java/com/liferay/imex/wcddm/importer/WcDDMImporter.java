@@ -21,7 +21,6 @@ import com.liferay.imex.core.util.statics.ImexNormalizer;
 import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.imex.wcddm.FileNames;
 import com.liferay.imex.wcddm.importer.configuration.ImExWCDDmImporterPropsKeys;
-import com.liferay.imex.wcddm.importer.service.ImportWcDDMService;
 import com.liferay.imex.wcddm.model.ImExStructure;
 import com.liferay.imex.wcddm.model.ImExTemplate;
 import com.liferay.journal.model.JournalArticle;
@@ -56,10 +55,9 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 	)
 public class WcDDMImporter implements Importer {
 	
+	private static final String DESCRIPTION = "Web Content DDM import";
+
 	private static final Log _log = LogFactoryUtil.getLog(WcDDMImporter.class);
-	
-	@Reference(cardinality=ReferenceCardinality.MANDATORY)
-	protected ImportWcDDMService importWcDDMService;
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexProcessor processor;
@@ -93,7 +91,7 @@ public class WcDDMImporter implements Importer {
 			}
 			
 		} else {
-			_log.info(MessageUtil.getDisabled("Web Content DDM import"));
+			_log.info(MessageUtil.getDisabled(DESCRIPTION));
 		}
 		
 		_log.info(MessageUtil.getEndMessage("Web Content DDM import process"));		
@@ -342,7 +340,7 @@ public class WcDDMImporter implements Importer {
 
 	@Override
 	public String getProcessDescription() {
-		return "Web Content DDM import";
+		return DESCRIPTION;
 	}
 	
 	@Reference(unbind = "-")

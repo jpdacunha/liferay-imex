@@ -1,20 +1,16 @@
-package com.liferay.imex.wcddm.exporter;
+package com.liferay.imex.adt.exporter;
 
 
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
-import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
-import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
+import com.liferay.imex.adt.FileNames;
+import com.liferay.imex.adt.exporter.configuration.ImExWCDDmExporterPropsKeys;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.core.util.statics.ImexNormalizer;
 import com.liferay.imex.core.util.statics.MessageUtil;
-import com.liferay.imex.wcddm.FileNames;
-import com.liferay.imex.wcddm.exporter.configuration.ImExWCDDmExporterPropsKeys;
-import com.liferay.imex.wcddm.model.ImExStructure;
-import com.liferay.imex.wcddm.model.ImExTemplate;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -39,18 +35,18 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 @Component(
 		immediate = true,
 		property = {
-			"imex.component.execution.priority=20",
-			"imex.component.description=Web Content DDM exporter",
+			"imex.component.execution.priority=100",
+			"imex.component.description=ADT exporter",
 			"service.ranking:Integer=10"
 		},
 		
 		service = Exporter.class
 	)
-public class WcDDMExporter implements Exporter {
+public class AdtExporter implements Exporter {
 	
-	public static final String DESCRIPTION = "Web Content DDM exporter";
+	public static final String DESCRIPTION = "ADT exporter";
 	
-	private static final Log _log = LogFactoryUtil.getLog(WcDDMExporter.class);
+	private static final Log _log = LogFactoryUtil.getLog(AdtExporter.class);
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexProcessor processor;
@@ -58,7 +54,7 @@ public class WcDDMExporter implements Exporter {
 	@Override
 	public void doExport(Properties config, File destDir, long companyId, Locale locale, boolean debug) {
 		
-		_log.info(MessageUtil.getStartMessage("WEBCONTENT export process"));
+		_log.info(MessageUtil.getStartMessage("ADT export process"));
 		
 		boolean enabled = GetterUtil.getBoolean(config.get(ImExWCDDmExporterPropsKeys.EXPORT_WCDDM_ENABLED));
 		
@@ -68,7 +64,7 @@ public class WcDDMExporter implements Exporter {
 				
 				Company company = CompanyLocalServiceUtil.getCompany(companyId);
 				
-				File wcDdmDir = initializeWCDDMExportDirectory(destDir);
+				File wcDdmDir = initializeAdtExportDirectory(destDir);
 				
 				List<Group> groups = GroupLocalServiceUtil.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 				
@@ -96,10 +92,10 @@ public class WcDDMExporter implements Exporter {
 			}
 			
 		} else {
-			_log.info(MessageUtil.getDisabled("WEBCONTENT export"));
+			_log.info(MessageUtil.getDisabled(DESCRIPTION));
 		}
 		
-		_log.info(MessageUtil.getEndMessage("WEBCONTENT export process"));
+		_log.info(MessageUtil.getEndMessage("ADT export process"));
 		
 	}
 	
@@ -123,13 +119,13 @@ public class WcDDMExporter implements Exporter {
 						//Iterate over structures
 						for(DDMStructure ddmStructure : ddmStructures){
 												
-							File structureDir = initializeSingleWCDDMExportDirectory(groupDir, ddmStructure);
+							File structureDir = initializeSingleAdtExportDirectory(groupDir, ddmStructure);
 							
 							if (structureDir != null) {
 								
 								if (structureDir.exists()) {
 							
-									try {
+									/*try {
 										
 										processor.write(new ImExStructure(ddmStructure), structureDir, FileNames.getStructureFileName(ddmStructure, group, locale, processor.getFileExtension()));
 										
@@ -150,7 +146,7 @@ public class WcDDMExporter implements Exporter {
 										if (debug) {
 											_log.error(e,e);
 										}
-									}
+									}*/
 							
 								} else {
 									_log.warn(MessageUtil.getDNE(structureDir.getAbsolutePath()));
@@ -207,13 +203,13 @@ public class WcDDMExporter implements Exporter {
 	}
 	
 	/**
-	 * Create directory for single role (/role-name)
+	 * Create directory for single item
 	 * @param roleDir
 	 * @param role
 	 * @return
 	 * @throws ImexException
 	 */
-	private File initializeSingleWCDDMExportDirectory(File groupDir, DDMStructure structure) throws ImexException {
+	private File initializeSingleAdtExportDirectory(File groupDir, DDMStructure structure) throws ImexException {
 		
 		String name = ImexNormalizer.convertToKey(structure.getStructureKey());
 		File dir = new File(groupDir, name);
@@ -224,14 +220,14 @@ public class WcDDMExporter implements Exporter {
 
 
 	/**
-	 * Create root role directory (/role)
+	 * Create root directory
 	 * @param exportDir
 	 * @return
 	 * @throws ImexException
 	 */
-	private File initializeWCDDMExportDirectory(File exportDir) throws ImexException {
+	private File initializeAdtExportDirectory(File exportDir) throws ImexException {
 		
-		File rolesDir = new File(exportDir, FileNames.DIR_WCDDM);
+		File rolesDir = new File(exportDir, FileNames.DIR_ADT);
 		boolean success = rolesDir.mkdirs();
 		if (!success) {
 			throw new ImexException("Failed to create directory " + rolesDir);

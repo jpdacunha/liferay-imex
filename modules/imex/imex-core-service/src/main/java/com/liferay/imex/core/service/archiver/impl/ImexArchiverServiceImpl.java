@@ -86,8 +86,12 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 			
 			if (archiveDestinationDirectory != null && archiveDestinationDirectory.isDirectory()) {
 				
-				if (zip(toArchiveDirectory, archiveDestinationDirectory, processIdentifier)) {
-					cleanup(archiveDestinationDirectory, processIdentifier, nbArchiveToKeep);
+				if (toArchiveDirectory != null && toArchiveDirectory.exists()) {
+					if (zip(toArchiveDirectory, archiveDestinationDirectory, processIdentifier)) {
+						cleanup(archiveDestinationDirectory, processIdentifier, nbArchiveToKeep);
+					}
+				} else {
+					_log.debug(MessageUtil.getDNE(toArchiveDirectory));
 				}
 				
 			} else {

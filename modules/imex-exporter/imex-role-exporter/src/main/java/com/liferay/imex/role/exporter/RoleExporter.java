@@ -39,6 +39,8 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 	)
 public class RoleExporter implements Exporter {
 	
+	public static final String DESCRIPTION = "Liferay Role Export Process";
+	
 	private static final Log _log = LogFactoryUtil.getLog(RoleExporter.class);
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
@@ -181,7 +183,7 @@ public class RoleExporter implements Exporter {
 
 	@Override
 	public String getProcessDescription() {
-		return "Liferay Role Export Process";
+		return DESCRIPTION;
 	}
 	
 }

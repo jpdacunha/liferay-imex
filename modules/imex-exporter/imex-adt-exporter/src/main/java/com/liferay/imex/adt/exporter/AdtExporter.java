@@ -17,7 +17,6 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.ClassName;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
@@ -150,7 +149,7 @@ public class AdtExporter implements Exporter {
 										
 										String groupName = GroupUtil.getGroupName(group, locale);
 										
-										processor.write(new ImExAdt(ddmTemplate), adtDir, FileNames.getAdtFileName(ddmTemplate, group, locale, processor.getFileExtension()));
+										processor.write(new ImExAdt(ddmTemplate, classType), adtDir, FileNames.getAdtFileName(ddmTemplate, group, locale, processor.getFileExtension()));
 										_log.info(MessageUtil.getOK(groupName, "ADT : "  + ddmTemplate.getName(locale)));
 										
 									} catch (Exception e) {

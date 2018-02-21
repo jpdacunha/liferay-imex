@@ -135,7 +135,7 @@ public class WcDDMImporter implements Importer {
 			
 			
 		} else {
-			_log.error("Skipping null roleDir ...");
+			_log.error("Skipping null dir ...");
 		}
 	}
 
@@ -233,7 +233,7 @@ public class WcDDMImporter implements Importer {
 		String groupName = GroupUtil.getGroupName(group, locale);	
 		ServiceContext serviceContextTem = (ServiceContext)serviceContext.clone();
 		
-		if (templateFiles != null) {	
+		if (templateFiles != null || (templateFiles != null && templateFiles.length == 0)) {	
 			
 			for (File matchingTemplateFile : Arrays.asList(templateFiles)) {
 				

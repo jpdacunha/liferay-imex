@@ -13,17 +13,24 @@ public class ImExAdt implements Serializable {
 
 	public ImExAdt(){}
 	
-	public ImExAdt(DDMTemplate jt) throws Exception {
+	public ImExAdt(DDMTemplate jt, String className) throws Exception {
 		
 		uuid = jt.getUuid();
 		name = jt.getName();
 		data = jt.getScript();
 		langType = jt.getLanguage();
 		templateType = jt.getType();
+		description = jt.getDescription();
+		cacheable = jt.isCacheable();
+		key = jt.getTemplateKey();
+		this.className = className;
+		
 		
 	}
 	
 	private String uuid;
+	
+	private String key;
 
 	private String name;
 	
@@ -33,6 +40,44 @@ public class ImExAdt implements Serializable {
 	
 	private String templateType;
 	
+	private String className;
+	
+	private String description;
+	
+	private boolean cacheable;
+	
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public boolean isCacheable() {
+		return cacheable;
+	}
+
+	public void setCacheable(boolean cacheable) {
+		this.cacheable = cacheable;
+	}
+
+	public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
+	}
+
 	public String getTemplateType() {
 		return templateType;
 	}

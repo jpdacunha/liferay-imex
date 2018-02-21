@@ -203,7 +203,7 @@ public class MessageUtil {
 		}
 		
 		String groupName = GroupUtil.getGroupName(group, locale);
-		return " groupFriendlyURL:[" + group.getFriendlyURL() + "] groupName:[" + groupName + "]";
+		return " groupFriendlyURL:[" + group.getFriendlyURL() + "] groupName:[" + groupName + "] groupId:[" + group.getGroupId() + "]";
 	}
 	
 	private static String getCompanyIdentifier(Company company) {

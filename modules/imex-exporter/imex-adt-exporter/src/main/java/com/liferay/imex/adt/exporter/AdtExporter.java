@@ -62,7 +62,7 @@ public class AdtExporter implements Exporter {
 		if (enabled) {
 			
 			String stringList = GetterUtil.getString(config.get(ImExWCDDmExporterPropsKeys.EXPORT_ADT_TYPES_LIST));
-			List<String> types = CollectionUtil.getArray(stringList);
+			List<String> types = CollectionUtil.getList(stringList);
 			
 			if (types != null && types.size() > 0) {
 				
@@ -76,19 +76,18 @@ public class AdtExporter implements Exporter {
 					
 					for (Group group : groups) {
 						
+						_log.info(MessageUtil.getStartMessage(group, locale));
 						for (String classType : types) {
 							
 							boolean isSite = group.isSite() && !group.getFriendlyURL().equals("/control_panel");
 							if (isSite) {
 								
-								_log.info(MessageUtil.getStartMessage(group, locale));
 								doExport(config, group, adtDir, locale, debug, classType);
-								_log.info(MessageUtil.getEndMessage(group, locale));
 								
 							}
 							
 						}
-						
+						_log.info(MessageUtil.getEndMessage(group, locale));
 
 					}
 
@@ -150,7 +149,7 @@ public class AdtExporter implements Exporter {
 										String groupName = GroupUtil.getGroupName(group, locale);
 										
 										processor.write(new ImExAdt(ddmTemplate, classType), adtDir, FileNames.getAdtFileName(ddmTemplate, group, locale, processor.getFileExtension()));
-										_log.info(MessageUtil.getOK(groupName, "ADT : "  + ddmTemplate.getName(locale)));
+										_log.info(MessageUtil.getOK(groupName, "ADT : "  + ddmTemplate.getName(locale) + ", type : " + classType));
 										
 									} catch (Exception e) {
 										_log.error(MessageUtil.getError(ddmTemplate.getName(locale), e.getMessage()));
@@ -164,7 +163,7 @@ public class AdtExporter implements Exporter {
 								}
 								
 							} else {
-								_log.error("structureDir is null ...");						
+								_log.error("adtDir is null ...");						
 							}
 							
 						}
@@ -178,7 +177,7 @@ public class AdtExporter implements Exporter {
 				}
 				
 			} else {
-				_log.info(MessageUtil.getEmpty(group, locale));				
+				_log.info(MessageUtil.getEmpty(group, locale, classType));				
 			}
 			
 		} else {

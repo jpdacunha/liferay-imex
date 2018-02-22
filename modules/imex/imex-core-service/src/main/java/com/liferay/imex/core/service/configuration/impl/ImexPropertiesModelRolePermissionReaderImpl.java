@@ -1,39 +1,45 @@
-package com.liferay.imex.core.service.permission.reader.impl;
+package com.liferay.imex.core.service.configuration.impl;
 
-import com.liferay.imex.core.service.permission.model.ModelRolePermissionBatch;
-import com.liferay.imex.core.service.permission.reader.ModelRolePermissionReader;
+import com.liferay.imex.core.api.configuration.ImExCorePropsKeys;
+import com.liferay.imex.core.api.permission.ImexModelRolePermissionReader;
+import com.liferay.imex.core.api.permission.model.ModelRolePermissionBatch;
+import com.liferay.imex.core.util.statics.CollectionUtil;
+import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringPool;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
-public class PropertiesModelRolePermissionReaderImpl implements ModelRolePermissionReader {
+import org.osgi.service.component.annotations.Component;
+
+@Component
+public class ImexPropertiesModelRolePermissionReaderImpl implements ImexModelRolePermissionReader {
 	
-	private static Log _log = LogFactoryUtil.getLog(PropertiesModelRolePermissionReaderImpl.class);
-	
-	private final static String PERMISSIONS_SUPPORTED_ROLES = "permissions.batch.roles";
-	private final static String RULE_PREFIX_KEY = "permissions.batch";
-	private final static String RULE_SUFIX_KEY = "actions";
-	private final static String REINIT_SUFIX_KEY = "reinit";
-	
+	private static Log _log = LogFactoryUtil.getLog(ImexPropertiesModelRolePermissionReaderImpl.class);
+
 	private final static boolean REINIT_DEFAULT_VALUE = true;
 	
 	/*
 	 * (non-Javadoc)
 	 * @see com.liferay.portal.permission.model.batch.reader.ModelRolePermissionReader#getRolesBatchs(java.lang.String)
 	 */
-	public List<ModelRolePermissionBatch> getRolesBatchs(String batchId) throws PortalException, SystemException {
+	public List<ModelRolePermissionBatch> getRolesBatchs(String batchId, Properties props) throws PortalException, SystemException {
 		
 		List<ModelRolePermissionBatch> liste = new ArrayList<ModelRolePermissionBatch>();
+		
+		if (props == null) {
+			_log.warn("Missing required properties");
+			return liste;
+		}
 					
-		String[] roles = PropsUtil.getArray(PERMISSIONS_SUPPORTED_ROLES);
+		String[] roles = CollectionUtil.getArray(props.getProperty(ImExCorePropsKeys.PERMISSIONS_SUPPORTED_ROLES));
 		
 		if (roles != null  && roles.length > 0) {
 			
@@ -41,7 +47,7 @@ public class PropertiesModelRolePermissionReaderImpl implements ModelRolePermiss
 			
 			for (String roleName : rolesNames) {
 				
-				ModelRolePermissionBatch batch = readRoleBatch(batchId, roleName);
+				ModelRolePermissionBatch batch = readRoleBatch(batchId, roleName, props);
 				if (ModelRolePermissionBatch.validate(batch)) {
 					liste.add(batch);
 				}
@@ -49,7 +55,7 @@ public class PropertiesModelRolePermissionReaderImpl implements ModelRolePermiss
 			}
 			
 		} else {
-			_log.error("Invalid configuration : no roles are defined. Please check  [" + PERMISSIONS_SUPPORTED_ROLES + "] parameter");
+			_log.error("Invalid configuration : no roles are defined. Please check  [" + ImExCorePropsKeys.PERMISSIONS_SUPPORTED_ROLES + "] is correctly defined");
 		}
 		
 		return liste;
@@ -60,12 +66,12 @@ public class PropertiesModelRolePermissionReaderImpl implements ModelRolePermiss
 	 * (non-Javadoc)
 	 * @see com.liferay.portal.permission.service.ModelRolePermissionReader#isReinitOnset(java.lang.String)
 	 */
-	public boolean isReinitOnset(String batchId) {
+	public boolean isReinitOnset(String batchId, Properties props) {
 		
 		String key = buildReInitKey(batchId);
 		
 		if (key != null) {
-			return GetterUtil.getBoolean(PropsUtil.get(key), REINIT_DEFAULT_VALUE);
+			return GetterUtil.getBoolean(props.getProperty(key), REINIT_DEFAULT_VALUE);
 		}
 		
 		return REINIT_DEFAULT_VALUE;
@@ -80,7 +86,7 @@ public class PropertiesModelRolePermissionReaderImpl implements ModelRolePermiss
 	 * @throws PortalException
 	 * @throws SystemException
 	 */
-	private static ModelRolePermissionBatch readRoleBatch(String batchId, String roleName) throws PortalException, SystemException {
+	private static ModelRolePermissionBatch readRoleBatch(String batchId, String roleName, Properties properties) throws PortalException, SystemException {
 		
 		List<String> actions = null;
 		ModelRolePermissionBatch batch = null;
@@ -88,7 +94,7 @@ public class PropertiesModelRolePermissionReaderImpl implements ModelRolePermiss
 		
 		if (key != null) {
 				
-			String[] actionsArray = PropsUtil.getArray(key);
+			String[] actionsArray = CollectionUtil.getArray((String)properties.get(key));
 			
 			if (actionsArray != null  && actionsArray.length > 0) {
 				
@@ -96,6 +102,8 @@ public class PropertiesModelRolePermissionReaderImpl implements ModelRolePermiss
 				
 				batch = new ModelRolePermissionBatch(roleName, actions);
 				
+			} else {
+				_log.warn(MessageUtil.getMessage("No rule defined for role:[" + roleName + "], key:[" + key + "]"));
 			}
 				
 		}
@@ -114,11 +122,11 @@ public class PropertiesModelRolePermissionReaderImpl implements ModelRolePermiss
 		if (batchId != null && !batchId.equals("")) {
 			
 			key = new StringBuilder();
-			key.append(RULE_PREFIX_KEY);
+			key.append(ImExCorePropsKeys.RULE_PREFIX_KEY);
 			key.append(StringPool.PERIOD);
 			key.append(batchId);
 			key.append(StringPool.PERIOD);
-			key.append(REINIT_SUFIX_KEY);
+			key.append(ImExCorePropsKeys.REINIT_SUFIX_KEY);
 			
 		}
 		
@@ -144,13 +152,13 @@ public class PropertiesModelRolePermissionReaderImpl implements ModelRolePermiss
 			if (batchId != null && !batchId.equals("")) {
 				
 				key = new StringBuilder();
-				key.append(RULE_PREFIX_KEY);
+				key.append(ImExCorePropsKeys.RULE_PREFIX_KEY);
 				key.append(StringPool.PERIOD);
 				key.append(batchId);
 				key.append(StringPool.PERIOD);
 				key.append(roleName);
 				key.append(StringPool.PERIOD);
-				key.append(RULE_SUFIX_KEY);
+				key.append(ImExCorePropsKeys.RULE_SUFIX_KEY);
 				
 			}
 			

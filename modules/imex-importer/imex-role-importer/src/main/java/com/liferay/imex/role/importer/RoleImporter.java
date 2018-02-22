@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.Locale;
 import java.util.Properties;
 
+import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -50,7 +51,7 @@ public class RoleImporter implements Importer {
 	protected ImportRolePermissionsService importPermissionService;
 
 	@Override
-	public void doImport(ServiceContext serviceContex, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
+	public void doImport(Bundle bundle, ServiceContext serviceContex, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
 		
 		_log.info(MessageUtil.getStartMessage("ROLE import process"));
 		

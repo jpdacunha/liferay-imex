@@ -62,9 +62,33 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	}
 	
 	@Override
+	public Properties loadExporterAndCoreConfiguration(Bundle bundle) {
+		
+		Properties props = new Properties();
+		
+		props.putAll(loadCoreConfiguration());
+		props.putAll(loadExporterConfiguration(bundle));
+		
+		return props;
+		
+	}
+	
+	@Override
 	public Properties loadImporterConfiguration(Bundle bundle) {
 		
 		return loadConfiguration(bundle, IMPORTER);
+		
+	}
+	
+	@Override
+	public Properties loadImporterAndCoreConfiguration(Bundle bundle) {
+		
+		Properties props = new Properties();
+		
+		props.putAll(loadImporterConfiguration(bundle));
+		props.putAll(loadCoreConfiguration());
+		
+		return props;
 		
 	}
 	

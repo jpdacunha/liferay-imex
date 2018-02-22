@@ -8,9 +8,11 @@ import java.io.File;
 import java.util.Locale;
 import java.util.Properties;
 
+import org.osgi.framework.Bundle;
+
 public interface Importer extends ImexTask {
 	
-	public void doImport(ServiceContext rootServiceContext, User exportUser, Properties config, File srcDir, long companyId, Locale locale, boolean debug);
+	public void doImport(Bundle bundle, ServiceContext rootServiceContext, User exportUser, Properties config, File srcDir, long companyId, Locale locale, boolean debug);
 	
 	public String getProcessDescription();
 

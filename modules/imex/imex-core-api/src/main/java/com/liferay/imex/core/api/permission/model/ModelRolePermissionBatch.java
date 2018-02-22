@@ -1,4 +1,4 @@
-package com.liferay.imex.core.service.permission.model;
+package com.liferay.imex.core.api.permission.model;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -28,7 +28,7 @@ public class ModelRolePermissionBatch {
 	}
 	
 	/**
-	 * Effectue la validation du batch à positionner pour un role
+	 * Validate role batch
 	 * @param batch
 	 * @return
 	 */

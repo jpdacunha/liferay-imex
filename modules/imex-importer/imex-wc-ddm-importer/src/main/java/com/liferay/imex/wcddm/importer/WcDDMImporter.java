@@ -40,6 +40,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -67,7 +68,7 @@ public class WcDDMImporter implements Importer {
 	private DDM _ddm;
 
 	@Override
-	public void doImport(ServiceContext serviceContext, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
+	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
 		
 		_log.info(MessageUtil.getStartMessage("Web Content DDM import process"));
 		

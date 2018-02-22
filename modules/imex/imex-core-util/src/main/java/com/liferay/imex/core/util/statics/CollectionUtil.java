@@ -57,7 +57,7 @@ public class CollectionUtil {
 		
 	}
 	
-	public static List<String> getArray(String value) {
+	public static List<String> getList(String value) {
 		
 		List<String> retour = new ArrayList<String>();
 		if (value != null && value.contains(StringPool.COMMA)) {
@@ -74,5 +74,10 @@ public class CollectionUtil {
 		return retour;
 	}
 	
+	public static String[] getArray(String value) {
+		//TODO : JDA non optimized code array => List => array (again)
+		List<String> list = getList(value);
+		return list.stream().toArray(String[]::new);
+	}
 	
 }

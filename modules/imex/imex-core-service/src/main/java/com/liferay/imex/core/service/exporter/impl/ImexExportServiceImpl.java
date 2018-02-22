@@ -165,7 +165,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			_log.info(MessageUtil.getStartMessage(exporter.getProcessDescription(), 1));
 			
 			//Loading configuration for each exporter
-			Properties config = configurationService.loadExporterConfiguration(bundle);
+			Properties config = configurationService.loadExporterAndCoreConfiguration(bundle);
 			
 			if (config == null) {
 				_log.warn(MessageUtil.getMessage(bundle, "has no defined configuration. Aborting execution ..."));

@@ -8,6 +8,7 @@ import com.liferay.imex.adt.FileNames;
 import com.liferay.imex.adt.importer.configuration.ImExAdtImporterPropsKeys;
 import com.liferay.imex.adt.model.ImExAdt;
 import com.liferay.imex.core.api.importer.Importer;
+import com.liferay.imex.core.api.permission.ImexModelPermissionSetter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.util.enums.ImexOperationEnum;
 import com.liferay.imex.core.util.statics.FileUtil;
@@ -17,9 +18,12 @@ import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Resource;
+import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.ResourceLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
@@ -30,6 +34,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -45,15 +50,20 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 	)
 public class AdtImporter implements Importer {
 	
+	private static final String RESOURCE_CLASSNAME = "com.liferay.portlet.display.template.PortletDisplayTemplate";
+
 	private static final String DESCRIPTION = "ADT import";
 
 	private static final Log _log = LogFactoryUtil.getLog(AdtImporter.class);
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexProcessor processor;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexModelPermissionSetter permissionSetter;
 
 	@Override
-	public void doImport(ServiceContext serviceContext, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
+	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
 		
 		_log.info(MessageUtil.getStartMessage("ADT import process"));
 		
@@ -67,7 +77,7 @@ public class AdtImporter implements Importer {
 				
 				File[] groupDirs = FileUtil.listFiles(dir);
 				for (File groupDir : groupDirs) {
-					this.doImport(serviceContext, companyId, user, config, groupDir, locale, debug);
+					this.doImport(bundle, serviceContext, companyId, user, config, groupDir, locale, debug);
 				}
 				
 				
@@ -83,7 +93,7 @@ public class AdtImporter implements Importer {
 		_log.info(MessageUtil.getEndMessage("ADT import process"));		
 	}
 	
-	private void doImport(ServiceContext serviceContext, long companyId, User user, Properties config, File groupDir, Locale locale, boolean debug) {
+	private void doImport(Bundle bundle, ServiceContext serviceContext, long companyId, User user, Properties config, File groupDir, Locale locale, boolean debug) {
 			
 		if (groupDir != null) {
 			
@@ -102,7 +112,7 @@ public class AdtImporter implements Importer {
 					//For each structure dir
 					for (File adtDir : adtsDirs) {
 						
-						doImportAdt(serviceContext, debug, group, user, locale, adtDir);
+						doImportAdt(bundle, serviceContext, debug, group, user, locale, adtDir, config);
 						_log.info(MessageUtil.getSeparator());
 						
 					}
@@ -123,7 +133,7 @@ public class AdtImporter implements Importer {
 		}
 	}
 	
-	private DDMTemplate doImportAdt(ServiceContext serviceContext, boolean debug, Group group, User user, Locale locale, File adtDir) {
+	private DDMTemplate doImportAdt(Bundle bundle, ServiceContext serviceContext, boolean debug, Group group, User user, Locale locale, File adtDir, Properties config) {
 		
 		DDMTemplate template = null;
 		String adtfileBegin = FileNames.getAdtFileNameBegin();
@@ -147,7 +157,7 @@ public class AdtImporter implements Importer {
 					long classNameId = ClassNameLocalServiceUtil.getClassNameId(imexAdt.getClassName());
 					
 					//Liferay trap here :-) : the ressourceClassNameId is the name of the portlet. Potential problem here if the class is moved in future Liferay versions. 
-					long resourceClassNameId = ClassNameLocalServiceUtil.getClassNameId("com.liferay.portlet.display.template.PortletDisplayTemplate");
+					long resourceClassNameId = ClassNameLocalServiceUtil.getClassNameId(RESOURCE_CLASSNAME);
 					
 					Map<Locale, String> nameMap = LocalizationUtil.getLocalizationMap(imexAdt.getName());
 					Map<Locale, String> descriptionMap = LocalizationUtil.getLocalizationMap(imexAdt.getDescription());
@@ -205,6 +215,12 @@ public class AdtImporter implements Importer {
 						operation = ImexOperationEnum.CREATE;
 						
 					}
+					
+					//Setting ADT permissions
+					Resource resource = ResourceLocalServiceUtil.getResource(template.getCompanyId(), DDMTemplate.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL, template.getTemplateId() + "");
+					permissionSetter.setPermissions(config, bundle, resource);
+					
+					
 					_log.info(MessageUtil.getOK(groupName, "ADT : "  + template.getName(locale), adtFile, operation));
 				
 				}  catch (Exception e) {

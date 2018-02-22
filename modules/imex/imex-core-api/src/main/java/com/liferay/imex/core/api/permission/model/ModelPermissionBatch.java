@@ -1,7 +1,5 @@
-package com.liferay.imex.core.service.permission.model;
+package com.liferay.imex.core.api.permission.model;
 
-import com.liferay.imex.core.service.permission.reader.ModelRolePermissionReader;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -9,60 +7,40 @@ import com.liferay.portal.kernel.model.Resource;
 
 import java.util.List;
 
-import org.osgi.service.component.annotations.Reference;
-
 /**
  * 
  * Classe representant un batch de permissions a positionner pour une resource 
  * @author jpdacunha
  * 
  */
-public abstract class ModelPermissionBatch {
-	
-	public final static String NO_PERMISSIONS_LAYOUT = "NoPermissions";
+public class ModelPermissionBatch {
 	
 	private static Log _log = LogFactoryUtil.getLog(ModelPermissionBatch.class);
 
 	private Resource resource;
 	private String batchId;
-	
-	@Reference
-	private ModelRolePermissionReader permissionReader;
+	private boolean reInitOnSet;
+	private List<ModelRolePermissionBatch> batchs;
+
+	public boolean isReInitOnSet() {
+		return reInitOnSet;
+	}
+
+	public List<ModelRolePermissionBatch> getBatchs() {
+		return batchs;
+	}
 
 	// Constructeur prive inutilisable
 	@SuppressWarnings("unused")
 	private ModelPermissionBatch() {
 		super();
 	}
-	
-	public abstract String getClassName();
 
-	public ModelPermissionBatch(Resource resource, String batchId) {
+	public ModelPermissionBatch(Resource resource, String batchId, boolean reinitOnset, List<ModelRolePermissionBatch> batchs) {
 		this.resource = resource;
 		this.batchId = batchId;
-	}
-
-	/**
-	 * Indique si les permissions doivent etre reinitialises avant le
-	 * positionement de celles contenus dans le batch
-	 * 
-	 * @return
-	 */
-	public boolean reInitOnSet() {
-		
-		return permissionReader.isReinitOnset(this.batchId);
-		
-	}
-	
-	/**
-	 * Permissions a positionner sur la ressource
-	 * @throws SystemException 
-	 * @throws PortalException 
-	 */
-	public List<ModelRolePermissionBatch> getBatchs() throws PortalException, SystemException {
-		
-		return permissionReader.getRolesBatchs(this.batchId);
-		
+		this.reInitOnSet = reinitOnset;
+		this.batchs = batchs;
 	}
 	
 	/**

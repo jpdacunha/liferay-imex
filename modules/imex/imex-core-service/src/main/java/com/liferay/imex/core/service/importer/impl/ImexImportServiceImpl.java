@@ -172,7 +172,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 			_log.info(MessageUtil.getStartMessage(Importer.getProcessDescription(), 1));
 			
 			//Loading configuration for each Importer
-			Properties config = configurationService.loadImporterConfiguration(bundle);
+			Properties config = configurationService.loadImporterAndCoreConfiguration(bundle);
 			
 			if (config == null) {
 				_log.warn(MessageUtil.getMessage(bundle, "has no defined configuration. Aborting execution ..."));
@@ -192,7 +192,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 					serviceContext.setSignedIn(!user.isDefaultUser());
 				}
 				
-				Importer.doImport(serviceContext, user, config, companyDir, companyId, company.getLocale(), true);
+				Importer.doImport(bundle, serviceContext, user, config, companyDir, companyId, company.getLocale(), true);
 				
 			} catch (PortalException e) {
 				_log.error(e,e);

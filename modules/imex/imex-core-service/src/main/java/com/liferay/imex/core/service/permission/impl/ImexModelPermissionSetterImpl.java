@@ -1,8 +1,10 @@
 package com.liferay.imex.core.service.permission.impl;
 
 import com.liferay.imex.core.api.permission.ImexModelPermissionSetter;
-import com.liferay.imex.core.service.permission.model.ModelPermissionBatch;
-import com.liferay.imex.core.service.permission.model.ModelRolePermissionBatch;
+import com.liferay.imex.core.api.permission.ImexModelRolePermissionReader;
+import com.liferay.imex.core.api.permission.model.ModelPermissionBatch;
+import com.liferay.imex.core.api.permission.model.ModelRolePermissionBatch;
+import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
@@ -17,13 +19,33 @@ import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
+import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 
 @Component(immediate = true, service = ImexModelPermissionSetter.class)
 public class ImexModelPermissionSetterImpl implements ImexModelPermissionSetter {
 	
 	private static final Log _log = LogFactoryUtil.getLog(ImexModelPermissionSetterImpl.class);
+	
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexModelRolePermissionReader reader;
+	
+	
+	public void setPermissions(Properties props, Bundle bundle, Resource resource) throws SystemException, PortalException {
+		
+		String batchId = bundle.getSymbolicName();
+		boolean reinitOnset = reader.isReinitOnset(batchId, props);
+		List<ModelRolePermissionBatch> roleBatchs = reader.getRolesBatchs(batchId, props);
+		ModelPermissionBatch batch = new ModelPermissionBatch(resource, batchId, reinitOnset, roleBatchs);
+		
+		setPermissions(batch);
+		
+	}
 	
 	/*
 	 * (non-Javadoc)
@@ -57,34 +79,39 @@ public class ImexModelPermissionSetterImpl implements ImexModelPermissionSetter 
 		
 		if (ModelPermissionBatch.validate(batch)) {
 			
+			_log.info(MessageUtil.getStartMessage("Setting permissions"));
+			
 			Resource resource = batch.getResource();
 			List<ModelRolePermissionBatch> roleActions = batch.getBatchs();
 			
 			long companyId = resource.getCompanyId();
 			String resourceName = resource.getName();
 			String resourcePrimKey = resource.getPrimKey();
-			boolean reInitOnSet = batch.reInitOnSet();
+			boolean reInitOnSet = batch.isReInitOnSet();
+	
+			_log.info(MessageUtil.getPropertyMessage("Selected batch", batch.getBatchId()));
+			_log.info(MessageUtil.getPropertyMessage("Permissions reinitialisation", reInitOnSet + ""));
+			_log.info(MessageUtil.getPropertyMessage("Resource Name", resourceName));
+			_log.info(MessageUtil.getPropertyMessage("Resource Primary Key", resourcePrimKey));
 			
-			_log.info("");
-			_log.info("BEGIN : Setting permissions");
-			_log.info(" > Selected batch [" + batch.getBatchId() + "] defined for [" + batch.getClassName() + "] ");
-			_log.info(" > Permissions reinitialisation [" + reInitOnSet + "] ");
-			_log.info(" > Resource [name=" + resourceName + ",id=" + resourcePrimKey + "] ");
-			
-			//Suppression des permissions sur la resource
-			if (reInitOnSet) {				
-				resetPermissions(companyId, resource);
+			if (roleActions != null && roleActions.size() > 0) {
+				//Suppression des permissions sur la resource
+				if (reInitOnSet) {				
+					resetPermissions(companyId, resource);
+				}
+				
+				//Positionement des permissions d'apres le batch
+				for (ModelRolePermissionBatch roleBatch : roleActions) {				
+					setPermissionsRole(roleBatch, resource);				
+				}
+			} else {
+				_log.info(MessageUtil.getMessage("No permissions to set"));
 			}
 			
-			//Positionement des permissions d'apres le batch
-			for (ModelRolePermissionBatch roleBatch : roleActions) {				
-				setPermissionsRole(roleBatch, resource);				
-			}
-			
-			_log.info("END.");
+			_log.info(MessageUtil.getEndMessage("Setting permissions"));
 			
 		} else {
-			_log.warn("Invalid parameter : execution aborted ...");
+			_log.error(MessageUtil.getError("Invalid parameter", "Unable to execute invalid batch"));
 		}
 		
 	}
@@ -127,7 +154,7 @@ public class ImexModelPermissionSetterImpl implements ImexModelPermissionSetter 
 	 * @throws PortalException
 	 * @throws SystemException
 	 */
-	public void setPermissionsRole(ModelRolePermissionBatch roleBatch, Resource resource) throws PortalException, SystemException {
+	private void setPermissionsRole(ModelRolePermissionBatch roleBatch, Resource resource) throws PortalException, SystemException {
 		
 		if (ModelRolePermissionBatch.validate(roleBatch)) {
 			

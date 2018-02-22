@@ -47,6 +47,10 @@ public class MessageUtil {
 		
 	}
 	
+	public static String getEmpty(Group group, Locale locale, String name) {
+		return getEmpty(name + " " + getGroupIdentifier(group, locale));
+	}
+	
 	public static String getEmpty(Group group, Locale locale) {
 		return getEmpty(getGroupIdentifier(group, locale));
 	}
@@ -142,7 +146,7 @@ public class MessageUtil {
 	}
 	
 	public static String getEndMessage(Group group, Locale locale) {		
-		return getEndMessage("process for GROUP : " + getGroupIdentifier(group, locale));		
+		return getEndMessage("process for GROUP : " + getGroupIdentifier(group, locale), 2);		
 	}
 	
 	public static String getEndMessage(String description, int nbPadLeft) {

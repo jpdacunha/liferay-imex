@@ -29,5 +29,9 @@ public interface ImexConfigurationService {
 	public File getConfigurationOverrideFileName(Bundle bundle);
 
 	public File getConfigurationOverrideFileName(Entry<String, Properties> entry);
+
+	public Properties loadExporterAndCoreConfiguration(Bundle bundle);
+	
+	public Properties loadImporterAndCoreConfiguration(Bundle bundle);
 	
 }

@@ -66,7 +66,7 @@ public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService 
 					
 					File propsFile = configurationService.getConfigurationOverrideFileName(entry);
 					
-					if (!propsFile.exists()) {
+					if (propsFile == null || (propsFile != null && !propsFile.exists())) {
 						
 						FileOutputStream stream = null;
 						try {
@@ -83,7 +83,7 @@ public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService 
 					    }
 						
 					} else {
-						_log.error("Keeping existing file");
+						_log.warn(MessageUtil.getMessage("Keeping existing file [" +  propsFile.getAbsolutePath() + "]"));
 					}
 					
 				} else {

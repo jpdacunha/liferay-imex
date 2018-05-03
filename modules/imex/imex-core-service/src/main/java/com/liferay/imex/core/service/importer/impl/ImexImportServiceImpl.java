@@ -19,7 +19,6 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
-import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -182,7 +181,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 			
 			try {
 				
-				Company company = CompanyLocalServiceUtil.getCompany(companyId);
+				Company company = companyLocalService.getCompany(companyId);
 				
 				ServiceContext serviceContext = new ServiceContext();
 				serviceContext.setCompanyId(companyId);

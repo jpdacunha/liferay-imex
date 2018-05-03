@@ -17,7 +17,6 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.service.CompanyLocalService;
-import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.StringPool;
 
@@ -174,7 +173,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			ImexPropsUtil.displayProperties(config, bundle);
 		
 			try {
-				Company company = CompanyLocalServiceUtil.getCompany(companyId);
+				Company company = companyLocalService.getCompany(companyId);
 				exporter.doExport(config, destDir, companyId, company.getLocale(), true);
 			} catch (PortalException e) {
 				_log.error(e,e);

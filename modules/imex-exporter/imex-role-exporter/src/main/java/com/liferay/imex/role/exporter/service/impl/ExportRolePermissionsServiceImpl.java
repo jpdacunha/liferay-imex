@@ -18,11 +18,11 @@ import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
-import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
-import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
-import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
-import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
+import com.liferay.portal.kernel.service.PortletLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.util.PortletKeys;
 
 import java.util.ArrayList;
@@ -47,7 +47,18 @@ public class ExportRolePermissionsServiceImpl implements ExportRolePermissionsSe
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	private GroupLocalService groupLocalService;
 	
-
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	private PortletLocalService portletLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected CompanyLocalService companyLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected RoleLocalService roleLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ResourcePermissionLocalService resourcePermissionLocalService;
+	
 	public RolePermissions getRolePermissions(long companyId, long roleId) throws Exception{
 		return getRolePermissions(companyId, roleId, false);
 	}
@@ -56,7 +67,7 @@ public class ExportRolePermissionsServiceImpl implements ExportRolePermissionsSe
 				
 		RolePermissions result = new RolePermissions();
 		
-		List<Portlet> portlets = PortletLocalServiceUtil.getPortlets(companyId, true, false);
+		List<Portlet> portlets = portletLocalService.getPortlets(companyId, true, false);
 		
 		List<String> portletNames = new ArrayList<String>(portlets.size() + 1); 
 		for (Portlet portlet : portlets) {
@@ -106,8 +117,8 @@ public class ExportRolePermissionsServiceImpl implements ExportRolePermissionsSe
 	
 		Resource r = new Resource();
 		r.setResourceName(resource);
-		Company company = CompanyLocalServiceUtil.getCompany(companyId);
-		Role role = RoleLocalServiceUtil.getRole(roleId);
+		Company company = companyLocalService.getCompany(companyId);
+		Role role = roleLocalService.getRole(roleId);
 		
 		for (String actionId : actions) {			
 			
@@ -159,9 +170,9 @@ public class ExportRolePermissionsServiceImpl implements ExportRolePermissionsSe
 		boolean hasGroupTemplateScope = false;
 		boolean hasGroupScope = false;
 		
-		hasCompanyScope = (role.getType() == RoleConstants.TYPE_REGULAR) && ResourcePermissionLocalServiceUtil.hasScopeResourcePermission(company.getCompanyId(), curResource, ResourceConstants.SCOPE_COMPANY, role.getRoleId(), actionId);
-		hasGroupTemplateScope = ((role.getType() == RoleConstants.TYPE_SITE) || (role.getType() == RoleConstants.TYPE_ORGANIZATION)) && ResourcePermissionLocalServiceUtil.hasScopeResourcePermission(company.getCompanyId(), curResource, ResourceConstants.SCOPE_GROUP_TEMPLATE, role.getRoleId(), actionId);
-		hasGroupScope = (role.getType() == RoleConstants.TYPE_REGULAR) && ResourcePermissionLocalServiceUtil.hasScopeResourcePermission(company.getCompanyId(), curResource, ResourceConstants.SCOPE_GROUP, role.getRoleId(), actionId);
+		hasCompanyScope = (role.getType() == RoleConstants.TYPE_REGULAR) && resourcePermissionLocalService.hasScopeResourcePermission(company.getCompanyId(), curResource, ResourceConstants.SCOPE_COMPANY, role.getRoleId(), actionId);
+		hasGroupTemplateScope = ((role.getType() == RoleConstants.TYPE_SITE) || (role.getType() == RoleConstants.TYPE_ORGANIZATION)) && resourcePermissionLocalService.hasScopeResourcePermission(company.getCompanyId(), curResource, ResourceConstants.SCOPE_GROUP_TEMPLATE, role.getRoleId(), actionId);
+		hasGroupScope = (role.getType() == RoleConstants.TYPE_REGULAR) && resourcePermissionLocalService.hasScopeResourcePermission(company.getCompanyId(), curResource, ResourceConstants.SCOPE_GROUP, role.getRoleId(), actionId);
 
 		Scope result = null;
 		if (hasCompanyScope) {
@@ -177,17 +188,5 @@ public class ExportRolePermissionsServiceImpl implements ExportRolePermissionsSe
 		return result;
 		
 	}
-	
-	private boolean isGuestRoleId(long companyId, long roleId) throws PortalException {
-
-		Role guestRole = RoleLocalServiceUtil.getRole(
-			companyId, RoleConstants.GUEST);
-
-		if (roleId == guestRole.getRoleId()) {
-			return true;
-		}
-
-		return false;
-		}
 
 }

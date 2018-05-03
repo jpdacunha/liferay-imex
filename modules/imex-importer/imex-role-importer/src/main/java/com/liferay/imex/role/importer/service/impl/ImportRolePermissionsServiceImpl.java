@@ -16,10 +16,10 @@ import com.liferay.portal.kernel.model.ResourcePermission;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
-import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
-import com.liferay.portal.kernel.service.ResourceBlockLocalServiceUtil;
-import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
-import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
+import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.ResourceBlockLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 
@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 
 /**
  * 
@@ -40,6 +42,18 @@ public class ImportRolePermissionsServiceImpl implements ImportRolePermissionsSe
 	
 	private static Log _log = LogFactoryUtil.getLog(ImportRolePermissionsServiceImpl.class);
 	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected GroupLocalService groupLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected RoleLocalService roleLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ResourceBlockLocalService resourceBlockLocalService;
+	 
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ResourcePermissionLocalService resourcePermissionLocalService;
+	
 	public void updateRolePermissions(
 			long companyId,
 			ImexRole imexRole,
@@ -48,7 +62,7 @@ public class ImportRolePermissionsServiceImpl implements ImportRolePermissionsSe
 		
 		if (imexRole != null) {
 		
-			Role role = RoleLocalServiceUtil.getRoleByUuidAndCompanyId(imexRole.getUuid(), companyId);
+			Role role = roleLocalService.getRoleByUuidAndCompanyId(imexRole.getUuid(), companyId);
 			
 			if (reInit) {
 				reinitAction(role);
@@ -68,12 +82,12 @@ public class ImportRolePermissionsServiceImpl implements ImportRolePermissionsSe
 	private void reinitAction(Role role) throws SystemException {
 		
 		long roleId = role.getRoleId();			
-	    List<ResourcePermission> liste = ResourcePermissionLocalServiceUtil.getRoleResourcePermissions(roleId);
+	    List<ResourcePermission> liste = resourcePermissionLocalService.getRoleResourcePermissions(roleId);
 	    
 	    for (ResourcePermission resourcePermission : liste) {
 	    	
 	    	if (resourcePermission.getScope() != ResourceConstants.SCOPE_INDIVIDUAL) {
-	    		ResourcePermissionLocalServiceUtil.deleteResourcePermission(resourcePermission);
+	    		resourcePermissionLocalService.deleteResourcePermission(resourcePermission);
 	    	}
 	    	
 	    }
@@ -104,7 +118,7 @@ public class ImportRolePermissionsServiceImpl implements ImportRolePermissionsSe
 				String[] groupIds = new String[groupNames.size()];
 				int i = 0;
 				for (String groupName : groupNames) {
-					Group group = GroupLocalServiceUtil.getGroup(companyId, groupName);
+					Group group = groupLocalService.getGroup(companyId, groupName);
 					groupIds[i] = Long.toString(group.getGroupId());
 					i++;
 				}
@@ -122,7 +136,7 @@ public class ImportRolePermissionsServiceImpl implements ImportRolePermissionsSe
 
 		boolean selected = true;
 
-		if (ResourceBlockLocalServiceUtil.isSupported(selResource)) {
+		if (resourceBlockLocalService.isSupported(selResource)) {
 
 			updateActions_6Blocks(role, selResource, actionId, selected, scope,
 					groupIds);
@@ -146,7 +160,7 @@ public class ImportRolePermissionsServiceImpl implements ImportRolePermissionsSe
 		if (selected) {
 			if (scope == ResourceConstants.SCOPE_COMPANY) {
 				try {
-					ResourcePermissionLocalServiceUtil.addResourcePermission(
+					resourcePermissionLocalService.addResourcePermission(
 						companyId, selResource, scope,
 						String.valueOf(role.getCompanyId()), roleId, actionId);
 				} catch (PrincipalException e) {
@@ -154,7 +168,7 @@ public class ImportRolePermissionsServiceImpl implements ImportRolePermissionsSe
 				}
 			}
 			else if (scope == ResourceConstants.SCOPE_GROUP_TEMPLATE) {
-				ResourcePermissionLocalServiceUtil.addResourcePermission(
+				resourcePermissionLocalService.addResourcePermission(
 					companyId, selResource,
 					ResourceConstants.SCOPE_GROUP_TEMPLATE,
 					String.valueOf(GroupConstants.DEFAULT_PARENT_GROUP_ID),
@@ -162,12 +176,12 @@ public class ImportRolePermissionsServiceImpl implements ImportRolePermissionsSe
 			}
 			else if (scope == ResourceConstants.SCOPE_GROUP) {
 					
-				ResourcePermissionLocalServiceUtil.removeResourcePermissions(
+				resourcePermissionLocalService.removeResourcePermissions(
 					companyId, selResource,
 					ResourceConstants.SCOPE_GROUP, roleId, actionId);
 				
 				for (String curGroupId : groupIds) {
-					ResourcePermissionLocalServiceUtil.addResourcePermission(
+					resourcePermissionLocalService.addResourcePermission(
 						companyId, selResource,
 						ResourceConstants.SCOPE_GROUP, curGroupId, roleId,
 						actionId);
@@ -178,15 +192,15 @@ public class ImportRolePermissionsServiceImpl implements ImportRolePermissionsSe
 
 			// Remove company, group template, and group permissions
 
-			ResourcePermissionLocalServiceUtil.removeResourcePermissions(
+			resourcePermissionLocalService.removeResourcePermissions(
 				companyId, selResource,
 				ResourceConstants.SCOPE_COMPANY, roleId, actionId);
 
-			ResourcePermissionLocalServiceUtil.removeResourcePermissions(
+			resourcePermissionLocalService.removeResourcePermissions(
 				companyId, selResource,
 				ResourceConstants.SCOPE_GROUP_TEMPLATE, roleId, actionId);
 
-			ResourcePermissionLocalServiceUtil.removeResourcePermissions(
+			resourcePermissionLocalService.removeResourcePermissions(
 				companyId, selResource, ResourceConstants.SCOPE_GROUP,
 				roleId, actionId);
 		}
@@ -202,28 +216,28 @@ public class ImportRolePermissionsServiceImpl implements ImportRolePermissionsSe
 
 		if (selected) {
 			if (scope == ResourceConstants.SCOPE_GROUP) {
-				ResourceBlockLocalServiceUtil.removeAllGroupScopePermissions(
+				resourceBlockLocalService.removeAllGroupScopePermissions(
 					 companyId, selResource, roleId, actionId);
-				ResourceBlockLocalServiceUtil.removeCompanyScopePermission(
+				resourceBlockLocalService.removeCompanyScopePermission(
 					 companyId, selResource, roleId, actionId);
 
 				for (String groupId : groupIds) {
-					ResourceBlockLocalServiceUtil.addGroupScopePermission(
+					resourceBlockLocalService.addGroupScopePermission(
 						companyId, GetterUtil.getLong(groupId),
 						selResource, roleId, actionId);
 				}
 			}
 			else {
-				ResourceBlockLocalServiceUtil.removeAllGroupScopePermissions(
+				resourceBlockLocalService.removeAllGroupScopePermissions(
 					companyId, selResource, roleId, actionId);
-				ResourceBlockLocalServiceUtil.addCompanyScopePermission(
+				resourceBlockLocalService.addCompanyScopePermission(
 					companyId, selResource, roleId, actionId);
 			}
 		}
 		else {
-			ResourceBlockLocalServiceUtil.removeAllGroupScopePermissions(
+			resourceBlockLocalService.removeAllGroupScopePermissions(
 				companyId, selResource, roleId, actionId);
-			ResourceBlockLocalServiceUtil.removeCompanyScopePermission(
+			resourceBlockLocalService.removeCompanyScopePermission(
 				companyId, selResource, roleId, actionId);
 		}
 	}

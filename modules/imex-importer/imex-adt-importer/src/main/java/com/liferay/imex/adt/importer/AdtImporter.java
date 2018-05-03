@@ -1,9 +1,9 @@
 package com.liferay.imex.adt.importer;
 
-import com.liferay.counter.kernel.service.CounterLocalServiceUtil;
+import com.liferay.counter.kernel.service.CounterLocalService;
 import com.liferay.dynamic.data.mapping.exception.NoSuchTemplateException;
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
-import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
+import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalService;
 import com.liferay.imex.adt.FileNames;
 import com.liferay.imex.adt.importer.configuration.ImExAdtImporterPropsKeys;
 import com.liferay.imex.adt.model.ImExAdt;
@@ -21,9 +21,9 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Resource;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
-import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
-import com.liferay.portal.kernel.service.ResourceLocalServiceUtil;
+import com.liferay.portal.kernel.service.ClassNameLocalService;
+import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.ResourceLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
@@ -61,6 +61,21 @@ public class AdtImporter implements Importer {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexModelPermissionSetter permissionSetter;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected DDMTemplateLocalService dDMTemplateLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ClassNameLocalService classNameLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected GroupLocalService groupLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ResourceLocalService resourceLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected CounterLocalService counterLocalService;
 
 	@Override
 	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
@@ -101,7 +116,7 @@ public class AdtImporter implements Importer {
 				
 				String groupFriendlyUrl = ImexNormalizer.getFriendlyURLByDirName(groupDir.getName());
 				
-				Group group = GroupLocalServiceUtil.fetchFriendlyURLGroup(companyId, groupFriendlyUrl);
+				Group group = groupLocalService.fetchFriendlyURLGroup(companyId, groupFriendlyUrl);
 				
 				if (group != null) {
 					
@@ -154,10 +169,10 @@ public class AdtImporter implements Importer {
 					
 					ImExAdt imexAdt = (ImExAdt)processor.read(ImExAdt.class, adtFile);
 					
-					long classNameId = ClassNameLocalServiceUtil.getClassNameId(imexAdt.getClassName());
+					long classNameId = classNameLocalService.getClassNameId(imexAdt.getClassName());
 					
 					//Liferay trap here :-) : the ressourceClassNameId is the name of the portlet. Potential problem here if the class is moved in future Liferay versions. 
-					long resourceClassNameId = ClassNameLocalServiceUtil.getClassNameId(RESOURCE_CLASSNAME);
+					long resourceClassNameId = classNameLocalService.getClassNameId(RESOURCE_CLASSNAME);
 					
 					Map<Locale, String> nameMap = LocalizationUtil.getLocalizationMap(imexAdt.getName());
 					Map<Locale, String> descriptionMap = LocalizationUtil.getLocalizationMap(imexAdt.getDescription());
@@ -177,22 +192,22 @@ public class AdtImporter implements Importer {
 					try {
 						
 						//Searching for existing template
-						template = DDMTemplateLocalServiceUtil.getDDMTemplateByUuidAndGroupId(imexAdt.getUuid(), group.getGroupId());
+						template = dDMTemplateLocalService.getDDMTemplateByUuidAndGroupId(imexAdt.getUuid(), group.getGroupId());
 						
 						long templateId = template.getTemplateId();
 						
-						DDMTemplateLocalServiceUtil.updateTemplate(userId, templateId, classPK, nameMap, descriptionMap, type, mode, language, script, cacheable, serviceContextTem);
+						dDMTemplateLocalService.updateTemplate(userId, templateId, classPK, nameMap, descriptionMap, type, mode, language, script, cacheable, serviceContextTem);
 						
 					} catch (NoSuchTemplateException e) {
 												
 						long groupId = group.getGroupId();
-						String templateKey = "imex-" + imexAdt.getKey() + "-" + CounterLocalServiceUtil.increment();
+						String templateKey = "imex-" + imexAdt.getKey() + "-" + counterLocalService.increment();
 						
 						boolean smallImage = false;
 						String smallImageURL = null;
 						File smallImageFile = null;
 						
-						template = DDMTemplateLocalServiceUtil.addTemplate(
+						template = dDMTemplateLocalService.addTemplate(
 								userId, 
 								groupId, 
 								classNameId, 
@@ -217,7 +232,7 @@ public class AdtImporter implements Importer {
 					}
 					
 					//Setting ADT permissions
-					Resource resource = ResourceLocalServiceUtil.getResource(template.getCompanyId(), DDMTemplate.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL, template.getTemplateId() + "");
+					Resource resource = resourceLocalService.getResource(template.getCompanyId(), DDMTemplate.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL, template.getTemplateId() + "");
 					permissionSetter.setPermissions(config, bundle, resource);
 					
 					

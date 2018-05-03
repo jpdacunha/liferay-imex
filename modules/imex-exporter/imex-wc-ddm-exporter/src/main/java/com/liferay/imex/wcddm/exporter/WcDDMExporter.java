@@ -3,8 +3,8 @@ package com.liferay.imex.wcddm.exporter;
 
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
-import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
-import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
+import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
+import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalService;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.util.exception.ImexException;
@@ -22,9 +22,9 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
-import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
-import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
-import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.ClassNameLocalService;
+import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.io.File;
@@ -54,6 +54,21 @@ public class WcDDMExporter implements Exporter {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexProcessor processor;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected DDMTemplateLocalService dDMTemplateLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected DDMStructureLocalService dDMStructureLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected CompanyLocalService companyLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected GroupLocalService groupLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ClassNameLocalService classNameLocalService;
 
 	@Override
 	public void doExport(Properties config, File destDir, long companyId, Locale locale, boolean debug) {
@@ -66,11 +81,11 @@ public class WcDDMExporter implements Exporter {
 		
 			try {
 				
-				Company company = CompanyLocalServiceUtil.getCompany(companyId);
+				Company company = companyLocalService.getCompany(companyId);
 				
 				File wcDdmDir = initializeWCDDMExportDirectory(destDir);
 				
-				List<Group> groups = GroupLocalServiceUtil.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+				List<Group> groups = groupLocalService.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 				
 				for (Group group : groups) {
 
@@ -112,8 +127,8 @@ public class WcDDMExporter implements Exporter {
 			
 			//String groupName = GroupUtil.getGroupName(group, locale);
 			
-			long classNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);					
-			List<DDMStructure> ddmStructures = DDMStructureLocalServiceUtil.getStructures(group.getGroupId(), classNameId);
+			long classNameId = classNameLocalService.getClassNameId(JournalArticle.class);					
+			List<DDMStructure> ddmStructures = dDMStructureLocalService.getStructures(group.getGroupId(), classNameId);
 			
 			if (ddmStructures != null && ddmStructures.size() > 0) {
 			
@@ -139,7 +154,7 @@ public class WcDDMExporter implements Exporter {
 										String groupName = GroupUtil.getGroupName(group, locale);
 										_log.info(MessageUtil.getOK(groupName, "STRUCTURE : "  + ddmStructure.getName(locale)));
 										
-										List<DDMTemplate> ddmTemplates = DDMTemplateLocalServiceUtil.getTemplatesByClassPK(ddmStructure.getGroupId(), ddmStructure.getPrimaryKey());
+										List<DDMTemplate> ddmTemplates = dDMTemplateLocalService.getTemplatesByClassPK(ddmStructure.getGroupId(), ddmStructure.getPrimaryKey());
 										
 										//Iterate over templates
 										for(DDMTemplate ddmTemplate : ddmTemplates){

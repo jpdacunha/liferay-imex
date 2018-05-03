@@ -14,8 +14,8 @@ import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
-import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
-import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,10 +31,14 @@ public class ImexModelPermissionSetterImpl implements ImexModelPermissionSetter 
 	
 	private static final Log _log = LogFactoryUtil.getLog(ImexModelPermissionSetterImpl.class);
 	
-	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexModelRolePermissionReader reader;
 	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected RoleLocalService roleLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ResourcePermissionLocalService resourcePermissionLocalService;
 	
 	public void setPermissions(Properties props, Bundle bundle, Resource resource) throws SystemException, PortalException {
 		
@@ -131,14 +135,14 @@ public class ImexModelPermissionSetterImpl implements ImexModelPermissionSetter 
 			String resourceName = resource.getName();
 			String resourcePrimKey = resource.getPrimKey();
 		
-			Role ownerRole = RoleLocalServiceUtil.getRole(companyId, RoleConstants.OWNER);			
+			Role ownerRole = roleLocalService.getRole(companyId, RoleConstants.OWNER);			
 			List<String> actions = ResourceActionsUtil.getResourceActions(resourceName);
 
 			String[] arrayActionIds = (String[])actions.toArray(new String[actions.size()]);
 			
-			ResourcePermissionLocalServiceUtil.deleteResourcePermissions(companyId, resourceName, ResourceConstants.SCOPE_INDIVIDUAL, resource.getPrimKey());
+			resourcePermissionLocalService.deleteResourcePermissions(companyId, resourceName, ResourceConstants.SCOPE_INDIVIDUAL, resource.getPrimKey());
 			
-			ResourcePermissionLocalServiceUtil.setResourcePermissions(companyId, resourceName, resource.getScope(), resourcePrimKey, ownerRole.getRoleId(), arrayActionIds);
+			resourcePermissionLocalService.setResourcePermissions(companyId, resourceName, resource.getScope(), resourcePrimKey, ownerRole.getRoleId(), arrayActionIds);
 			
 		} else {
 			_log.warn("Resource is null : execution aborted ...");
@@ -166,8 +170,8 @@ public class ImexModelPermissionSetterImpl implements ImexModelPermissionSetter 
 			List<String> actionIds = roleBatch.getActionIds();
 			String[] arrayActionIds = actionIds.toArray(new String[actionIds.size()]);
 				
-			Role role = RoleLocalServiceUtil.getRole(companyId, roleBatch.getRoleName());
-			ResourcePermissionLocalServiceUtil.setResourcePermissions(companyId, resourceName, resource.getScope(), resourcePrimKey, role.getRoleId(), arrayActionIds);
+			Role role = roleLocalService.getRole(companyId, roleBatch.getRoleName());
+			resourcePermissionLocalService.setResourcePermissions(companyId, resourceName, resource.getScope(), resourcePrimKey, role.getRoleId(), arrayActionIds);
 			
 			_log.info("     [" + roleBatch.getRoleName() + "] -> " + Arrays.toString(arrayActionIds));
 						

@@ -1,6 +1,6 @@
 package com.liferay.imex.wcddm.importer;
 
-import com.liferay.counter.kernel.service.CounterLocalServiceUtil;
+import com.liferay.counter.kernel.service.CounterLocalService;
 import com.liferay.dynamic.data.mapping.exception.NoSuchStructureException;
 import com.liferay.dynamic.data.mapping.exception.NoSuchTemplateException;
 import com.liferay.dynamic.data.mapping.io.DDMFormJSONDeserializer;
@@ -9,8 +9,8 @@ import com.liferay.dynamic.data.mapping.model.DDMFormLayout;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMStructureConstants;
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
-import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
-import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
+import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
+import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalService;
 import com.liferay.dynamic.data.mapping.util.DDM;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.processor.ImexProcessor;
@@ -28,8 +28,8 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
-import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.ClassNameLocalService;
+import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
@@ -62,6 +62,21 @@ public class WcDDMImporter implements Importer {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexProcessor processor;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected DDMTemplateLocalService dDMTemplateLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected DDMStructureLocalService dDMStructureLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected GroupLocalService groupLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ClassNameLocalService classNameLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected CounterLocalService counterLocalService;
 	
 	private DDMFormJSONDeserializer _ddmFormJSONDeserializer;
 	
@@ -106,7 +121,7 @@ public class WcDDMImporter implements Importer {
 				
 				String groupFriendlyUrl = ImexNormalizer.getFriendlyURLByDirName(groupDir.getName());
 				
-				Group group = GroupLocalServiceUtil.fetchFriendlyURLGroup(companyId, groupFriendlyUrl);
+				Group group = groupLocalService.fetchFriendlyURLGroup(companyId, groupFriendlyUrl);
 				
 				if (group != null) {
 					
@@ -171,26 +186,26 @@ public class WcDDMImporter implements Importer {
 				
 				try {
 					
-					structure = DDMStructureLocalServiceUtil.getDDMStructureByUuidAndGroupId(imexStructure.getUuid(), group.getGroupId());
+					structure = dDMStructureLocalService.getDDMStructureByUuidAndGroupId(imexStructure.getUuid(), group.getGroupId());
 					
 					long parentStructureId = structure.getParentStructureId();
 					long classNameId = structure.getClassNameId();
 					String structureKey = structure.getStructureKey();
 					
-					structure = DDMStructureLocalServiceUtil.updateStructure(userId, groupId, parentStructureId , classNameId, structureKey, nameMap, descriptionMap, ddmForm, ddmFormLayout, serviceContextStr);
+					structure = dDMStructureLocalService.updateStructure(userId, groupId, parentStructureId , classNameId, structureKey, nameMap, descriptionMap, ddmForm, ddmFormLayout, serviceContextStr);
 					
 				} catch (NoSuchStructureException e) {
 						
-					long classNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);
+					long classNameId = classNameLocalService.getClassNameId(JournalArticle.class);
 
 					long parentStructureId = DDMStructureConstants.DEFAULT_PARENT_STRUCTURE_ID;
-					String structureKey = "imex-" + imexStructure.getKey() + "-" + CounterLocalServiceUtil.increment();
+					String structureKey = "imex-" + imexStructure.getKey() + "-" + counterLocalService.increment();
 					String storageType = imexStructure.getStorageType();
 					int type = imexStructure.getStructureType();
 					//uuid is set only for creation
 					serviceContextStr.setUuid(imexStructure.getUuid());
 					
-					structure = DDMStructureLocalServiceUtil.addStructure(
+					structure = dDMStructureLocalService.addStructure(
 							userId, 
 							groupId, 
 							parentStructureId, 
@@ -266,24 +281,24 @@ public class WcDDMImporter implements Importer {
 					try {
 						
 						//Searching for existing template
-						template = DDMTemplateLocalServiceUtil.getDDMTemplateByUuidAndGroupId(imexTemplate.getUuid(), group.getGroupId());
+						template = dDMTemplateLocalService.getDDMTemplateByUuidAndGroupId(imexTemplate.getUuid(), group.getGroupId());
 						
 						long templateId = template.getTemplateId();
 						
-						DDMTemplateLocalServiceUtil.updateTemplate(userId, templateId, classPK, nameMap, descriptionMap, type, mode, language, script, cacheable, serviceContextTem);
+						dDMTemplateLocalService.updateTemplate(userId, templateId, classPK, nameMap, descriptionMap, type, mode, language, script, cacheable, serviceContextTem);
 						
 					} catch (NoSuchTemplateException e) {
 												
-						long classNameId = ClassNameLocalServiceUtil.getClassNameId(DDMStructure.class);
-						long resourceClassNameId = ClassNameLocalServiceUtil.getClassNameId(JournalArticle.class);
+						long classNameId = classNameLocalService.getClassNameId(DDMStructure.class);
+						long resourceClassNameId = classNameLocalService.getClassNameId(JournalArticle.class);
 						long groupId = group.getGroupId();
-						String templateKey = "imex-" + imexTemplate.getKey() + "-" + CounterLocalServiceUtil.increment();
+						String templateKey = "imex-" + imexTemplate.getKey() + "-" + counterLocalService.increment();
 						
 						boolean smallImage = false;
 						String smallImageURL = null;
 						File smallImageFile = null;
 						
-						template = DDMTemplateLocalServiceUtil.addTemplate(
+						template = dDMTemplateLocalService.addTemplate(
 								userId, 
 								groupId, 
 								classNameId, 

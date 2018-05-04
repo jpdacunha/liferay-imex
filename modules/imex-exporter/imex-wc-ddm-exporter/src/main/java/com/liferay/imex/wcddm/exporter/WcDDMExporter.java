@@ -7,10 +7,10 @@ import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalService;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.core.util.statics.ImexNormalizer;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.imex.wcddm.FileNames;
 import com.liferay.imex.wcddm.exporter.configuration.ImExWCDDmExporterPropsKeys;
 import com.liferay.imex.wcddm.model.ImExStructure;
@@ -69,11 +69,14 @@ public class WcDDMExporter implements Exporter {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ClassNameLocalService classNameLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
 
 	@Override
 	public void doExport(Properties config, File destDir, long companyId, Locale locale, boolean debug) {
 		
-		_log.info(MessageUtil.getStartMessage("WEBCONTENT export process"));
+		reportService.getStartMessage(_log, "WEBCONTENT export process");
 		
 		boolean enabled = GetterUtil.getBoolean(config.get(ImExWCDDmExporterPropsKeys.EXPORT_WCDDM_ENABLED));
 		
@@ -92,9 +95,9 @@ public class WcDDMExporter implements Exporter {
 					boolean isSite = group.isSite() && !group.getFriendlyURL().equals("/control_panel");
 					if (isSite) {
 						
-						_log.info(MessageUtil.getStartMessage(group, locale));
+						reportService.getStartMessage(_log, group, locale);
 						doExport(config, group, wcDdmDir, locale, debug);
-						_log.info(MessageUtil.getEndMessage(group, locale));
+						reportService.getEndMessage(_log, group, locale);
 						
 					}
 
@@ -102,22 +105,22 @@ public class WcDDMExporter implements Exporter {
 
 				// Global Scope Export
 				Group companyGroup = company.getGroup();
-				_log.info(MessageUtil.getStartMessage(companyGroup, locale));
+				reportService.getStartMessage(_log, companyGroup, locale);
 				doExport(config, companyGroup, wcDdmDir, locale, debug);
-				_log.info(MessageUtil.getEndMessage(companyGroup, locale));
+				reportService.getEndMessage(_log, companyGroup, locale);
 				
 			} catch (ImexException e) {
 				_log.error(e,e);
-				_log.error(MessageUtil.getErrorMessage(e)); 
+				reportService.getError(_log, e); 
 			} catch (PortalException e) {
 				_log.error(e,e);
 			}
 			
 		} else {
-			_log.info(MessageUtil.getDisabled("WEBCONTENT export"));
+			reportService.getDisabled(_log, "WEBCONTENT export");
 		}
 		
-		_log.info(MessageUtil.getEndMessage("WEBCONTENT export process"));
+		reportService.getEndMessage(_log, "WEBCONTENT export process");
 		
 	}
 	
@@ -152,26 +155,26 @@ public class WcDDMExporter implements Exporter {
 										processor.write(new ImExStructure(ddmStructure), structureDir, FileNames.getStructureFileName(ddmStructure, group, locale, processor.getFileExtension()));
 										
 										String groupName = GroupUtil.getGroupName(group, locale);
-										_log.info(MessageUtil.getOK(groupName, "STRUCTURE : "  + ddmStructure.getName(locale)));
+										reportService.getOK(_log, groupName, "STRUCTURE : "  + ddmStructure.getName(locale));
 										
 										List<DDMTemplate> ddmTemplates = dDMTemplateLocalService.getTemplatesByClassPK(ddmStructure.getGroupId(), ddmStructure.getPrimaryKey());
 										
 										//Iterate over templates
 										for(DDMTemplate ddmTemplate : ddmTemplates){
 											processor.write(new ImExTemplate(ddmTemplate), structureDir, FileNames.getTemplateFileName(ddmTemplate, group, locale, processor.getFileExtension()));
-											_log.info(MessageUtil.getOK(groupName, "TEMPLATE : "  + ddmTemplate.getName(locale)));
+											reportService.getOK(_log, groupName, "TEMPLATE : "  + ddmTemplate.getName(locale));
 										}
-										_log.info(MessageUtil.getSeparator());
+										reportService.getSeparator(_log);
 										
 									} catch (Exception e) {
-										_log.error(MessageUtil.getError(ddmStructure.getName(locale), e.getMessage()));
+										reportService.getError(_log, ddmStructure.getName(locale), e.getMessage());
 										if (debug) {
 											_log.error(e,e);
 										}
 									}
 							
 								} else {
-									_log.warn(MessageUtil.getDNE(structureDir.getAbsolutePath()));
+									reportService.getDNE(_log, structureDir.getAbsolutePath());
 								}
 								
 							} else {
@@ -181,7 +184,7 @@ public class WcDDMExporter implements Exporter {
 						}
 						
 					} else {
-						_log.warn(MessageUtil.getDNE(groupDir.getAbsolutePath()));
+						reportService.getDNE(_log, groupDir.getAbsolutePath());
 					}
 					
 				} else {
@@ -189,7 +192,7 @@ public class WcDDMExporter implements Exporter {
 				}
 				
 			} else {
-				_log.info(MessageUtil.getEmpty(group, locale));				
+				reportService.getEmpty(_log, group, locale);				
 			}
 			
 		} else {

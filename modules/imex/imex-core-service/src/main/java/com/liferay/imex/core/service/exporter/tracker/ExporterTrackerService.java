@@ -2,10 +2,10 @@ package com.liferay.imex.core.service.exporter.tracker;
 
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.service.model.ImexServiceReferenceMap;
 import com.liferay.imex.core.util.exception.MissingKeyException;
 import com.liferay.imex.core.util.statics.CollectionUtil;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.osgi.util.ServiceTrackerFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -19,6 +19,8 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -33,6 +35,9 @@ public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter
 	private ServiceTracker<Exporter, com.liferay.imex.core.api.exporter.Exporter> _serviceTracker;
 	
 	private ImexServiceReferenceMap<Exporter> _serviceReferences = new ImexServiceReferenceMap<Exporter>();
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
 
 	@Override
 	public Exporter addingService(ServiceReference<Exporter> serviceReference) {
@@ -98,7 +103,7 @@ public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter
 		try {
 			filteredServiceReferences = CollectionUtil.filterByKeys(bundleNames, getExporters());
 		} catch (MissingKeyException e) {
-			_log.info(MessageUtil.getMessage("There's something wrong in your syntax : " + e.getMessage()));
+			reportService.getMessage(_log, "There's something wrong in your syntax : " + e.getMessage());
 		}
 				
 		return filteredServiceReferences;

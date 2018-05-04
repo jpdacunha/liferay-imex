@@ -4,10 +4,10 @@ import com.liferay.imex.core.api.archiver.ImexArchiverService;
 import com.liferay.imex.core.api.configuration.ImExCorePropsKeys;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.identifier.ProcessIdentifier;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
+import com.liferay.imex.core.api.report.model.ImexOperationEnum;
 import com.liferay.imex.core.service.archiver.util.ZipUtils;
-import com.liferay.imex.core.util.enums.ImexOperationEnum;
 import com.liferay.imex.core.util.statics.FileUtil;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -41,7 +41,9 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexConfigurationService configurationService;
 	
-
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
+	
 	@Override
 	public void archiveData(Properties coreConfig, ProcessIdentifier processIdentifier) {
 		
@@ -76,9 +78,9 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 
 	private void archive(File toArchiveDirectory, int nbArchiveToKeep, ProcessIdentifier processIdentifier) {
 		
-		_log.info(MessageUtil.getSeparator());
-		_log.info(MessageUtil.getStartMessage("Archiving process"));
-		_log.debug(MessageUtil.getPropertyMessage("Nb archive history to keep" , nbArchiveToKeep + ""));
+		reportService.getSeparator(_log);
+		reportService.getStartMessage(_log, "Archiving process");
+		reportService.getPropertyMessage(_log, "Nb archive history to keep" , nbArchiveToKeep + "");
 		
 		if (nbArchiveToKeep > 0) {
 			
@@ -91,19 +93,19 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 						cleanup(archiveDestinationDirectory, processIdentifier, nbArchiveToKeep);
 					}
 				} else {
-					_log.debug(MessageUtil.getDNE(toArchiveDirectory));
+					reportService.getDNE(_log, toArchiveDirectory);
 				}
 				
 			} else {
-				_log.error(MessageUtil.getError(ARCHIVAGE_ERROR, "Unable to archive an invalid directory"));
+				reportService.getError(_log, ARCHIVAGE_ERROR, "Unable to archive an invalid directory");
 			}
 		
 		} else {
-			_log.debug(MessageUtil.getMessage("Archive service is currently disabled"));
+			reportService.getMessage(_log, "Archive service is currently disabled");
 		}
 		
-		_log.info(MessageUtil.getEndMessage("Archiving process"));
-		_log.info(MessageUtil.getSeparator());
+		reportService.getEndMessage(_log, "Archiving process");
+		reportService.getSeparator(_log);
 		
 	}
 	
@@ -139,15 +141,15 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 						String fileSize = FileUtil.readableFileSize(todelete.length());
 						todelete.delete();
 						if (!todelete.exists()) {
-							_log.info(MessageUtil.getOK("Deleting unused archive file", todelete.getName() + "(" + fileSize + ")", todelete, ImexOperationEnum.DELETE));
+							reportService.getOK(_log,"Deleting unused archive file", todelete.getName() + "(" + fileSize + ")", todelete, ImexOperationEnum.DELETE);
 						} else {
-							_log.error(MessageUtil.getError("Unable to delete file", todelete.getAbsolutePath()));
+							reportService.getError(_log,"Unable to delete file", todelete.getAbsolutePath());
 						}
 							
 					});
 			
 		} else {
-			_log.info(MessageUtil.getMessage("No archive files to delete"));
+			reportService.getMessage(_log, "No archive files to delete");
 		}
 		
 	}
@@ -169,19 +171,19 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 			long sizeOfDataDirectory = FileUtils.sizeOfDirectory(dataDirectory);
 			if (sizeOfDataDirectory > 0) {
 				
-				 zipUtils.zipFiles(archiveFile, dataDirectory);
+				zipUtils.zipFiles(archiveFile, dataDirectory);
 				 
-				_log.info(MessageUtil.getOK(dataDirectory.getAbsolutePath(), archiveFile.getAbsolutePath()));
+				reportService.getOK(_log, dataDirectory.getAbsolutePath(), archiveFile.getAbsolutePath());
 				long sizeOfArchiveFile = archiveFile.length();
-				_log.info(MessageUtil.getOK(FileUtil.readableFileSize(sizeOfDataDirectory) + " successfully zipped to " + FileUtil.readableFileSize(sizeOfArchiveFile)));
+				reportService.getOK(_log, FileUtil.readableFileSize(sizeOfDataDirectory) + " successfully zipped to " + FileUtil.readableFileSize(sizeOfArchiveFile));
 				
 			} else {
-				_log.info(MessageUtil.getMessage(dataDirectory.getAbsolutePath() + " is empty nothing to archive"));
+				reportService.getMessage(_log, dataDirectory.getAbsolutePath() + " is empty nothing to archive");
 			}
 			
 		} catch (IOException e) {
 			_log.error(e,e);
-			_log.error(MessageUtil.getErrorMessage(e)); 
+			reportService.getError(_log, e); 
 		}
 		
 		return (archiveFile != null && archiveFile.exists());
@@ -196,7 +198,7 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 		
 		archiveFile.mkdirs();
 		if (!archiveFile.exists()) {
-			_log.error(MessageUtil.getError(ARCHIVAGE_ERROR, "Failed to create directory " + archiveFile));
+			reportService.getError(_log, ARCHIVAGE_ERROR, "Failed to create directory " + archiveFile);
 			return null;
 		} else {
 			return archiveFile;

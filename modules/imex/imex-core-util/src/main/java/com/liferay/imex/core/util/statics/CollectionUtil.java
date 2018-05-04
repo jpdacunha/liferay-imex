@@ -1,7 +1,6 @@
 package com.liferay.imex.core.util.statics;
 
 import com.liferay.imex.core.util.exception.MissingKeyException;
-import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.util.StringPool;
 
 import java.util.ArrayList;
@@ -42,18 +41,6 @@ public class CollectionUtil {
 		}
 	
 		return filteredServiceReferences;
-		
-	}
-	
-	public static <K> void printKeys (Map<String, K> map, Log logger) {
-		
-		if (map != null && map.size() > 0) {
-			logger.info(MessageUtil.getMessage("Available keys :"));
-		}
-		
-		for (String key : map.keySet()) {
-			logger.info(MessageUtil.getMessage(key, 1));
-		}
 		
 	}
 	

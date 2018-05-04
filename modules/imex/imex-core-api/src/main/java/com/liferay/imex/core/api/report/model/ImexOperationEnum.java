@@ -1,4 +1,4 @@
-package com.liferay.imex.core.util.enums;
+package com.liferay.imex.core.api.report.model;
 
 public enum ImexOperationEnum {
 	

@@ -3,3 +3,7 @@ Bundle-Name: imex-core-service
 Bundle-SymbolicName: imex.core.service
 Bundle-Version: 1.0.0
 Export-Package: com.liferay.imex.core.api.serializer
+Import-Package: !android.*, \
+!dalvik.system.*, \
+!sun.reflect.*, \
+*

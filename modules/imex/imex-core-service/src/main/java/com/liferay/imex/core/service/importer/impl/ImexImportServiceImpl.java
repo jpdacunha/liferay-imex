@@ -6,12 +6,10 @@ import com.liferay.imex.core.api.identifier.ProcessIdentifier;
 import com.liferay.imex.core.api.importer.ImexImportService;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ImporterTracker;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.service.ImexServiceBaseImpl;
 import com.liferay.imex.core.service.importer.model.ImporterProcessIdentifier;
 import com.liferay.imex.core.util.exception.ImexException;
-import com.liferay.imex.core.util.statics.CollectionUtil;
-import com.liferay.imex.core.util.statics.ImexPropsUtil;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.imex.core.util.statics.UserUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -52,6 +50,9 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexArchiverService imexArchiverService;
 	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
+	
 	@Override
 	public void doImportAll() {
 		doImport(StringPool.BLANK);
@@ -69,11 +70,11 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 		ProcessIdentifier identifier = new ImporterProcessIdentifier();
 		String identifierStr = identifier.getUniqueIdentifier();
 				
-		_log.info(MessageUtil.getSeparator());
+		reportService.getSeparator(_log);
 		if (bundleNames != null && bundleNames.size() > 0) {			
-			_log.info(MessageUtil.getStartMessage("[" + identifierStr + "] PARTIAL import process for [" + bundleNames.toString() + "]"));
+			reportService.getStartMessage(_log, "[" + identifierStr + "] PARTIAL import process for [" + bundleNames.toString() + "]");
 		} else {
-			_log.info(MessageUtil.getStartMessage("[" + identifierStr + "] ALL import process"));
+			reportService.getStartMessage(_log, "[" + identifierStr + "] ALL import process");
 		}
 		
 		try {
@@ -82,12 +83,12 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 			
 			if (importers == null || importers.size() == 0) {
 				
-				_log.error(MessageUtil.getMessage("There is no importers to execute. Please check : "));
-				_log.error(MessageUtil.getMessage("- All importers are correctly registered in OSGI container"));
+				reportService.getMessage(_log, "There is no importers to execute. Please check : ");
+				reportService.getMessage(_log, "- All importers are correctly registered in OSGI container");
 				if (bundleNames != null) {
-					_log.error(MessageUtil.getMessage("- A registered bundle exists for each typed name [" + bundleNames + "]"));
+					reportService.getMessage(_log, "- A registered bundle exists for each typed name [" + bundleNames + "]");
 				}
-				CollectionUtil.printKeys(trackerService.getImporters(), _log);
+				reportService.printKeys(trackerService.getImporters(), _log);
 				
 			} else {
 				
@@ -96,7 +97,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 				imexArchiverService.archiveData(coreConfig, identifier);
 				
 				File importDir = getImportDirectory();
-				_log.info(MessageUtil.getPropertyMessage("IMEX import path", importDir.toString()));
+				reportService.getPropertyMessage(_log, "IMEX import path", importDir.toString());
 			
 				List<Company> companies = companyLocalService.getCompanies();
 				
@@ -119,7 +120,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 			_log.error(e,e);
 		}
 		
-		_log.info(MessageUtil.getEndMessage("import process"));
+		reportService.getEndMessage(_log, "import process");
 
 	}
 
@@ -153,12 +154,12 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 		User user = UserUtil.getDefaultAdmin(companyId);
 		
 		if (user == null) {
-			_log.info(MessageUtil.getError("Company [" + companyName + "]", "Missing omni admin user"));
+			reportService.getError(_log, "Company [" + companyName + "]", "Missing omni admin user");
 			return;
 		}
 		
-		_log.info(MessageUtil.getStartMessage("[" + companyName + "] import process"));
-		_log.info(MessageUtil.getMessage("Using user [" + user.getEmailAddress() + "] as default user"));
+		reportService.getStartMessage(_log, "[" + companyName + "] import process");
+		reportService.getMessage(_log, "Using user [" + user.getEmailAddress() + "] as default user");
 		
 		for (Map.Entry<String ,ServiceReference<Importer>> entry  : importers.entrySet()) {
 			
@@ -168,16 +169,16 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 			
 			Importer Importer = bundle.getBundleContext().getService(reference);
 			
-			_log.info(MessageUtil.getStartMessage(Importer.getProcessDescription(), 1));
+			reportService.getStartMessage(_log, Importer.getProcessDescription(), 1);
 			
 			//Loading configuration for each Importer
 			Properties config = configurationService.loadImporterAndCoreConfiguration(bundle);
 			
 			if (config == null) {
-				_log.warn(MessageUtil.getMessage(bundle, "has no defined configuration. Aborting execution ..."));
+				reportService.getMessage(_log, bundle, "has no defined configuration. Aborting execution ...");
 			}
 
-			ImexPropsUtil.displayProperties(config, bundle);
+			reportService.displayProperties(config, bundle, _log);
 			
 			try {
 				
@@ -197,11 +198,11 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 				_log.error(e,e);
 			}
 								
-			_log.info(MessageUtil.getEndMessage(Importer.getProcessDescription(), 1));
+			reportService.getEndMessage(_log, Importer.getProcessDescription(), 1);
 			
 		}
 		
-		_log.info(MessageUtil.getEndMessage("[" + companyName + "] import process"));
+		reportService.getEndMessage(_log, "[" + companyName + "] import process");
 		
 	}
 	

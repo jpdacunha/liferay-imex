@@ -14,11 +14,11 @@ import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalService;
 import com.liferay.dynamic.data.mapping.util.DDM;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.processor.ImexProcessor;
-import com.liferay.imex.core.util.enums.ImexOperationEnum;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
+import com.liferay.imex.core.api.report.model.ImexOperationEnum;
 import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.core.util.statics.ImexNormalizer;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.imex.wcddm.FileNames;
 import com.liferay.imex.wcddm.importer.configuration.ImExWCDDmImporterPropsKeys;
 import com.liferay.imex.wcddm.model.ImExStructure;
@@ -78,6 +78,9 @@ public class WcDDMImporter implements Importer {
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected CounterLocalService counterLocalService;
 	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
+	
 	private DDMFormJSONDeserializer _ddmFormJSONDeserializer;
 	
 	private DDM _ddm;
@@ -85,7 +88,7 @@ public class WcDDMImporter implements Importer {
 	@Override
 	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
 		
-		_log.info(MessageUtil.getStartMessage("Web Content DDM import process"));
+		reportService.getStartMessage(_log, "Web Content DDM import process");
 		
 		boolean enabled = GetterUtil.getBoolean(config.get(ImExWCDDmImporterPropsKeys.IMPORT_WCDDM_ENABLED));
 		
@@ -103,14 +106,14 @@ public class WcDDMImporter implements Importer {
 				
 			} catch (Exception e) {
 				_log.error(e,e);
-				_log.error(MessageUtil.getErrorMessage(e)); 
+				reportService.getError(_log, e); 
 			}
 			
 		} else {
-			_log.info(MessageUtil.getDisabled(DESCRIPTION));
+			reportService.getDisabled(_log, DESCRIPTION);
 		}
 		
-		_log.info(MessageUtil.getEndMessage("Web Content DDM import process"));		
+		reportService.getEndMessage(_log, "Web Content DDM import process");		
 	}
 	
 	private void doImport(ServiceContext serviceContext, long companyId, User user, Properties config, File groupDir, Locale locale, boolean debug) {
@@ -125,7 +128,7 @@ public class WcDDMImporter implements Importer {
 				
 				if (group != null) {
 					
-					_log.info(MessageUtil.getStartMessage(group, locale));
+					reportService.getStartMessage(_log, group, locale);
 					
 					File[] structuresDirs = FileUtil.listFiles(groupDir);
 					
@@ -135,18 +138,18 @@ public class WcDDMImporter implements Importer {
 						DDMStructure structure = doImportStructure(serviceContext, debug, group, user, locale, structureDir);
 						
 						doImportTemplate(serviceContext, debug, group, user, locale, structureDir, structure);
-						_log.info(MessageUtil.getSeparator());
+						reportService.getSeparator(_log);
 						
 					}
 					
-					_log.info(MessageUtil.getEndMessage(group, locale));
+					reportService.getEndMessage(_log, group, locale);
 					
 				} else {
-					_log.warn(MessageUtil.getDNE(groupFriendlyUrl));
+					reportService.getDNE(_log, groupFriendlyUrl);
 				}
 				
 			} else {
-				_log.warn(MessageUtil.getDNE(groupDir.getAbsolutePath()));
+				reportService.getDNE(_log, groupDir.getAbsolutePath());
 			}
 			
 			
@@ -224,17 +227,17 @@ public class WcDDMImporter implements Importer {
 				}
 				
 				String groupName = GroupUtil.getGroupName(group, locale);
-				_log.info(MessageUtil.getOK(groupName, "STRUCTURE : "  + structure.getName(locale), structureFile, operation));
+				reportService.getOK(_log, groupName, "STRUCTURE : "  + structure.getName(locale), structureFile, operation);
 				
 			}  catch (Exception e) {
-				_log.error(MessageUtil.getError(structureFile.getName(), e.getMessage()));
+				reportService.getError(_log, structureFile.getName(), e.getMessage());
 				if (debug) {
 					_log.error(e,e);
 				}
 			}
 			
 		} else {
-			_log.info(MessageUtil.getError("Wrong number of files", "[" + structureDir.getPath() + "] cannot contain more than one file matching [" + structurefileBegin + "]"));
+			reportService.getError(_log, "Wrong number of files", "[" + structureDir.getPath() + "] cannot contain more than one file matching [" + structurefileBegin + "]");
 		}
 		
 		return structure;
@@ -322,10 +325,10 @@ public class WcDDMImporter implements Importer {
 						
 					}
 					
-					_log.info(MessageUtil.getOK(groupName, "[TEMPLATE : " + template.getName(locale) + " => STRUCTURE : " + structure.getName(locale) + "]", templateFile, operation));
+					reportService.getOK(_log, groupName, "[TEMPLATE : " + template.getName(locale) + " => STRUCTURE : " + structure.getName(locale) + "]", templateFile, operation);
 					
 				} catch (Exception e) {
-					_log.error(MessageUtil.getError(templateFile.getName(), e.getMessage()));
+					reportService.getError(_log, templateFile.getName(), e.getMessage());
 					if (debug) {
 						_log.error(e,e);
 					}
@@ -333,7 +336,7 @@ public class WcDDMImporter implements Importer {
 			}
 			
 		} else {
-			_log.info(MessageUtil.getMessage("Missing templates", "No files found matching [" + templatefileBegin + "]"));
+			reportService.getMessage(_log, "Missing templates", "No files found matching [" + templatefileBegin + "]");
 		}
 		
 		return template;
@@ -347,7 +350,7 @@ public class WcDDMImporter implements Importer {
 		if (dir.exists()) {
 			return dir;
 		} else {
-			_log.warn(MessageUtil.getDNE(dir));
+			reportService.getDNE(_log, dir);
 		}
 		
 		return null;

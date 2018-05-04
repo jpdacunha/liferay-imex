@@ -5,8 +5,8 @@ import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ImporterTracker;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.util.configuration.ImExPropsValues;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -44,6 +44,9 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	private ImporterTracker importerTrackerService;
 	
 	private ExporterTracker exporterTrackerService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
 	
 	@Override
 	public Properties loadCoreConfiguration() {
@@ -209,8 +212,9 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 			props = new Properties();
 			try {
 				props.load(new FileInputStream(overrideCfgFile));
-				_log.info(MessageUtil.getMessage(bundle, "is using configuration loaded from [" + overrideCfgFile.getAbsolutePath() + "]."));
+				reportService.getMessage(_log, bundle, "is using configuration loaded from [" + overrideCfgFile.getAbsolutePath() + "].");
 			} catch (IOException e) {
+				reportService.getError(_log, "IOException", e.getMessage());
 				_log.error(e,e);
 			}
 		}
@@ -254,9 +258,9 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	    } 
 		
 		if (props != null) {
-			_log.info(MessageUtil.getMessage(bundle, "is using default configuration loaded from his embedded [" + fileName + "]."));
+			reportService.getMessage(_log, bundle, "is using default configuration loaded from his embedded [" + fileName + "].");
 		} else {
-			_log.error(MessageUtil.getMessage(bundle, "has no default configuration to loads. Make sure a [" + fileName + "] exists on your classpath."));
+			reportService.getMessage(_log, bundle, "has no default configuration to load. Make sure a [" + fileName + "] exists on your classpath.");
 		}
 		
 		return props;

@@ -1,7 +1,6 @@
 package com.liferay.imex.core.service.model;
 
 import com.liferay.imex.core.util.configuration.OSGIServicePropsKeys;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -23,11 +22,12 @@ public class ImexServiceReferenceMap<T> {
 	private static final Log _log = LogFactoryUtil.getLog(ImexServiceReferenceMap.class);
 
 	private Map<String, ServiceReference<T>> map = Collections.synchronizedMap(new TreeMap<String, ServiceReference<T>>());
+
 	
 	public synchronized ServiceReference<?> addServiceReference(ServiceReference<T> serviceReference) {
 		
 		String key = ImexServiceReferenceMap.getKey(serviceReference);
-		_log.debug(MessageUtil.getMessage("Adding [" + key + "] ..."));
+		_log.debug("Adding [" + key + "] ...");
 		return map.put(key, serviceReference);
 		
 	}
@@ -35,7 +35,7 @@ public class ImexServiceReferenceMap<T> {
 	public void removeService(ServiceReference<T> serviceReference) {
 		
 		String key = ImexServiceReferenceMap.getKey(serviceReference);
-		_log.debug(MessageUtil.getMessage("Removing [" + key + "] ..."));
+		_log.debug("Removing [" + key + "] ...");
 		map.remove(key);
 		
 	}
@@ -59,14 +59,14 @@ public class ImexServiceReferenceMap<T> {
 			if (Validator.isNotNull(priority1) && Validator.isDigit(priority1)) {
 				order1 = Integer.valueOf(priority1);
 			} else {
-				_log.error(MessageUtil.getError("Invalid property value", OSGIServicePropsKeys.IMEX_COMPONENT_EXECUTION_PRIORITY + " is invalid for " + ImexServiceReferenceMap.getKey(s1)));
+				_log.error("Invalid property value : " + OSGIServicePropsKeys.IMEX_COMPONENT_EXECUTION_PRIORITY + " is invalid for " + ImexServiceReferenceMap.getKey(s1));
 			}
 			
 			int order2 = 0;
 			if (Validator.isNotNull(priority2) && Validator.isDigit(priority2)) {
 				order2 = Integer.valueOf(priority2);
 			} else {
-				_log.error(MessageUtil.getError("Invalid property value", OSGIServicePropsKeys.IMEX_COMPONENT_EXECUTION_PRIORITY + " is invalid for " + ImexServiceReferenceMap.getKey(s2)));
+				_log.error("Invalid property value : " + OSGIServicePropsKeys.IMEX_COMPONENT_EXECUTION_PRIORITY + " is invalid for " + ImexServiceReferenceMap.getKey(s2));
 			}
 
 			return order2-order1;

@@ -6,12 +6,10 @@ import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.exporter.ImexExportService;
 import com.liferay.imex.core.api.identifier.ProcessIdentifier;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.service.ImexServiceBaseImpl;
 import com.liferay.imex.core.service.exporter.model.ExporterProcessIdentifier;
 import com.liferay.imex.core.util.exception.ImexException;
-import com.liferay.imex.core.util.statics.CollectionUtil;
-import com.liferay.imex.core.util.statics.ImexPropsUtil;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -48,6 +46,9 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexArchiverService imexArchiverService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
 
 	@Override
 	public void doExportAll() {
@@ -66,11 +67,11 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 		ProcessIdentifier identifier = new ExporterProcessIdentifier();
 		String identifierStr = identifier.getUniqueIdentifier();
 		
-		_log.info(MessageUtil.getSeparator());
+		reportService.getSeparator(_log);
 		if (bundleNames != null && bundleNames.size() > 0) {
-			_log.info(MessageUtil.getStartMessage("[" + identifierStr + "] PARTIAL export process for [" + bundleNames.toString() + "]"));
+			reportService.getStartMessage(_log, "[" + identifierStr + "] PARTIAL export process for [" + bundleNames.toString() + "]");
 		} else {
-			_log.info(MessageUtil.getStartMessage("[" + identifierStr + "] ALL export process"));
+			reportService.getStartMessage(_log, "[" + identifierStr + "] ALL export process");
 		}
 		
 		try {
@@ -79,12 +80,12 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			
 			if (exporters == null || exporters.size() == 0) {
 				
-				_log.error(MessageUtil.getMessage("There is no exporters to execute. Please check : "));
-				_log.error(MessageUtil.getMessage("- All importers are correctly registered in OSGI container"));
+				reportService.getMessage(_log, "There is no exporters to execute. Please check : ");
+				reportService.getMessage(_log, "- All importers are correctly registered in OSGI container");
 				if (bundleNames != null) {
-					_log.error(MessageUtil.getMessage("- A registered bundle exists for each typed name [" + bundleNames + "]"));
+					reportService.getMessage(_log, "- A registered bundle exists for each typed name [" + bundleNames + "]");
 				}
-				CollectionUtil.printKeys(trackerService.getExporters(), _log);
+				reportService.printKeys(trackerService.getExporters(), _log);
 				
 			} else {
 				
@@ -94,13 +95,13 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 				
 				File exportDir = initializeExportDirectory();
 				
-				_log.info(MessageUtil.getPropertyMessage("IMEX export path", exportDir.toString()));
+				reportService.getPropertyMessage(_log, "IMEX export path", exportDir.toString());
 				
 				List<Company> companies = companyLocalService.getCompanies();
 				
 				for (Company company : companies) {
 					
-					_log.info(MessageUtil.getStartMessage(company));
+					reportService.getStartMessage(_log, company);
 					
 					long companyId = company.getCompanyId();
 					
@@ -116,7 +117,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			_log.error(e,e);
 		}
 		
-		_log.info(MessageUtil.getEndMessage("[" + identifierStr + "] export process"));
+		reportService.getEndMessage(_log, "[" + identifierStr + "] export process");
 
 	}
 
@@ -161,16 +162,16 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			
 			Exporter exporter = bundle.getBundleContext().getService(reference);
 			
-			_log.info(MessageUtil.getStartMessage(exporter.getProcessDescription(), 1));
+			reportService.getStartMessage(_log, exporter.getProcessDescription(), 1);
 			
 			//Loading configuration for each exporter
 			Properties config = configurationService.loadExporterAndCoreConfiguration(bundle);
 			
 			if (config == null) {
-				_log.warn(MessageUtil.getMessage(bundle, "has no defined configuration. Aborting execution ..."));
+				reportService.getMessage(_log, bundle, "has no defined configuration. Aborting execution ...");
 			}
 			
-			ImexPropsUtil.displayProperties(config, bundle);
+			reportService.displayProperties(config, bundle, _log);
 		
 			try {
 				Company company = companyLocalService.getCompany(companyId);
@@ -179,7 +180,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 				_log.error(e,e);
 			}
 												
-			_log.info(MessageUtil.getEndMessage(exporter.getProcessDescription(), 1));
+			reportService.getEndMessage(_log, exporter.getProcessDescription(), 1);
 			
 		}
 

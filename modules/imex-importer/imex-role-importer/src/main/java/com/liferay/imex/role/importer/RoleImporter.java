@@ -2,9 +2,9 @@ package com.liferay.imex.role.importer;
 
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.processor.ImexProcessor;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.imex.core.util.statics.ImexPropsUtil;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.imex.role.FileNames;
 import com.liferay.imex.role.importer.configuration.ImExRoleImporterPropsKeys;
 import com.liferay.imex.role.importer.service.ImportRolePermissionsService;
@@ -49,11 +49,14 @@ public class RoleImporter implements Importer {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImportRolePermissionsService importPermissionService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
 
 	@Override
 	public void doImport(Bundle bundle, ServiceContext serviceContex, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
 		
-		_log.info(MessageUtil.getStartMessage("ROLE import process"));
+		reportService.getStartMessage(_log, "ROLE import process");
 		
 		boolean enabled = GetterUtil.getBoolean(config.get(ImExRoleImporterPropsKeys.IMPORT_ROLE_ENABLED));
 		
@@ -71,14 +74,14 @@ public class RoleImporter implements Importer {
 				
 			} catch (Exception e) {
 				_log.error(e,e);
-				_log.error(MessageUtil.getErrorMessage(e)); 
+				reportService.getError(_log, e); 
 			}
 			
 		} else {
-			_log.info(MessageUtil.getDisabled("ROLE import"));
+			reportService.getDisabled(_log, "ROLE import");
 		}
 		
-		_log.info(MessageUtil.getEndMessage("ROLE import process"));
+		reportService.getEndMessage(_log, "ROLE import process");
 		
 	}
 	
@@ -111,29 +114,29 @@ public class RoleImporter implements Importer {
 								RolePermissions rolePermissions = (RolePermissions)processor.read(RolePermissions.class, roleDir, FileNames.ROLE_PERMISSION_FILENAME + processor.getFileExtension());
 								importPermissionService.updateRolePermissions(companyId, imexRole, rolePermissions, reInitPermissions);
 							} else {
-								_log.warn(MessageUtil.getDNE(rolePermissionFile.getAbsolutePath()));
+								reportService.getDNE(_log, rolePermissionFile.getAbsolutePath());
 							}
 							
-							_log.info(MessageUtil.getOK(imexRole.getName()));
+							reportService.getOK(_log, imexRole.getName());
 							
 						} else {
-							_log.warn(MessageUtil.getDNE(roleFile.getAbsolutePath()));
+							reportService.getDNE(_log, roleFile.getAbsolutePath());
 						}
 						
 						
 					} catch (Exception e) {
-						_log.error(MessageUtil.getError(roleName, e.getMessage()));
+						reportService.getError(_log, roleName, e.getMessage());
 						if (debug) {
 							_log.error(e,e);
 						}
 					}
 					
 				} else {
-					_log.info(MessageUtil.getSkipped(roleName));
+					reportService.getSkipped(_log, roleName);
 				}
 				
 			} else {
-				_log.warn(MessageUtil.getDNE(roleDir.getAbsolutePath()));
+				reportService.getDNE(_log, roleDir.getAbsolutePath());
 			}
 			
 			
@@ -150,7 +153,7 @@ public class RoleImporter implements Importer {
 		if (rolesDir.exists()) {
 			return rolesDir;
 		} else {
-			_log.warn(MessageUtil.getDNE(rolesDir));
+			reportService.getDNE(_log, rolesDir);
 		}
 		
 		return null;

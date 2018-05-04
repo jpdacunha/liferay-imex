@@ -4,7 +4,6 @@ import com.liferay.imex.core.api.configuration.ImExCorePropsKeys;
 import com.liferay.imex.core.api.permission.ImexModelRolePermissionReader;
 import com.liferay.imex.core.api.permission.model.ModelRolePermissionBatch;
 import com.liferay.imex.core.util.statics.CollectionUtil;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
@@ -103,7 +102,7 @@ public class ImexPropertiesModelRolePermissionReaderImpl implements ImexModelRol
 				batch = new ModelRolePermissionBatch(roleName, actions);
 				
 			} else {
-				_log.warn(MessageUtil.getMessage("No rule defined for role:[" + roleName + "], key:[" + key + "]"));
+				_log.warn("No rule defined for role:[" + roleName + "], key:[" + key + "]");
 			}
 				
 		}

@@ -1,6 +1,6 @@
 package com.liferay.imex.role.importer.service.impl;
 
-import com.liferay.imex.core.util.statics.MessageUtil;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.role.importer.service.ImportRoleService;
 import com.liferay.imex.role.model.ImexRole;
 import com.liferay.portal.kernel.exception.DuplicateRoleException;
@@ -31,6 +31,9 @@ public class ImportRoleServiceImpl implements ImportRoleService {
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected RoleLocalService roleLocalService;
 	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
+	
 	public Role importRole(long companyId, User user, ImexRole imexRole) throws PortalException {
 	
 		Role role = null;
@@ -50,7 +53,7 @@ public class ImportRoleServiceImpl implements ImportRoleService {
 						
 						role.setName(imexRole.getName());
 						roleLocalService.updateRole(role);
-						_log.info(MessageUtil.getOK("[" + imexRole.getName() + ", uuid = " + role.getUuid() + " ]"));
+						reportService.getOK(_log, "[" + imexRole.getName() + ", uuid = " + role.getUuid() + " ]");
 						
 					}
 				}
@@ -62,7 +65,7 @@ public class ImportRoleServiceImpl implements ImportRoleService {
 
 		} catch (NoSuchRoleException e) {
 			
-			_log.info(MessageUtil.getDNE(imexRole.getName()));
+			reportService.getDNE(_log, imexRole.getName());
 			
 			//Initialisation des titres
 			Map<java.util.Locale, String> titleMap = new HashMap<Locale, String>();
@@ -77,7 +80,7 @@ public class ImportRoleServiceImpl implements ImportRoleService {
 			try {
 				
 				role = roleLocalService.addRole(user.getUserId(), null, 0, imexRole.getName(), titleMap, descriptionMap, imexRole.getRoleType().getIntValue(), null, serviceContext);
-				_log.info(MessageUtil.getCreate(imexRole.getName()));
+				reportService.getCreate(_log, imexRole.getName());
 				
 			} catch (DuplicateRoleException ex) { 
 				
@@ -86,7 +89,7 @@ public class ImportRoleServiceImpl implements ImportRoleService {
 				role.setUuid(imexRole.getUuid());
 				roleLocalService.updateRole(role);
 				
-				_log.info(MessageUtil.getUpdate(imexRole.getName() + ", uuid = " + role.getUuid()));
+				reportService.getUpdate(_log, imexRole.getName() + ", uuid = " + role.getUuid());
 				
 			}
 			

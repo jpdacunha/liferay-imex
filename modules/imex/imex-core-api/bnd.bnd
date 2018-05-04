@@ -10,4 +10,7 @@ Export-Package: \
 	com.liferay.imex.core.api.configuration,\
 	com.liferay.imex.core.api.identifier,\
 	com.liferay.imex.core.api.permission,\
-	com.liferay.imex.core.api.permission.model
+	com.liferay.imex.core.api.permission.model,\
+	com.liferay.imex.core.api.report.model,\
+	com.liferay.imex.core.api.report,\
+	com.liferay.imex.core.api.configuration.model

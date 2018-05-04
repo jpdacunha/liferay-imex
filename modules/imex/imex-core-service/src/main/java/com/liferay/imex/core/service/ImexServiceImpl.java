@@ -4,8 +4,8 @@ import com.liferay.imex.core.api.ImexService;
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.identifier.ProcessIdentifier;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.service.configuration.model.ConfigurationOverrideProcessIdentifier;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
@@ -33,6 +33,9 @@ public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService 
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexConfigurationService configurationService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
 	
 	@Override
 	public void generateOverrideFileSystemConfigurationFiles() {
@@ -83,11 +86,11 @@ public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService 
 					    }
 						
 					} else {
-						_log.warn(MessageUtil.getMessage("Keeping existing file [" +  propsFile.getAbsolutePath() + "]"));
+						reportService.getMessage(_log, "Keeping existing file [" +  propsFile.getAbsolutePath() + "]");
 					}
 					
 				} else {
-					_log.warn(MessageUtil.getEmpty(entry.getKey()));
+					reportService.getEmpty(_log, entry.getKey());
 				}	
 			
 			}

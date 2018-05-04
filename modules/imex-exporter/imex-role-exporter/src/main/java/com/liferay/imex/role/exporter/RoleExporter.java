@@ -2,9 +2,9 @@ package com.liferay.imex.role.exporter;
 
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.ImexPropsUtil;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.imex.role.FileNames;
 import com.liferay.imex.role.exporter.configuration.ImExRoleExporterPropsKeys;
 import com.liferay.imex.role.exporter.service.ExportRolePermissionsService;
@@ -51,11 +51,14 @@ public class RoleExporter implements Exporter {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ExportRolePermissionsService rolePermissionServive;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
 
 	@Override
 	public void doExport(Properties config, File destDir, long companyId, Locale locale, boolean debug) {
 		
-		_log.info(MessageUtil.getStartMessage("ROLE export process"));
+		reportService.getStartMessage(_log, "ROLE export process");
 		
 		boolean enabled = GetterUtil.getBoolean(config.get(ImExRoleExporterPropsKeys.EXPORT_ROLE_ENABLED));
 		
@@ -72,14 +75,14 @@ public class RoleExporter implements Exporter {
 				
 			} catch (ImexException e) {
 				_log.error(e,e);
-				_log.error(MessageUtil.getErrorMessage(e)); 
+				reportService.getError(_log, e); 
 			}
 			
 		} else {
-			_log.info(MessageUtil.getDisabled("ROLE export"));
+			reportService.getDisabled(_log, "ROLE export");
 		}
 		
-		_log.info(MessageUtil.getEndMessage("ROLE export process"));
+		reportService.getEndMessage(_log, "ROLE export process");
 		
 	}
 	
@@ -116,17 +119,17 @@ public class RoleExporter implements Exporter {
 							RolePermissions source =  rolePermissionServive.getRolePermissions(companyId, roleId);
 							processor.write(source, roleDir, FileNames.ROLE_PERMISSION_FILENAME + processor.getFileExtension());
 							
-							_log.info(MessageUtil.getOK(role.getName()));
+							reportService.getOK(_log, role.getName());
 						
 						} catch (Exception e) {
-							_log.error(MessageUtil.getError(role.getName(), e.getMessage()));
+							reportService.getError(_log, role.getName(), e.getMessage());
 							if (debug) {
-							_log.error(e,e);
+								_log.error(e,e);
 							}
 						}
 						
 					} else {
-						_log.warn(MessageUtil.getDNE(roleDir.getAbsolutePath()));
+						reportService.getDNE(_log, roleDir.getAbsolutePath());
 					}
 					
 				} else {
@@ -134,7 +137,7 @@ public class RoleExporter implements Exporter {
 				}
 				
 			} else {
-				_log.info(MessageUtil.getSkipped(role.getName()));
+				reportService.getSkipped(_log, role.getName());
 			}
 			
 		} else {

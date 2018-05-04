@@ -8,11 +8,11 @@ import com.liferay.imex.adt.exporter.configuration.ImExWCDDmExporterPropsKeys;
 import com.liferay.imex.adt.model.ImExAdt;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.core.util.statics.ImexNormalizer;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -67,11 +67,14 @@ public class AdtExporter implements Exporter {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ClassNameLocalService classNameLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
 
 	@Override
 	public void doExport(Properties config, File destDir, long companyId, Locale locale, boolean debug) {
 		
-		_log.info(MessageUtil.getStartMessage("ADT export process"));
+		reportService.getStartMessage(_log, "ADT export process");
 		
 		boolean enabled = GetterUtil.getBoolean(config.get(ImExWCDDmExporterPropsKeys.EXPORT_ADT_ENABLED));
 		
@@ -92,7 +95,7 @@ public class AdtExporter implements Exporter {
 					
 					for (Group group : groups) {
 						
-						_log.info(MessageUtil.getStartMessage(group, locale));
+						reportService.getStartMessage(_log, group, locale);
 						for (String classType : types) {
 							
 							boolean isSite = group.isSite() && !group.getFriendlyURL().equals("/control_panel");
@@ -103,36 +106,36 @@ public class AdtExporter implements Exporter {
 							}
 							
 						}
-						_log.info(MessageUtil.getEndMessage(group, locale));
+						reportService.getEndMessage(_log, group, locale);
 
 					}
 
 					// Global Scope Export
 					Group companyGroup = company.getGroup();
-					_log.info(MessageUtil.getStartMessage(companyGroup, locale));
+					reportService.getStartMessage(_log, companyGroup, locale);
 
 					for (String classType : types) {			
 						doExport(config, companyGroup, adtDir, locale, debug, classType);	
 					}
 					
-					_log.info(MessageUtil.getEndMessage(companyGroup, locale));
+					reportService.getEndMessage(_log, companyGroup, locale);
 					
 				} catch (ImexException e) {
 					_log.error(e,e);
-					_log.error(MessageUtil.getErrorMessage(e)); 
+					reportService.getError(_log, e);
 				} catch (PortalException e) {
 					_log.error(e,e);
 				}
 				
 			} else {
-				_log.info(MessageUtil.getMessage("No configured types to export"));
+				reportService.getMessage(_log, "No configured types to export");
 			}
 			
 		} else {
-			_log.info(MessageUtil.getDisabled(DESCRIPTION));
+			reportService.getDisabled(_log, DESCRIPTION);
 		}
 		
-		_log.info(MessageUtil.getEndMessage("ADT export process"));
+		reportService.getEndMessage(_log, "ADT export process");
 		
 	}
 	
@@ -165,17 +168,17 @@ public class AdtExporter implements Exporter {
 										String groupName = GroupUtil.getGroupName(group, locale);
 										
 										processor.write(new ImExAdt(ddmTemplate, classType), adtDir, FileNames.getAdtFileName(ddmTemplate, group, locale, processor.getFileExtension()));
-										_log.info(MessageUtil.getOK(groupName, "ADT : "  + ddmTemplate.getName(locale) + ", type : " + classType));
+										reportService.getOK(_log, groupName, "ADT : "  + ddmTemplate.getName(locale) + ", type : " + classType);
 										
 									} catch (Exception e) {
-										_log.error(MessageUtil.getError(ddmTemplate.getName(locale), e.getMessage()));
+										reportService.getError(_log, ddmTemplate.getName(locale), e.getMessage());
 										if (debug) {
 											_log.error(e,e);
 										}
 									}
 							
 								} else {
-									_log.warn(MessageUtil.getDNE(adtDir.getAbsolutePath()));
+									reportService.getDNE(_log, adtDir.getAbsolutePath());
 								}
 								
 							} else {
@@ -185,7 +188,7 @@ public class AdtExporter implements Exporter {
 						}
 						
 					} else {
-						_log.warn(MessageUtil.getDNE(groupDir.getAbsolutePath()));
+						reportService.getDNE(_log, groupDir.getAbsolutePath());
 					}
 					
 				} else {
@@ -193,7 +196,7 @@ public class AdtExporter implements Exporter {
 				}
 				
 			} else {
-				_log.info(MessageUtil.getEmpty(group, locale, classType));				
+				reportService.getEmpty(_log, group, locale, classType);				
 			}
 			
 		} else {

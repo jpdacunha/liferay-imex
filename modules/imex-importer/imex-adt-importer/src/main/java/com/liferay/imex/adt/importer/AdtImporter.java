@@ -10,11 +10,11 @@ import com.liferay.imex.adt.model.ImExAdt;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.permission.ImexModelPermissionSetter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
-import com.liferay.imex.core.util.enums.ImexOperationEnum;
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
+import com.liferay.imex.core.api.report.model.ImexOperationEnum;
 import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.core.util.statics.ImexNormalizer;
-import com.liferay.imex.core.util.statics.MessageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
@@ -76,11 +76,14 @@ public class AdtImporter implements Importer {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected CounterLocalService counterLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
 
 	@Override
 	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
 		
-		_log.info(MessageUtil.getStartMessage("ADT import process"));
+		reportService.getStartMessage(_log, "ADT import process");
 		
 		boolean enabled = GetterUtil.getBoolean(config.get(ImExAdtImporterPropsKeys.IMPORT_ADT_ENABLED));
 		
@@ -98,14 +101,14 @@ public class AdtImporter implements Importer {
 				
 			} catch (Exception e) {
 				_log.error(e,e);
-				_log.error(MessageUtil.getErrorMessage(e)); 
+				reportService.getError(_log, e); 
 			}
 			
 		} else {
-			_log.info(MessageUtil.getDisabled(DESCRIPTION));
+			reportService.getDisabled(_log, DESCRIPTION);
 		}
 		
-		_log.info(MessageUtil.getEndMessage("ADT import process"));		
+		reportService.getEndMessage(_log, "ADT import process");		
 	}
 	
 	private void doImport(Bundle bundle, ServiceContext serviceContext, long companyId, User user, Properties config, File groupDir, Locale locale, boolean debug) {
@@ -120,7 +123,7 @@ public class AdtImporter implements Importer {
 				
 				if (group != null) {
 					
-					_log.info(MessageUtil.getStartMessage(group, locale));
+					reportService.getStartMessage(_log, group, locale);
 					
 					File[] adtsDirs = FileUtil.listFiles(groupDir);
 					
@@ -128,18 +131,18 @@ public class AdtImporter implements Importer {
 					for (File adtDir : adtsDirs) {
 						
 						doImportAdt(bundle, serviceContext, debug, group, user, locale, adtDir, config);
-						_log.info(MessageUtil.getSeparator());
+						reportService.getSeparator(_log);
 						
 					}
 					
-					_log.info(MessageUtil.getEndMessage(group, locale));
+					reportService.getEndMessage(_log, group, locale);
 					
 				} else {
-					_log.warn(MessageUtil.getDNE(groupFriendlyUrl));
+					reportService.getDNE(_log, groupFriendlyUrl);
 				}
 				
 			} else {
-				_log.warn(MessageUtil.getDNE(groupDir.getAbsolutePath()));
+				reportService.getDNE(_log, groupDir.getAbsolutePath());
 			}
 			
 			
@@ -236,10 +239,10 @@ public class AdtImporter implements Importer {
 					permissionSetter.setPermissions(config, bundle, resource);
 					
 					
-					_log.info(MessageUtil.getOK(groupName, "ADT : "  + template.getName(locale), adtFile, operation));
+					reportService.getOK(_log, groupName, "ADT : "  + template.getName(locale), adtFile, operation);
 				
 				}  catch (Exception e) {
-					_log.error(MessageUtil.getError(adtFile.getName(), e.getMessage()));
+					reportService.getError(_log, adtFile.getName(), e.getMessage());
 					if (debug) {
 						_log.error(e,e);
 					}
@@ -248,7 +251,7 @@ public class AdtImporter implements Importer {
 			}
 			
 		} else {
-			_log.info(MessageUtil.getMessage("Missing templates", "No files found matching [" + adtfileBegin + "]"));
+			reportService.getMessage(_log, "Missing templates", "No files found matching [" + adtfileBegin + "]");
 		}
 
 		return template;
@@ -262,7 +265,7 @@ public class AdtImporter implements Importer {
 		if (dir.exists()) {
 			return dir;
 		} else {
-			_log.warn(MessageUtil.getDNE(dir));
+			reportService.getDNE(_log, dir);
 		}
 		
 		return null;

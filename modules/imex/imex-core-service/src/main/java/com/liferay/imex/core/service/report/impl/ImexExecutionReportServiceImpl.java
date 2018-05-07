@@ -1,5 +1,6 @@
 package com.liferay.imex.core.service.report.impl;
 
+import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.api.report.model.ImexOperationEnum;
 import com.liferay.imex.core.util.statics.ReportMessageUtil;
@@ -7,6 +8,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.util.Locale;
@@ -137,7 +139,7 @@ public class ImexExecutionReportServiceImpl extends BaseExecutionReportServiceIm
 		getEndMessage(logger, description, 0);
 	}	
 	
-	/* Collections */
+	/* Collections / Properties */
 	public <K> void printKeys (Map<String, K> map, Log logger) {
 		
 		if (map != null && map.size() > 0) {
@@ -165,6 +167,28 @@ public class ImexExecutionReportServiceImpl extends BaseExecutionReportServiceIm
 			
 		} 
 	                               
+	}
+	
+	public void displayConfigurationLoadingInformation(ImexProperties properties, Log log) {
+		displayConfigurationLoadingInformation(properties, log, null);
+	}
+	
+	public void displayConfigurationLoadingInformation(ImexProperties properties, Log log, Bundle bundle) {
+		
+		if (properties != null) {
+			
+			if (properties.isDefaulConfiguration()) {
+				getMessage(_log, bundle, "is using default configuration loaded from his embedded [" + properties.getPath() + "].");
+			} else if (Validator.isNotNull(properties.getPath())) {
+				getMessage(_log, bundle, "is using configuration loaded from [" + properties.getPath() + "].");
+			} else {
+				getError(_log, "Configuration error", "Configuration is not properly loaded");
+			}
+			
+		} else {
+			getMessage(log, "Properties are null : no properties to print");
+		}
+		
 	}
 
 }

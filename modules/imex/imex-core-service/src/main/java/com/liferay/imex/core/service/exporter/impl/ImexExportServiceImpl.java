@@ -2,6 +2,7 @@ package com.liferay.imex.core.service.exporter.impl;
 
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
+import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.exporter.ImexExportService;
@@ -22,7 +23,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -90,8 +90,9 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			} else {
 				
 				//Archive actual files before importing
-				Properties coreConfig = configurationService.loadCoreConfiguration();
-				imexArchiverService.archiveData(coreConfig, identifier);
+				ImexProperties coreConfig = configurationService.loadCoreConfiguration();
+				reportService.displayConfigurationLoadingInformation(coreConfig, _log);
+				imexArchiverService.archiveData(coreConfig.getProperties(), identifier);
 				
 				File exportDir = initializeExportDirectory();
 				
@@ -148,6 +149,14 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			throw new ImexException("Failed to create directory " + exportFile);
 		}
 		
+		String logsDirPath = configurationService.getImexLogsPath();
+		
+		File logsDir = new File(logsDirPath);
+		logsDir.mkdirs();
+		if (!logsDir.exists()) {
+			throw new ImexException("Failed to create directory " + logsDir);
+		}		
+		
 		return exportFile;
 			
 	}
@@ -165,17 +174,18 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			reportService.getStartMessage(_log, exporter.getProcessDescription(), 1);
 			
 			//Loading configuration for each exporter
-			Properties config = configurationService.loadExporterAndCoreConfiguration(bundle);
+			ImexProperties config = configurationService.loadExporterAndCoreConfiguration(bundle);
+			reportService.displayConfigurationLoadingInformation(config, _log, bundle);
 			
 			if (config == null) {
 				reportService.getMessage(_log, bundle, "has no defined configuration. Aborting execution ...");
 			}
 			
-			reportService.displayProperties(config, bundle, _log);
+			reportService.displayProperties(config.getProperties(), bundle, _log);
 		
 			try {
 				Company company = companyLocalService.getCompany(companyId);
-				exporter.doExport(config, destDir, companyId, company.getLocale(), true);
+				exporter.doExport(config.getProperties(), destDir, companyId, company.getLocale(), true);
 			} catch (PortalException e) {
 				_log.error(e,e);
 			}

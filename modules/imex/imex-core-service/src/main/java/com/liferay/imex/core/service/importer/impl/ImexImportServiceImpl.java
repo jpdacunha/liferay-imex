@@ -2,6 +2,7 @@ package com.liferay.imex.core.service.importer.impl;
 
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
+import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.identifier.ProcessIdentifier;
 import com.liferay.imex.core.api.importer.ImexImportService;
 import com.liferay.imex.core.api.importer.Importer;
@@ -25,7 +26,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -93,8 +93,9 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 			} else {
 				
 				//Archive actual files before importing
-				Properties coreConfig = configurationService.loadCoreConfiguration();
-				imexArchiverService.archiveData(coreConfig, identifier);
+				ImexProperties coreConfig = configurationService.loadCoreConfiguration();
+				reportService.displayConfigurationLoadingInformation(coreConfig, _log);
+				imexArchiverService.archiveData(coreConfig.getProperties(), identifier);
 				
 				File importDir = getImportDirectory();
 				reportService.getPropertyMessage(_log, "IMEX import path", importDir.toString());
@@ -172,13 +173,14 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 			reportService.getStartMessage(_log, Importer.getProcessDescription(), 1);
 			
 			//Loading configuration for each Importer
-			Properties config = configurationService.loadImporterAndCoreConfiguration(bundle);
+			ImexProperties config = configurationService.loadImporterAndCoreConfiguration(bundle);
+			reportService.displayConfigurationLoadingInformation(config, _log, bundle);
 			
 			if (config == null) {
 				reportService.getMessage(_log, bundle, "has no defined configuration. Aborting execution ...");
 			}
 
-			reportService.displayProperties(config, bundle, _log);
+			reportService.displayProperties(config.getProperties(), bundle, _log);
 			
 			try {
 				
@@ -192,7 +194,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 					serviceContext.setSignedIn(!user.isDefaultUser());
 				}
 				
-				Importer.doImport(bundle, serviceContext, user, config, companyDir, companyId, company.getLocale(), true);
+				Importer.doImport(bundle, serviceContext, user, config.getProperties(), companyDir, companyId, company.getLocale(), true);
 				
 			} catch (PortalException e) {
 				_log.error(e,e);

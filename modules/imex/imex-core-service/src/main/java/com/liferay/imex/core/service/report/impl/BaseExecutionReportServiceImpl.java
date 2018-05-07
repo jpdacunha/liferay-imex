@@ -1,15 +1,18 @@
 package com.liferay.imex.core.service.report.impl;
 
+import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.util.statics.ReportMessageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Level;
 import org.pmw.tinylog.Logger;
-import org.pmw.tinylog.writers.FileWriter;
+import org.pmw.tinylog.writers.RollingFileWriter;
 
 public class BaseExecutionReportServiceImpl {
 	
@@ -18,16 +21,20 @@ public class BaseExecutionReportServiceImpl {
 	private Configurator configurator;
 	
 	protected final static String PREFIX = "[IMEX] : ";
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexConfigurationService configurationService;
 		
+	public Configurator getConfigurator() {
+		return configurator;
+	}
+
+	public void setConfigurator(Configurator configurator) {
+		this.configurator = configurator;
+	}
+
 	public BaseExecutionReportServiceImpl() {
 		super();
-		//TODO : JDA externalize path configuration
-		_log.info("Create logger configurator ...");
-		configurator = Configurator.defaultConfig();
-		configurator.level(Level.DEBUG);
-		configurator.addWriter(new FileWriter("/home/dev/devdemo/liferay/deploy/imex/logs/imex.log"));
-		configurator.activate();
-		_log.info("Done");
 	}
 	
 	public void getSeparator(Log logger) {
@@ -102,8 +109,38 @@ public class BaseExecutionReportServiceImpl {
 		
 	}
 	
+	private synchronized void initializeLogger() {
+		
+		if (configurator == null) {
+			
+			_log.info("Initializing logger ...");
+			
+			configurator = Configurator.defaultConfig();
+			configurator.level(Level.DEBUG);
+			
+			String logsPath = configurationService.getImexLogsPath();
+			
+			RollingFileWriter writer = new RollingFileWriter(logsPath + "/imex.log", 3);
+			
+			//TODO : JDA implement my own writer (http://www.tinylog.org/extend)
+			
+			//writer.init(configuration);
+			
+			//configurator.addWriter(new FileWriter(logsPath + "/imex.log"));
+			
+			configurator.addWriter(writer);
+			
+			configurator.activate();
+			
+			_log.info("Done.");
+			
+		}
+		
+	}
 	
 	private void imexLog(Log logger, String toLog) {
+		
+		initializeLogger();
 		
 		if (logger != null) {
 			

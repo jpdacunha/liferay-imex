@@ -3,6 +3,7 @@ package com.liferay.imex.core.service;
 import com.liferay.imex.core.api.ImexService;
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
+import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.identifier.ProcessIdentifier;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.service.configuration.model.ConfigurationOverrideProcessIdentifier;
@@ -56,8 +57,8 @@ public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService 
 			
 			if (archive) {
 				
-				Properties coreConfig = configurationService.loadCoreConfiguration();
-				imexArchiverService.archiveCfg(coreConfig, processIdentifier);
+				ImexProperties coreConfig = configurationService.loadCoreConfiguration();
+				imexArchiverService.archiveCfg(coreConfig.getProperties(), processIdentifier);
 				
 			}
 			

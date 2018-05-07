@@ -1,5 +1,7 @@
 package com.liferay.imex.core.api.configuration;
 
+import com.liferay.imex.core.api.configuration.model.ImexProperties;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +12,11 @@ import org.osgi.framework.Bundle;
 
 public interface ImexConfigurationService {
 	
-	public Properties loadExporterConfiguration(Bundle bundle);
+	public ImexProperties loadExporterConfiguration(Bundle bundle);
 	
-	public Properties loadImporterConfiguration(Bundle bundle);
+	public ImexProperties loadImporterConfiguration(Bundle bundle);
 	
-	public Properties loadCoreConfiguration();
+	public ImexProperties loadCoreConfiguration();
 	
 	public String getImexPath();
 	
@@ -24,14 +26,16 @@ public interface ImexConfigurationService {
 	
 	public String getImexCfgOverridePath();
 	
+	public String getImexLogsPath();
+	
 	public Map<String,Properties> loadAllConfigurationMap(List<String> bundleNames);
 
 	public File getConfigurationOverrideFileName(Bundle bundle);
 
 	public File getConfigurationOverrideFileName(Entry<String, Properties> entry);
 
-	public Properties loadExporterAndCoreConfiguration(Bundle bundle);
+	public ImexProperties loadExporterAndCoreConfiguration(Bundle bundle);
 	
-	public Properties loadImporterAndCoreConfiguration(Bundle bundle);
+	public ImexProperties loadImporterAndCoreConfiguration(Bundle bundle);
 	
 }

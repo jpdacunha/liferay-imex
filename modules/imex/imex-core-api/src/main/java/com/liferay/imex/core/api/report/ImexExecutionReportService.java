@@ -1,5 +1,6 @@
 package com.liferay.imex.core.api.report;
 
+import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.report.model.ImexOperationEnum;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.model.Company;
@@ -89,5 +90,9 @@ public interface ImexExecutionReportService {
 	public <K> void printKeys (Map<String, K> map, Log logger);
 	
 	public void displayProperties(Properties props, Bundle bundle, Log logger);
-
+	
+	public void displayConfigurationLoadingInformation(ImexProperties properties, Log log);
+	
+	public void displayConfigurationLoadingInformation(ImexProperties properties, Log log, Bundle bundle);
+	
 }

@@ -1,5 +1,6 @@
 package com.liferay.imex.core.service.report.impl;
 
+import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.api.report.model.ImexOperationEnum;
@@ -8,6 +9,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
@@ -18,11 +20,155 @@ import java.util.Map.Entry;
 
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.pmw.tinylog.Configurator;
+import org.pmw.tinylog.Level;
+import org.pmw.tinylog.Logger;
+import org.pmw.tinylog.writers.RollingFileWriter;
 
 @Component(immediate = true, service = ImexExecutionReportService.class)
-public class ImexExecutionReportServiceImpl extends BaseExecutionReportServiceImpl implements ImexExecutionReportService {
+public class ImexExecutionReportServiceImpl implements ImexExecutionReportService {
 	
 	private static final Log _log = LogFactoryUtil.getLog(ImexExecutionReportServiceImpl.class);
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexConfigurationService configurationService;
+	
+	private Configurator configurator;
+	
+	protected final static String PREFIX = "[IMEX] : ";
+	
+	/* Root methods */
+
+	public void getSeparator(Log logger) {
+		imexLog(logger, StringPool.BLANK);
+	}
+	
+	public void getStartMessage(Log logger, String description, int nbPadLeft) {
+		
+		String rootMessage = PREFIX + "Starting";
+		
+		if (Validator.isNotNull(description)){
+			rootMessage += StringPool.SPACE + description;
+		}
+		
+		rootMessage = ReportMessageUtil.pad(rootMessage, nbPadLeft);
+		
+		imexLog(logger, rootMessage);
+		
+	}
+
+
+	public void getMessage(Log logger, String description, int nbPadLeft) {
+		
+		String rootMessage = StringPool.BLANK;
+		
+		if (Validator.isNotNull(description)){
+			rootMessage = PREFIX + description;
+		}
+		
+		rootMessage = ReportMessageUtil.pad(rootMessage, nbPadLeft);
+		
+		imexLog(logger, rootMessage);
+		
+	}
+	
+	
+	public void getEndMessage(Log logger, String description, int nbPadLeft) {
+		
+		String rootMessage = PREFIX + "End of";
+		
+		if (Validator.isNotNull(description)){
+			rootMessage += StringPool.SPACE + description;
+		}
+		
+		rootMessage = ReportMessageUtil.pad(rootMessage, nbPadLeft);
+		
+		imexLog(logger, rootMessage);
+		
+	}
+
+	
+	public void getPropertyMessage(Log logger, String key, String value) {
+		getPropertyMessage(logger, key, value, 0);
+	}
+	
+	
+	public void getPropertyMessage(Log logger, String key, String value, int nbPadLeft) {
+		
+		String rootMessage = PREFIX;
+		
+		if (Validator.isNotNull(key) && Validator.isNotNull(value)) {
+			
+			rootMessage += key + " : " + value;
+			
+		} else {
+			rootMessage = StringPool.BLANK;
+		}
+		
+		rootMessage = ReportMessageUtil.pad(rootMessage, nbPadLeft);
+		
+		imexLog(logger, rootMessage);
+		
+	}
+	
+	public Configurator getConfigurator() {
+		return configurator;
+	}
+
+	public void setConfigurator(Configurator configurator) {
+		this.configurator = configurator;
+	}
+	
+	private void initializeLogger(String logsPath) {
+		
+		if (configurator == null) {
+			
+			_log.info("Initializing logger ...");
+			
+			configurator = Configurator.defaultConfig();
+			configurator.level(Level.DEBUG);
+			
+			_log.info("IMEX output log path : " + logsPath);
+			
+			RollingFileWriter writer = new RollingFileWriter(logsPath + "/imex.log", 3);
+			
+			//TODO : JDA implement my own writer (http://www.tinylog.org/extend)
+			
+			//writer.init(configuration);
+			
+			//configurator.addWriter(new FileWriter(logsPath + "/imex.log"));
+			
+			configurator.addWriter(writer);
+			
+			configurator.activate();
+				
+			
+			_log.info("Done.");
+			
+		}
+		
+	}
+	
+	private void imexLog(Log logger, String toLog) {
+		
+		String logsPath = configurationService.getImexLogsPath();
+		
+		initializeLogger(logsPath);
+		
+		if (logger != null) {
+			
+			logger.info(toLog);
+			Logger.info(toLog);
+			
+		} else {
+			
+			_log.error("Mandatory object logger is null");
+			
+		}
+		
+	}
 	
 	/* Start Messages*/
 	
@@ -118,7 +264,10 @@ public class ImexExecutionReportServiceImpl extends BaseExecutionReportServiceIm
 	/* Information messages */
 	
 	public void getMessage(Log logger, Bundle bundle, String description) {
-		getMessage(logger, "[" + bundle.getSymbolicName() + "] " + description, 0);
+		if (bundle != null) {
+			getMessage(logger, "[" + bundle.getSymbolicName() + "] " + description, 0);
+		}
+		getMessage(logger, description, 0);
 	}
 	
 	public void getMessage(Log logger, String description) {

@@ -22,8 +22,8 @@ public class ExportCommand implements ImexCommand {
 	
 	public void ex(String ... bundleNames) {
 		
-		imexExportService.doExport(bundleNames);
-		System.out.println("Done.");
+		String id = imexExportService.doExport(bundleNames);
+		System.out.println("[" + id + "] Done.");
 	
 	}
 

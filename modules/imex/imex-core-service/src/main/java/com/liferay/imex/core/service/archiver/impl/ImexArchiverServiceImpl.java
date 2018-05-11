@@ -3,7 +3,7 @@ package com.liferay.imex.core.service.archiver.impl;
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
 import com.liferay.imex.core.api.configuration.ImExCorePropsKeys;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
-import com.liferay.imex.core.api.identifier.ProcessIdentifier;
+import com.liferay.imex.core.api.identifier.ProcessIdentifierGenerator;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.api.report.model.ImexOperationEnum;
 import com.liferay.imex.core.service.archiver.util.ZipUtils;
@@ -45,7 +45,7 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 	protected ImexExecutionReportService reportService;
 	
 	@Override
-	public void archiveData(Properties coreConfig, ProcessIdentifier processIdentifier) {
+	public void archiveData(Properties coreConfig, ProcessIdentifierGenerator processIdentifier) {
 		
 		int nbArchiveToKeep = GetterUtil.getInteger(coreConfig.get(ImExCorePropsKeys.ARCHIVE_HISTORY_NUMBER));
 		archiveData(nbArchiveToKeep, processIdentifier);
@@ -53,7 +53,7 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 	}
 	
 	@Override
-	public void archiveData(int nbArchiveToKeep, ProcessIdentifier processIdentifier) {
+	public void archiveData(int nbArchiveToKeep, ProcessIdentifierGenerator processIdentifier) {
 		
 		File dataDirectory = new File(configurationService.getImexDataPath());
 		archive(dataDirectory, nbArchiveToKeep, processIdentifier);
@@ -61,7 +61,7 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 	}
 	
 	@Override
-	public void archiveCfg(Properties coreConfig, ProcessIdentifier processIdentifier) {
+	public void archiveCfg(Properties coreConfig, ProcessIdentifierGenerator processIdentifier) {
 		
 		int nbArchiveToKeep = GetterUtil.getInteger(coreConfig.get(ImExCorePropsKeys.ARCHIVE_HISTORY_NUMBER));
 		archiveCfg(nbArchiveToKeep, processIdentifier);
@@ -69,14 +69,14 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 	}
 	
 	@Override
-	public void archiveCfg(int nbArchiveToKeep, ProcessIdentifier processIdentifier) {
+	public void archiveCfg(int nbArchiveToKeep, ProcessIdentifierGenerator processIdentifier) {
 		
 		File cfgDir = new File(configurationService.getImexCfgOverridePath());
 		archive(cfgDir, nbArchiveToKeep, processIdentifier);	
 		
 	}
 
-	private void archive(File toArchiveDirectory, int nbArchiveToKeep, ProcessIdentifier processIdentifier) {
+	private void archive(File toArchiveDirectory, int nbArchiveToKeep, ProcessIdentifierGenerator processIdentifier) {
 		
 		reportService.getSeparator(_log);
 		reportService.getStartMessage(_log, "Archiving process");
@@ -109,7 +109,7 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 		
 	}
 	
-	private void cleanup(File destinationDir, ProcessIdentifier processIdentifier, int nbArchiveToKeep) {
+	private void cleanup(File destinationDir, ProcessIdentifierGenerator processIdentifier, int nbArchiveToKeep) {
 		
 		File[] listFiles = destinationDir.listFiles();
 		
@@ -154,13 +154,13 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 		
 	}
 	
-	private String getArchiveFileName(File dataDirectory, ProcessIdentifier processIdentifier) {
+	private String getArchiveFileName(File dataDirectory, ProcessIdentifierGenerator processIdentifier) {
 	
-		return ARCHIVE_FILENAME_PREFIX + dataDirectory.getName() + StringPool.PERIOD + processIdentifier.getProcessTypeUniqueIdentifier() + ARCHIVE_FILENAME_SUFFIX;
+		return ARCHIVE_FILENAME_PREFIX + dataDirectory.getName() + StringPool.PERIOD + processIdentifier.generateProcessTypeUniqueIdentifier() + ARCHIVE_FILENAME_SUFFIX;
 		
 	}
 
-	private boolean zip(File dataDirectory, File archiveDestinationDirectory, ProcessIdentifier processIdentifier) {
+	private boolean zip(File dataDirectory, File archiveDestinationDirectory, ProcessIdentifierGenerator processIdentifier) {
 		
 		ZipUtils zipUtils = new ZipUtils(_log);
 		String archiveFileName = getArchiveFileName(dataDirectory, processIdentifier);
@@ -173,7 +173,7 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 				
 				zipUtils.zipFiles(archiveFile, dataDirectory);
 				 
-				reportService.getOK(_log, dataDirectory.getAbsolutePath(), archiveFile.getAbsolutePath());
+				reportService.getOK(_log, dataDirectory.getAbsolutePath(), archiveFile.getAbsolutePath(), "successfully archived");
 				long sizeOfArchiveFile = archiveFile.length();
 				reportService.getOK(_log, FileUtil.readableFileSize(sizeOfDataDirectory) + " successfully zipped to " + FileUtil.readableFileSize(sizeOfArchiveFile));
 				

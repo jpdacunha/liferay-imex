@@ -4,8 +4,8 @@ import java.util.List;
 
 public interface ImexService {
 	
-	public void generateOverrideFileSystemConfigurationFiles();
+	public String generateOverrideFileSystemConfigurationFiles();
 	
-	public void generateOverrideFileSystemConfigurationFiles(List<String> bundleNames, boolean archive);
+	public String generateOverrideFileSystemConfigurationFiles(List<String> bundleNames, boolean archive);
 
 }

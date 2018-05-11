@@ -4,10 +4,10 @@ import java.util.List;
 
 public interface ImexExportService {
 	
-	public void doExportAll();
+	public String doExportAll();
 	
-	public void doExport(List<String> bundleNames);
+	public String doExport(List<String> bundleNames);
 
-	public void doExport(String... bundleNames);
+	public String doExport(String... bundleNames);
 
 }

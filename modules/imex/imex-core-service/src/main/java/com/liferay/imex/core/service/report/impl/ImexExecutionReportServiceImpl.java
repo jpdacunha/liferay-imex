@@ -1,5 +1,6 @@
 package com.liferay.imex.core.service.report.impl;
 
+import com.liferay.imex.core.api.configuration.ImExCorePropsKeys;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
@@ -9,22 +10,26 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.pmw.tinylog.Configurator;
 import org.pmw.tinylog.Level;
 import org.pmw.tinylog.Logger;
+import org.pmw.tinylog.labelers.TimestampLabeler;
+import org.pmw.tinylog.policies.DailyPolicy;
 import org.pmw.tinylog.writers.RollingFileWriter;
 
 @Component(immediate = true, service = ImexExecutionReportService.class)
@@ -37,6 +42,8 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 	
 	private Configurator configurator;
 	
+	private Boolean displayInLiferayLogs = null;
+
 	protected final static String PREFIX = "[IMEX] : ";
 	
 	/* Root methods */
@@ -47,7 +54,7 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 	
 	public void getStartMessage(Log logger, String description, int nbPadLeft) {
 		
-		String rootMessage = PREFIX + "Starting";
+		String rootMessage = PREFIX + "[:STARTING:]";
 		
 		if (Validator.isNotNull(description)){
 			rootMessage += StringPool.SPACE + description;
@@ -77,7 +84,7 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 	
 	public void getEndMessage(Log logger, String description, int nbPadLeft) {
 		
-		String rootMessage = PREFIX + "End of";
+		String rootMessage = PREFIX + "[:END OF:]";
 		
 		if (Validator.isNotNull(description)){
 			rootMessage += StringPool.SPACE + description;
@@ -110,63 +117,6 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 		rootMessage = ReportMessageUtil.pad(rootMessage, nbPadLeft);
 		
 		imexLog(logger, rootMessage);
-		
-	}
-	
-	public Configurator getConfigurator() {
-		return configurator;
-	}
-
-	public void setConfigurator(Configurator configurator) {
-		this.configurator = configurator;
-	}
-	
-	private void initializeLogger(String logsPath) {
-		
-		if (configurator == null) {
-			
-			_log.info("Initializing logger ...");
-			
-			configurator = Configurator.defaultConfig();
-			configurator.level(Level.DEBUG);
-			
-			_log.info("IMEX output log path : " + logsPath);
-			
-			RollingFileWriter writer = new RollingFileWriter(logsPath + "/imex.log", 3);
-			
-			//TODO : JDA implement my own writer (http://www.tinylog.org/extend)
-			
-			//writer.init(configuration);
-			
-			//configurator.addWriter(new FileWriter(logsPath + "/imex.log"));
-			
-			configurator.addWriter(writer);
-			
-			configurator.activate();
-				
-			
-			_log.info("Done.");
-			
-		}
-		
-	}
-	
-	private void imexLog(Log logger, String toLog) {
-		
-		String logsPath = configurationService.getImexLogsPath();
-		
-		initializeLogger(logsPath);
-		
-		if (logger != null) {
-			
-			logger.info(toLog);
-			Logger.info(toLog);
-			
-		} else {
-			
-			_log.error("Mandatory object logger is null");
-			
-		}
 		
 	}
 	
@@ -239,6 +189,12 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 		getMessage(logger, "[" + key + "]=>[" + name + "] [   OK  ]", 4);
 	}
 	
+	@Override
+	public void getOK(Log logger, String key, String name, String description) {
+		getMessage(logger, "[" + key + "]=>[" + name + "] " + description + " [   OK  ]", 4);
+		
+	}
+	
 	public void getOK(Log logger, String key, String name, File file, ImexOperationEnum operation) {
 		
 		String message = "[" + operation.getValue() + "] [" + key + "]=>[" + name + "] [   OK  ]";		
@@ -266,8 +222,9 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 	public void getMessage(Log logger, Bundle bundle, String description) {
 		if (bundle != null) {
 			getMessage(logger, "[" + bundle.getSymbolicName() + "] " + description, 0);
+		} else {
+			getMessage(logger, description, 0);
 		}
-		getMessage(logger, description, 0);
 	}
 	
 	public void getMessage(Log logger, String description) {
@@ -319,25 +276,96 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 	}
 	
 	public void displayConfigurationLoadingInformation(ImexProperties properties, Log log) {
-		displayConfigurationLoadingInformation(properties, log, null);
+		Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+		displayConfigurationLoadingInformation(properties, log, bundle);
 	}
 	
 	public void displayConfigurationLoadingInformation(ImexProperties properties, Log log, Bundle bundle) {
 		
 		if (properties != null) {
-			
-			if (properties.isDefaulConfiguration()) {
-				getMessage(_log, bundle, "is using default configuration loaded from his embedded [" + properties.getPath() + "].");
-			} else if (Validator.isNotNull(properties.getPath())) {
-				getMessage(_log, bundle, "is using configuration loaded from [" + properties.getPath() + "].");
-			} else {
-				getError(_log, "Configuration error", "Configuration is not properly loaded");
+
+			String paths = StringPool.BLANK;
+			int i = 0;
+			for (String path : properties.getPath()) {
+				if (i == 0) {
+					paths += path;
+				} else {
+					paths += " , " + path;
+				}
+				i++;
 			}
+			
+			getMessage(_log, bundle, "is using configuration loaded from [" + paths + "].");
 			
 		} else {
 			getMessage(log, "Properties are null : no properties to print");
 		}
 		
+	}
+	
+	public Configurator getConfigurator() {
+		return configurator;
+	}
+
+	public void setConfigurator(Configurator configurator) {
+		this.configurator = configurator;
+	}
+	
+	private void initializeLogger(String logsPath) {
+		
+		if (configurator == null) {
+			
+			_log.debug("Initializing logger ...");
+			
+			configurator = Configurator.defaultConfig();
+			configurator.level(Level.DEBUG);
+			
+			configurator.formatPattern("{date:yyyy-MM-dd HH:mm:ss} {level} [{thread}][{context:" + ImexExecutionReportService.IDENTIFIER_KEY + "}] : {message}");
+			
+			if (_log.isDebugEnabled()) {
+				_log.debug("IMEX output log path : " + logsPath);
+			}
+			
+			RollingFileWriter writer = new RollingFileWriter(logsPath + "/imex.log", 3, new TimestampLabeler("yyyy-MM-dd"), new DailyPolicy());
+			
+			configurator.addWriter(writer);
+			
+			configurator.activate();
+				
+			_log.debug("Done.");
+			
+		}
+		
+		if (this.displayInLiferayLogs == null) {
+			
+			ImexProperties coreConfig = new ImexProperties();
+			configurationService.loadCoreConfiguration(coreConfig);
+			this.displayInLiferayLogs = GetterUtil.getBoolean(coreConfig.getProperties().get(ImExCorePropsKeys.DISPLAY_EXECUTION_IN_LIFERAY_LOGS));
+			
+		}
+		
+	}
+	
+	private void imexLog(Log logger, String toLog) {
+		
+		String logsPath = configurationService.getImexLogsPath();
+		
+		initializeLogger(logsPath);
+		
+		if (displayInLiferayLogs) {
+			if (logger != null) {
+				
+				logger.info(toLog);
+				
+			} else {
+				
+				_log.error("Mandatory object logger is null unable to log [" + toLog + "]");
+				
+			}	
+		}
+		
+		Logger.info(toLog);
+			
 	}
 
 }

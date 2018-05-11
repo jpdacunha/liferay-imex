@@ -6,10 +6,10 @@ import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.exporter.ImexExportService;
-import com.liferay.imex.core.api.identifier.ProcessIdentifier;
+import com.liferay.imex.core.api.identifier.ProcessIdentifierGenerator;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.service.ImexServiceBaseImpl;
-import com.liferay.imex.core.service.exporter.model.ExporterProcessIdentifier;
+import com.liferay.imex.core.service.exporter.model.ExporterProcessIdentifierGenerator;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -30,6 +30,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.pmw.tinylog.LoggingContext;
 
 @Component(immediate = true, service = ImexExportService.class)
 public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexExportService {
@@ -51,27 +52,29 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 	protected ImexExecutionReportService reportService;
 
 	@Override
-	public void doExportAll() {
-		doExport(StringPool.BLANK);
+	public String doExportAll() {
+		return doExport(StringPool.BLANK);
 	}
 	
 	@Override
-	public void doExport(String... names) {		
-		doExport(Arrays.asList(names));		
+	public String doExport(String... names) {		
+		return doExport(Arrays.asList(names));		
 	}
 
 	@Override
-	public void doExport(List<String> bundleNames) {
+	public String doExport(List<String> bundleNames) {
 		
 		//Generate an unique identifier for this export process
-		ProcessIdentifier identifier = new ExporterProcessIdentifier();
-		String identifierStr = identifier.getUniqueIdentifier();
+		ProcessIdentifierGenerator identifier = new ExporterProcessIdentifierGenerator();
+		String identifierStr = identifier.generateUniqueIdentifier();
+		
+		LoggingContext.put(ImexExecutionReportService.IDENTIFIER_KEY, identifierStr);
 		
 		reportService.getSeparator(_log);
 		if (bundleNames != null && bundleNames.size() > 0) {
-			reportService.getStartMessage(_log, "[" + identifierStr + "] PARTIAL export process for [" + bundleNames.toString() + "]");
+			reportService.getStartMessage(_log, "PARTIAL export process for [" + bundleNames.toString() + "]");
 		} else {
-			reportService.getStartMessage(_log, "[" + identifierStr + "] ALL export process");
+			reportService.getStartMessage(_log, "ALL export process");
 		}
 		
 		try {
@@ -90,7 +93,8 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			} else {
 				
 				//Archive actual files before importing
-				ImexProperties coreConfig = configurationService.loadCoreConfiguration();
+				ImexProperties coreConfig = new ImexProperties();
+				configurationService.loadCoreConfiguration(coreConfig);
 				reportService.displayConfigurationLoadingInformation(coreConfig, _log);
 				imexArchiverService.archiveData(coreConfig.getProperties(), identifier);
 				
@@ -118,7 +122,9 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			_log.error(e,e);
 		}
 		
-		reportService.getEndMessage(_log, "[" + identifierStr + "] export process");
+		reportService.getEndMessage(_log, "export process");
+		
+		return identifierStr;
 
 	}
 
@@ -174,14 +180,15 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			reportService.getStartMessage(_log, exporter.getProcessDescription(), 1);
 			
 			//Loading configuration for each exporter
-			ImexProperties config = configurationService.loadExporterAndCoreConfiguration(bundle);
+			ImexProperties config = new ImexProperties();
+			configurationService.loadExporterAndCoreConfiguration(bundle, config);
 			reportService.displayConfigurationLoadingInformation(config, _log, bundle);
 			
-			if (config == null) {
-				reportService.getMessage(_log, bundle, "has no defined configuration. Aborting execution ...");
+			if (config.getProperties() == null || config.getProperties().size() == 0) {
+				reportService.getMessage(_log, bundle, "has no defined configuration.");
+			} else {
+				reportService.displayProperties(config.getProperties(), bundle, _log);
 			}
-			
-			reportService.displayProperties(config.getProperties(), bundle, _log);
 		
 			try {
 				Company company = companyLocalService.getCompany(companyId);

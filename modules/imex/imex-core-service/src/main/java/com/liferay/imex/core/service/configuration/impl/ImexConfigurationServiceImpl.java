@@ -46,55 +46,43 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	private ExporterTracker exporterTrackerService;
 	
 	@Override
-	public ImexProperties loadCoreConfiguration() {
+	public void loadCoreConfiguration(ImexProperties props) {
 		
 		// The core configuration in IMEX is stored in the current core bundle
 		Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-		return loadConfiguration(bundle, IMEX);
+		loadConfiguration(bundle, props, IMEX);
 		
 	}
 
 	@Override
-	public ImexProperties loadExporterConfiguration(Bundle bundle) {
+	public void loadExporterConfiguration(Bundle bundle, ImexProperties props) {
 		
-		return loadConfiguration(bundle, EXPORTER);
-		
-	}
-	
-	@Override
-	public ImexProperties loadExporterAndCoreConfiguration(Bundle bundle) {
-		
-		ImexProperties props = new ImexProperties();
-		
-		ImexProperties coreProps = loadCoreConfiguration();
-		props.putAll(coreProps.getProperties());
-		
-		ImexProperties exporterProps = loadExporterConfiguration(bundle);
-		props.putAll(exporterProps.getProperties());
-		
-		return props;
+		loadConfiguration(bundle, props, EXPORTER);
 		
 	}
 	
 	@Override
-	public ImexProperties loadImporterConfiguration(Bundle bundle) {
+	public void loadExporterAndCoreConfiguration(Bundle bundle, ImexProperties props) {
 		
-		return loadConfiguration(bundle, IMPORTER);
+		loadCoreConfiguration(props);
+		
+		loadExporterConfiguration(bundle, props);
 		
 	}
 	
 	@Override
-	public ImexProperties loadImporterAndCoreConfiguration(Bundle bundle) {
+	public void loadImporterConfiguration(Bundle bundle, ImexProperties props) {
 		
-		ImexProperties props = new ImexProperties();
+		loadConfiguration(bundle, props, IMPORTER);
 		
-		ImexProperties importerProps = loadImporterConfiguration(bundle);
-		props.putAll(importerProps.getProperties());
+	}
+	
+	@Override
+	public void loadImporterAndCoreConfiguration(Bundle bundle, ImexProperties props) {
 		
-		ImexProperties coreProps = loadCoreConfiguration();
-		props.putAll(coreProps.getProperties());
-		
-		return props;
+		loadImporterConfiguration(bundle, props);
+	
+		loadCoreConfiguration(props);
 		
 	}
 	
@@ -147,22 +135,16 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 		
 	}
 	
-	private ImexProperties loadConfiguration(Bundle bundle, String type) {
+	private ImexProperties loadConfiguration(Bundle bundle, ImexProperties props, String type) {
 		
-		ImexProperties props = loadFileSystemConfiguration(bundle, type);
+		loadFileSystemConfiguration(bundle, props, type);
 		
 		if (props != null) {
 			
 			if (props.getProperties().size() == 0) {
 				
-				props = getDefaultConfiguration(bundle);
+				props = loadDefaultConfiguration(bundle, props);
 				
-				if (props.getProperties().size() == 0) {
-					props.setDefaulConfiguration(true);
-				}
-				
-			} else {
-				props.setBundleConfiguration(true);
 			}
 			
 		} else {
@@ -197,7 +179,8 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 			
 			Bundle bundle = reference.getBundle();
 			
-			ImexProperties props = loadExporterConfiguration(bundle);
+			ImexProperties props = new ImexProperties();
+			loadExporterConfiguration(bundle, props);
 			
 			bundleConf.put(bundle.getSymbolicName(), props.getProperties());
 			
@@ -210,17 +193,16 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	private Map<String,Properties> loadCoreConfigurationMap() {
 		
 		Map<String,Properties> bundleConf = new HashMap<>();
-		ImexProperties coreProps = loadCoreConfiguration();
+		ImexProperties props = new ImexProperties();
+		loadCoreConfiguration(props);
 		Bundle bundle = FrameworkUtil.getBundle(this.getClass());		
-		bundleConf.put(bundle.getSymbolicName(), coreProps.getProperties());
+		bundleConf.put(bundle.getSymbolicName(), props.getProperties());
 		
 		return bundleConf;
 		
 	}
 	
-	private ImexProperties loadFileSystemConfiguration(Bundle bundle, String type) {
-		
-		ImexProperties props = new ImexProperties();
+	private ImexProperties loadFileSystemConfiguration(Bundle bundle, ImexProperties props, String type) {
 		
 		File overrideCfgFile = getConfigurationOverrideFileName(bundle);
 		
@@ -229,7 +211,7 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 			try {
 				
 				props.getProperties().load(new FileInputStream(overrideCfgFile));
-				props.setPath(overrideCfgFile.getAbsolutePath());
+				props.addPath(overrideCfgFile.getAbsolutePath());
 				
 			} catch (IOException e) {
 				_log.error(e,e);
@@ -240,13 +222,10 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 		
 	}
 	
-	private ImexProperties getDefaultConfiguration(Bundle bundle) {
+	private ImexProperties loadDefaultConfiguration(Bundle bundle, ImexProperties props) {
 		
 		String fileName = DEFAULT_FILENAME_PREFIX + ".properties";
-		
-		ImexProperties props = new ImexProperties();
-		props.setPath(fileName);
-				
+			
 		URL fileURL = bundle.getResource(fileName);
 		
 		try {
@@ -258,6 +237,7 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 					
 					in = fileURL.openStream();
 					props.getProperties().load(in);
+					props.addPath("classpath:" + fileName);
 					
 				} finally {
 					if (in != null) {

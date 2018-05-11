@@ -1,13 +1,15 @@
 package com.liferay.imex.core.service.importer.model;
 
-import com.liferay.imex.core.service.identifier.impl.ProcessIdentifierImpl;
+import com.liferay.imex.core.service.identifier.impl.ProcessIdentifierGeneratorImpl;
 
-public class ImporterProcessIdentifier extends ProcessIdentifierImpl {
+public class ImporterProcessIdentifier extends ProcessIdentifierGeneratorImpl {
 
 	private final static String IDENTIFIER = "importer";
 	
+	private final static String SMALL_IDENTIFIER = "imp";
+
 	public ImporterProcessIdentifier() {
-		super(IDENTIFIER);
+		super(IDENTIFIER, SMALL_IDENTIFIER);
 	}
 
 }

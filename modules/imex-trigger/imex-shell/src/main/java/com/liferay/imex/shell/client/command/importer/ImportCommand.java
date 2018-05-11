@@ -2,8 +2,6 @@ package com.liferay.imex.shell.client.command.importer;
 
 import com.liferay.imex.core.api.importer.ImexImportService;
 import com.liferay.imex.shell.client.ImexCommand;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -24,8 +22,8 @@ public class ImportCommand implements ImexCommand {
 	
 	public void im(String... bundleNames) {
 		
-		imexImportService.doImport(bundleNames);
-		System.out.println("Done.");
+		String id = imexImportService.doImport(bundleNames);
+		System.out.println("[" + id + "] Done.");
 	
 	}
 

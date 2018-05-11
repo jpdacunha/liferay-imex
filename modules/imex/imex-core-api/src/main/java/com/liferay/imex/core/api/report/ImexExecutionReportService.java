@@ -15,6 +15,8 @@ import org.osgi.framework.Bundle;
 
 public interface ImexExecutionReportService {
 	
+	public final static String IDENTIFIER_KEY = "imexPidentifier";
+	
 	public void getPropertyMessage(Log logger, String key, String value);
 	
 	public void getPropertyMessage(Log logger, String key, String value, int nbPadLeft);
@@ -58,6 +60,8 @@ public interface ImexExecutionReportService {
 	public void getOK(Log logger, String name);
 	
 	public void getOK(Log logger, String key, String name);
+	
+	public void getOK(Log logger, String key, String name, String description);
 	
 	public void getOK(Log logger, String key, String name, File file, ImexOperationEnum operation);
 	

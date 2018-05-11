@@ -22,8 +22,8 @@ public class GenCfgCommand {
 	
 	public void cfggen(String ... bundleNames) {
 		
-		imexService.generateOverrideFileSystemConfigurationFiles();
-		System.out.println("Done.");
+		String id = imexService.generateOverrideFileSystemConfigurationFiles();
+		System.out.println("[" + id + "] Done.");
 		
 	}
 

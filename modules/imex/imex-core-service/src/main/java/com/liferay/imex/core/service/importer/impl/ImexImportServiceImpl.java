@@ -3,7 +3,7 @@ package com.liferay.imex.core.service.importer.impl;
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
-import com.liferay.imex.core.api.identifier.ProcessIdentifier;
+import com.liferay.imex.core.api.identifier.ProcessIdentifierGenerator;
 import com.liferay.imex.core.api.importer.ImexImportService;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ImporterTracker;
@@ -33,6 +33,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.pmw.tinylog.LoggingContext;
 
 @Component(immediate = true, service = ImexImportService.class)
 public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexImportService {
@@ -54,27 +55,29 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 	protected ImexExecutionReportService reportService;
 	
 	@Override
-	public void doImportAll() {
-		doImport(StringPool.BLANK);
+	public String doImportAll() {
+		return doImport(StringPool.BLANK);
 	}
 	
 	@Override
-	public void doImport(String... names) {		
-		doImport(Arrays.asList(names));		
+	public String doImport(String... names) {		
+		return doImport(Arrays.asList(names));		
 	}
 
 	@Override
-	public void doImport(List<String> bundleNames) {
+	public String doImport(List<String> bundleNames) { 
 		
 		//Generate an unique identifier for this import process
-		ProcessIdentifier identifier = new ImporterProcessIdentifier();
-		String identifierStr = identifier.getUniqueIdentifier();
+		ProcessIdentifierGenerator identifier = new ImporterProcessIdentifier();
+		String identifierStr = identifier.generateUniqueIdentifier();
+		
+		LoggingContext.put(ImexExecutionReportService.IDENTIFIER_KEY, identifierStr);
 				
 		reportService.getSeparator(_log);
 		if (bundleNames != null && bundleNames.size() > 0) {			
-			reportService.getStartMessage(_log, "[" + identifierStr + "] PARTIAL import process for [" + bundleNames.toString() + "]");
+			reportService.getStartMessage(_log, "PARTIAL import process for [" + bundleNames.toString() + "]");
 		} else {
-			reportService.getStartMessage(_log, "[" + identifierStr + "] ALL import process");
+			reportService.getStartMessage(_log, "ALL import process");
 		}
 		
 		try {
@@ -93,7 +96,8 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 			} else {
 				
 				//Archive actual files before importing
-				ImexProperties coreConfig = configurationService.loadCoreConfiguration();
+				ImexProperties coreConfig = new ImexProperties();
+				configurationService.loadCoreConfiguration(coreConfig);
 				reportService.displayConfigurationLoadingInformation(coreConfig, _log);
 				imexArchiverService.archiveData(coreConfig.getProperties(), identifier);
 				
@@ -122,6 +126,8 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 		}
 		
 		reportService.getEndMessage(_log, "import process");
+		
+		return identifierStr;
 
 	}
 
@@ -173,14 +179,15 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 			reportService.getStartMessage(_log, Importer.getProcessDescription(), 1);
 			
 			//Loading configuration for each Importer
-			ImexProperties config = configurationService.loadImporterAndCoreConfiguration(bundle);
+			ImexProperties config = new ImexProperties();
+			configurationService.loadImporterAndCoreConfiguration(bundle, config);
 			reportService.displayConfigurationLoadingInformation(config, _log, bundle);
 			
-			if (config == null) {
-				reportService.getMessage(_log, bundle, "has no defined configuration. Aborting execution ...");
+			if (config.getProperties() == null || config.getProperties().size() == 0) {
+				reportService.getMessage(_log, bundle, "has no defined configuration.");
+			} else {
+				reportService.displayProperties(config.getProperties(), bundle, _log);
 			}
-
-			reportService.displayProperties(config.getProperties(), bundle, _log);
 			
 			try {
 				

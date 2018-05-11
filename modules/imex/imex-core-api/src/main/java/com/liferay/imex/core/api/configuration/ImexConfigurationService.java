@@ -12,11 +12,11 @@ import org.osgi.framework.Bundle;
 
 public interface ImexConfigurationService {
 	
-	public ImexProperties loadExporterConfiguration(Bundle bundle);
+	public void loadExporterConfiguration(Bundle bundle, ImexProperties props);
 	
-	public ImexProperties loadImporterConfiguration(Bundle bundle);
+	public void loadImporterConfiguration(Bundle bundle, ImexProperties props);
 	
-	public ImexProperties loadCoreConfiguration();
+	public void loadCoreConfiguration(ImexProperties props);
 	
 	public String getImexPath();
 	
@@ -34,8 +34,8 @@ public interface ImexConfigurationService {
 
 	public File getConfigurationOverrideFileName(Entry<String, Properties> entry);
 
-	public ImexProperties loadExporterAndCoreConfiguration(Bundle bundle);
+	public void loadExporterAndCoreConfiguration(Bundle bundle, ImexProperties props);
 	
-	public ImexProperties loadImporterAndCoreConfiguration(Bundle bundle);
+	public void loadImporterAndCoreConfiguration(Bundle bundle, ImexProperties props);
 	
 }

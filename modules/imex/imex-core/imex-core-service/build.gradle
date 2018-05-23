@@ -9,8 +9,8 @@ dependencies {
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.0.0"
 	compileOnly group: "com.liferay", name: "com.liferay.osgi.util", version: "3.0.0"
 	
-	compileOnly project(":modules:imex:imex-core-api")
-	compileOnly project(":modules:imex:imex-core-util")
+	compileOnly project(":modules:imex:imex-core:imex-core-api")
+	compileOnly project(":modules:imex:imex-core:imex-core-util")
 	
 	compileInclude group: "commons-io", name: "commons-io", version: "2.4"
 	compileInclude group: "commons-lang", name: "commons-lang", version: "2.6"

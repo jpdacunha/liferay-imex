@@ -8,6 +8,6 @@ dependencies {
 	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.3.0"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.0.0"
 	compileInclude group: "org.simpleframework", name: "simple-xml", version: "2.7.1"
-	
-	compileOnly project(":modules:imex:imex-core-api")
+
+	compileOnly project(":modules:imex:imex-core:imex-core-api")
 }

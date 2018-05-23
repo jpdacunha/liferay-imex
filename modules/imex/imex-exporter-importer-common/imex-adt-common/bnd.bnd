@@ -1,0 +1,6 @@
+Bundle-Name: imex-adt-common
+Bundle-SymbolicName: imex.adt.common
+Bundle-Version: 1.0.0
+Export-Package: \
+	com.liferay.imex.adt.model,\
+	com.liferay.imex.adt

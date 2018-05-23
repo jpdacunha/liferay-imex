@@ -1,6 +1,0 @@
-Bundle-Name: imex-adt-service
-Bundle-SymbolicName: imex.adt.service
-Bundle-Version: 1.0.0
-Export-Package: \
-	com.liferay.imex.adt.model,\
-	com.liferay.imex.adt

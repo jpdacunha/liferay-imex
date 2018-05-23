@@ -1,0 +1,6 @@
+Bundle-Name: imex-wc-ddm-common
+Bundle-SymbolicName: imex.wc.ddm.common
+Bundle-Version: 1.0.0
+Export-Package: \
+	com.liferay.imex.wcddm,\
+	com.liferay.imex.wcddm.model

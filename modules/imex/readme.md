@@ -55,4 +55,40 @@ Example : 	property = {
 
 Imex show your new exporter in the list
 
+# How to create an Exporter / Importer common project
+
+Exporter / Importer projects are designed to share classes or methods across an importer and an exporter. 
+
+## Step 01 : Eclipse project setup
+
+ - Create exporter project with blade
+
+cd <LIFERAY_WORKSPACE_HOME>/modules/imex/imex-exporter-importer-common
+blade create -t api -p com.liferay.imex.site.model imex-site-common
+
+ - In eclipse from the top level folder use gradle > refresh gradle project
+ 
+ - Delete unused auto generated interface 
+ 
+ - Rename package name to remove .api at the end
+ 
+ - Delete all src/main/resources files
+ 
+ 
+## Step 02 : Update BND
+
+- Open bnd.bnd files and check bundle-symbolic name. Change it if needed.
+
+- To be compliant copy / paste Bundle-Name and replace "-" with "." 
+Example : imex-site-exporter => imex.site.exporter
+
+- Remove lines starting with import-package
+
+## Step 03 : Add dependencies 
+
+- Open the corresponding exporter build.gradle
+- Update the dependency to point the new project
+- Repeat the same for the importer
+ 
+
 # How to create a new Importer

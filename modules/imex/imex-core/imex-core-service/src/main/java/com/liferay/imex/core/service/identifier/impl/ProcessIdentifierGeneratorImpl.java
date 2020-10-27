@@ -1,7 +1,7 @@
 package com.liferay.imex.core.service.identifier.impl;
 
 import com.liferay.imex.core.api.identifier.ProcessIdentifierGenerator;
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.petra.string.StringPool;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -80,7 +80,7 @@ public class ListExporterCommand implements ImexCommand {
 	@Activate
 	protected void start() {
 		if (trackerService == null) {
-			_log.error("Tracker is incorrectly set");
+			_log.warn("Tracker is incorrectly set");
 	    }
 	}
 

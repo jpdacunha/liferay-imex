@@ -1,6 +1,6 @@
 package com.liferay.imex.role.model;
 
-import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.model.role.RoleConstants;
 
 import java.util.HashMap;
 import java.util.Map;

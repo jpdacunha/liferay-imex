@@ -1,6 +1,6 @@
 package com.liferay.imex.core.util.statics;
 
-import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.petra.string.StringPool;
 
 import java.text.Normalizer;
 import java.text.Normalizer.Form;

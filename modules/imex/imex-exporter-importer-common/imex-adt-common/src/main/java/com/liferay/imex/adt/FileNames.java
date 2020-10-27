@@ -2,8 +2,8 @@ package com.liferay.imex.adt;
 
 
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Group;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.util.Locale;
 

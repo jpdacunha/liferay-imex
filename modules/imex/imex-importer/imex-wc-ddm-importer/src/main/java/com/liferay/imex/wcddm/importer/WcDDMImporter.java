@@ -3,7 +3,9 @@ package com.liferay.imex.wcddm.importer;
 import com.liferay.counter.kernel.service.CounterLocalService;
 import com.liferay.dynamic.data.mapping.exception.NoSuchStructureException;
 import com.liferay.dynamic.data.mapping.exception.NoSuchTemplateException;
-import com.liferay.dynamic.data.mapping.io.DDMFormJSONDeserializer;
+import com.liferay.dynamic.data.mapping.io.DDMFormDeserializer;
+import com.liferay.dynamic.data.mapping.io.DDMFormDeserializerDeserializeRequest;
+import com.liferay.dynamic.data.mapping.io.DDMFormDeserializerDeserializeResponse;
 import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormLayout;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
@@ -81,7 +83,7 @@ public class WcDDMImporter implements Importer {
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexExecutionReportService reportService;
 	
-	private DDMFormJSONDeserializer _ddmFormJSONDeserializer;
+	private DDMFormDeserializer _ddmFormDeserializer;
 	
 	private DDM _ddm;
 
@@ -183,8 +185,13 @@ public class WcDDMImporter implements Importer {
 				long groupId = group.getGroupId();
 				serviceContextStr.setAddGroupPermissions(true);
 				serviceContextStr.setAddGuestPermissions(true);
-							
-				DDMForm ddmForm = _ddmFormJSONDeserializer.deserialize(imexStructure.getData());
+				
+				String content = imexStructure.getData();
+				
+				DDMFormDeserializerDeserializeRequest dDMFormDeserializerDeserializeRequest = DDMFormDeserializerDeserializeRequest.Builder.newBuilder(content).build();
+				DDMFormDeserializerDeserializeResponse deserialized = _ddmFormDeserializer.deserialize(dDMFormDeserializerDeserializeRequest);
+				
+				DDMForm ddmForm = deserialized.getDDMForm();
 				DDMFormLayout ddmFormLayout = _ddm.getDefaultDDMFormLayout(ddmForm);
 				
 				try {
@@ -368,10 +375,8 @@ public class WcDDMImporter implements Importer {
 	}
 	
 	@Reference(unbind = "-")
-	protected void setDDMFormJSONDeserializer(DDMFormJSONDeserializer ddmFormJSONDeserializer) {
-		_ddmFormJSONDeserializer = ddmFormJSONDeserializer;
+	protected void setDDMFormDeserializer(DDMFormDeserializer ddmFormDeserializer) {
+		_ddmFormDeserializer = ddmFormDeserializer;
 	}
-	
-	
 
 }

@@ -7,9 +7,9 @@ import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ImporterTracker;
 import com.liferay.imex.core.util.configuration.ImExPropsValues;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.File;
 import java.io.FileInputStream;

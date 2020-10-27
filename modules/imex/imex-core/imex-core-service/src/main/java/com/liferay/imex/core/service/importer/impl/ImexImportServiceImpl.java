@@ -12,6 +12,7 @@ import com.liferay.imex.core.service.ImexServiceBaseImpl;
 import com.liferay.imex.core.service.importer.model.ImporterProcessIdentifier;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.UserUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -20,7 +21,6 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.File;
 import java.util.Arrays;

@@ -71,6 +71,8 @@ public interface ImexExecutionReportService {
 	
 	public void getError(Log logger, Exception e);
 	
+	public void getError(Log logger, String name, Exception e);
+	
 	/* Information messages */
 	
 	public void getMessage(Log logger, Bundle bundle, String description);

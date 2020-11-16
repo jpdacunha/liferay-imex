@@ -171,7 +171,7 @@ public class AdtExporter implements Exporter {
 										reportService.getOK(_log, groupName, "ADT : "  + ddmTemplate.getName(locale) + ", type : " + classType);
 										
 									} catch (Exception e) {
-										reportService.getError(_log, ddmTemplate.getName(locale), e.getMessage());
+										reportService.getError(_log, ddmTemplate.getName(locale), e);
 										if (debug) {
 											_log.error(e,e);
 										}

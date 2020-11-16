@@ -125,7 +125,7 @@ public class RoleImporter implements Importer {
 						
 						
 					} catch (Exception e) {
-						reportService.getError(_log, roleName, e.getMessage());
+						reportService.getError(_log, roleName, e);
 						if (debug) {
 							_log.error(e,e);
 						}

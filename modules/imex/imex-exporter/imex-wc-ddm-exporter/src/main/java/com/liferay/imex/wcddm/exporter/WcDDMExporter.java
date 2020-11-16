@@ -167,7 +167,7 @@ public class WcDDMExporter implements Exporter {
 										reportService.getSeparator(_log);
 										
 									} catch (Exception e) {
-										reportService.getError(_log, ddmStructure.getName(locale), e.getMessage());
+										reportService.getError(_log, ddmStructure.getName(locale), e);
 										if (debug) {
 											_log.error(e,e);
 										}

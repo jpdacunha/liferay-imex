@@ -12,7 +12,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Resource;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
-import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
@@ -102,12 +102,12 @@ public class ImexModelPermissionSetterImpl implements ImexModelPermissionSetter 
 			reportService.getPropertyMessage(_log, "Resource Primary Key", resourcePrimKey);
 			
 			if (roleActions != null && roleActions.size() > 0) {
-				//Suppression des permissions sur la resource
+				//Deleting previous setted permissions
 				if (reInitOnSet) {				
 					resetPermissions(companyId, resource);
 				}
 				
-				//Positionement des permissions d'apres le batch
+				//Setting permissions on resource
 				for (ModelRolePermissionBatch roleBatch : roleActions) {				
 					setPermissionsRole(roleBatch, resource);				
 				}
@@ -125,7 +125,7 @@ public class ImexModelPermissionSetterImpl implements ImexModelPermissionSetter 
 
 	
 	/**
-	 * Enffectu le traitement de reinitialisation des permissions
+	 * Réalise le traitement de reinitialisation des permissions
 	 * @param companyId
 	 * @param resource
 	 * @throws PortalException
@@ -172,12 +172,19 @@ public class ImexModelPermissionSetterImpl implements ImexModelPermissionSetter 
 			//Action convertion
 			List<String> actionIds = roleBatch.getActionIds();
 			String[] arrayActionIds = actionIds.toArray(new String[actionIds.size()]);
-				
-			Role role = roleLocalService.getRole(companyId, roleBatch.getRoleName());
-			resourcePermissionLocalService.setResourcePermissions(companyId, resourceName, resource.getScope(), resourcePrimKey, role.getRoleId(), arrayActionIds);
 			
-			_log.info("     [" + roleBatch.getRoleName() + "] -> " + Arrays.toString(arrayActionIds));
-						
+			if (arrayActionIds != null && arrayActionIds.length > 0) {
+				
+				Role role = roleLocalService.getRole(companyId, roleBatch.getRoleName());
+				resourcePermissionLocalService.setResourcePermissions(companyId, resourceName, resource.getScope(), resourcePrimKey, role.getRoleId(), arrayActionIds);
+				_log.debug("     [" + roleBatch.getRoleName() + "] -> " + Arrays.toString(arrayActionIds));
+			
+			} else {
+				
+				_log.debug("     [" + roleBatch.getRoleName() + "] as no defined permissions");
+				
+			}
+					
 		} else {
 			_log.warn("Invalid parameter : execution aborted ...");
 		}

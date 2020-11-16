@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Component;
@@ -215,6 +216,11 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 	
 	public void getError(Log logger, Exception e) {
 		getError(logger, "[An unexpected error occured]", e.getMessage());
+	}
+	
+	public void getError(Log logger, String name, Exception e) {
+		String stacktrace = ExceptionUtils.getStackTrace(e);
+		getError(logger, name, e.getMessage() + " " + stacktrace);
 	}
 	
 	/* Information messages */

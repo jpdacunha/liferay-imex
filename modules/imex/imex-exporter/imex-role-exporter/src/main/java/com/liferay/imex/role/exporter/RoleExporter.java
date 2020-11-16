@@ -122,7 +122,7 @@ public class RoleExporter implements Exporter {
 							reportService.getOK(_log, role.getName());
 						
 						} catch (Exception e) {
-							reportService.getError(_log, role.getName(), e.getMessage());
+							reportService.getError(_log, role.getName(), e);
 							if (debug) {
 								_log.error(e,e);
 							}

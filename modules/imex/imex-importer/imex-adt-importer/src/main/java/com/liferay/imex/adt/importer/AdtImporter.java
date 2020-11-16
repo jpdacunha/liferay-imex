@@ -242,7 +242,7 @@ public class AdtImporter implements Importer {
 					reportService.getOK(_log, groupName, "ADT : "  + template.getName(locale), adtFile, operation);
 				
 				}  catch (Exception e) {
-					reportService.getError(_log, adtFile.getName(), e.getMessage());
+					reportService.getError(_log, adtFile.getName(), e);
 					if (debug) {
 						_log.error(e,e);
 					}

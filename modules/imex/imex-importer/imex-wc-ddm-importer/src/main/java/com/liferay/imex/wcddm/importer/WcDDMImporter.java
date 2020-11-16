@@ -237,7 +237,7 @@ public class WcDDMImporter implements Importer {
 				reportService.getOK(_log, groupName, "STRUCTURE : "  + structure.getName(locale), structureFile, operation);
 				
 			}  catch (Exception e) {
-				reportService.getError(_log, structureFile.getName(), e.getMessage());
+				reportService.getError(_log, structureFile.getName(), e);
 				if (debug) {
 					_log.error(e,e);
 				}
@@ -335,7 +335,7 @@ public class WcDDMImporter implements Importer {
 					reportService.getOK(_log, groupName, "[TEMPLATE : " + template.getName(locale) + " => STRUCTURE : " + structure.getName(locale) + "]", templateFile, operation);
 					
 				} catch (Exception e) {
-					reportService.getError(_log, templateFile.getName(), e.getMessage());
+					reportService.getError(_log, templateFile.getName(), e);
 					if (debug) {
 						_log.error(e,e);
 					}

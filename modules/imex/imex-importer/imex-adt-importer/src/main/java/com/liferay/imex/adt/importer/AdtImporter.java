@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ResourceLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 
 import java.io.File;
@@ -237,7 +238,6 @@ public class AdtImporter implements Importer {
 					//Setting ADT permissions
 					Resource resource = resourceLocalService.getResource(template.getCompanyId(), DDMTemplate.class.getName(), ResourceConstants.SCOPE_INDIVIDUAL, template.getTemplateId() + "");
 					permissionSetter.setPermissions(config, bundle, resource);
-					
 					
 					reportService.getOK(_log, groupName, "ADT : "  + template.getName(locale), adtFile, operation);
 				

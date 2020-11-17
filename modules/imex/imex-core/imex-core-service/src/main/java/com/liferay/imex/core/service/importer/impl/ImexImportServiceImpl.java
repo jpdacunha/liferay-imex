@@ -20,11 +20,13 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.PortalUtil;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.osgi.framework.Bundle;
@@ -37,6 +39,8 @@ import org.pmw.tinylog.LoggingContext;
 
 @Component(immediate = true, service = ImexImportService.class)
 public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexImportService {
+	
+	public final static String IMEX_IMPORT_SERVICE_ERROR = "Importer core service error";
 	
 	private static final Log _log = LogFactoryUtil.getLog(ImexImportServiceImpl.class);
 	
@@ -201,7 +205,17 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 					serviceContext.setSignedIn(!user.isDefaultUser());
 				}
 				
-				Importer.doImport(bundle, serviceContext, user, config.getProperties(), companyDir, companyId, company.getLocale(), true);
+				//Managing locale
+				Locale locale = company.getLocale();
+				LocaleThreadLocal.setDefaultLocale(locale);
+				
+				if (locale == null) {
+					reportService.getError(_log, IMEX_IMPORT_SERVICE_ERROR, "company default locale is null");
+				} else {
+					reportService.getMessage(_log, "Using [" + locale + "] as default locale");
+				}
+				
+				Importer.doImport(bundle, serviceContext, user, config.getProperties(), companyDir, companyId, locale, true);
 				
 			} catch (PortalException e) {
 				_log.error(e,e);

@@ -8,10 +8,10 @@ import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.api.report.model.ImexOperationEnum;
 import com.liferay.imex.core.service.archiver.util.ZipUtils;
 import com.liferay.imex.core.util.statics.FileUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.File;
 import java.io.IOException;

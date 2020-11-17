@@ -207,6 +207,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 				
 				//Managing locale
 				Locale locale = company.getLocale();
+				//This is a workaround because Liferay is not abble to manage default locale correctly in batch mode
 				LocaleThreadLocal.setDefaultLocale(locale);
 				
 				if (locale == null) {

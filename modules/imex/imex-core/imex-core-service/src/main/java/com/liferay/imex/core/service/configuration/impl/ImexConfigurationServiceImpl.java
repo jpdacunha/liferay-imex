@@ -3,9 +3,7 @@ package com.liferay.imex.core.service.configuration.impl;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.exporter.Exporter;
-import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.importer.Importer;
-import com.liferay.imex.core.api.importer.ImporterTracker;
 import com.liferay.imex.core.util.configuration.ImExPropsValues;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
@@ -26,13 +24,20 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
 @Component(immediate = true, service = ImexConfigurationService.class)
 public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	
+	private static final String CONFIGURATION = "/configuration";
+
+	private static final String ARCHIVE = "/archive";
+
+	private static final String LOGS = "/logs";
+
+	private static final String DATA = "/data";
+
+	private static final String IMEX2 = "/imex";
+
 	private static final Log _log = LogFactoryUtil.getLog(ImexConfigurationServiceImpl.class);
 	
 	public final static String EXPORTER = "exporter";
@@ -40,10 +45,6 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	public final static String IMEX = "imex";
 	
 	private static final String DEFAULT_FILENAME_PREFIX = "default";
-	
-	private ImporterTracker importerTrackerService;
-	
-	private ExporterTracker exporterTrackerService;
 	
 	@Override
 	public void loadCoreConfiguration(ImexProperties props) {
@@ -87,7 +88,7 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	}
 	
 	@Override
-	public Map<String,Properties> loadAllConfigurationMap(List<String> bundleNames) {
+	public Map<String,Properties> loadAllConfigurationMap(List<String> bundleNames, Map<String, ServiceReference<Importer>> importers, Map<String, ServiceReference<Exporter>> exporters) {
 		
 		Map<String,Properties> conf = new HashMap<>();
 		
@@ -95,10 +96,10 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 		Map<String,Properties> coreConfig = loadCoreConfigurationMap();
 		conf.putAll(coreConfig);
 		
-		Map<String,Properties> importerConfig = loadImportersConfigurationMap(bundleNames);
+		Map<String,Properties> importerConfig = loadImportersConfigurationMap(bundleNames, importers);
 		conf.putAll(importerConfig);
 		
-		Map<String,Properties> exporterConfig = loadExportersConfigurationMap(bundleNames);
+		Map<String,Properties> exporterConfig = loadExportersConfigurationMap(bundleNames, exporters);
 		conf.putAll(exporterConfig);
 		
 		return conf;
@@ -155,16 +156,16 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 		
 	}
 	
-	private Map<String,Properties> loadImportersConfigurationMap(List<String> bundleNames) {
+	private Map<String,Properties> loadImportersConfigurationMap(List<String> bundleNames, Map<String, ServiceReference<Importer>> importers) {
 		
-		Map<String, ServiceReference<Importer>> importers = importerTrackerService.getFilteredImporters(bundleNames);
+		//Map<String, ServiceReference<Importer>> importers = importerTrackerService.getFilteredImporters(bundleNames);
 		return loadConfigurationMap(bundleNames, importers);
 		
 	}
 	
-	private Map<String,Properties> loadExportersConfigurationMap(List<String> bundleNames) {
+	private Map<String,Properties> loadExportersConfigurationMap(List<String> bundleNames, Map<String, ServiceReference<Exporter>> exporters) {
 		
-		Map<String, ServiceReference<Exporter>> exporters = exporterTrackerService.getFilteredExporters(bundleNames);
+		//Map<String, ServiceReference<Exporter>> exporters = exporterTrackerService.getFilteredExporters(bundleNames);
 		return loadConfigurationMap(bundleNames, exporters);
 		
 	}
@@ -260,45 +261,27 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 
 	@Override
 	public String getImexPath() {
-		return ImExPropsValues.DEPLOY_DIR + "/imex";
+		return ImExPropsValues.DEPLOY_DIR + IMEX2;
 	}
 	
 	@Override
 	public String getImexDataPath() {
-		return getImexPath() + "/data";
+		return getImexPath() + DATA;
 	}
 	
 	@Override
 	public String getImexLogsPath() {
-		return getImexPath() + "/logs";
+		return getImexPath() + LOGS;
 	}
 
 	@Override
 	public String getImexArchivePath() {
-		return getImexPath() + "/archive";
+		return getImexPath() + ARCHIVE;
 	}
 	
 	@Override
 	public String getImexCfgOverridePath() {
-		return getImexPath() + "/configuration";
-	}
-	
-	@Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
-	protected void setImporterTracker(ImporterTracker trackerService) {
-		this.importerTrackerService = trackerService;
-	}
-
-	protected void unsetImporterTracker(ImporterTracker trackerService) {
-		this.importerTrackerService = null;
-	}
-	
-	@Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
-	protected void setExporterTracker(ExporterTracker trackerService) {
-		this.exporterTrackerService = trackerService;
-	}
-
-	protected void unsetExporterTracker(ExporterTracker trackerService) {
-		this.exporterTrackerService = null;
+		return getImexPath() + CONFIGURATION;
 	}
 
 }

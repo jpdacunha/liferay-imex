@@ -4,7 +4,11 @@ import com.liferay.imex.core.api.ImexService;
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
+import com.liferay.imex.core.api.exporter.Exporter;
+import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.identifier.ProcessIdentifierGenerator;
+import com.liferay.imex.core.api.importer.Importer;
+import com.liferay.imex.core.api.importer.ImporterTracker;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.api.report.model.ImexOperationEnum;
 import com.liferay.imex.core.service.configuration.model.ConfigurationOverrideProcessIdentifier;
@@ -18,9 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.pmw.tinylog.LoggingContext;
 
 @Component(
@@ -40,6 +46,10 @@ public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService 
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexExecutionReportService reportService;
 	
+	private ImporterTracker importerTrackerService;
+	
+	private ExporterTracker exporterTrackerService;
+	
 	@Override
 	public String generateOverrideFileSystemConfigurationFiles() {
 		return generateOverrideFileSystemConfigurationFiles(null, true);
@@ -48,7 +58,9 @@ public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService 
 	@Override
 	public String generateOverrideFileSystemConfigurationFiles(List<String> bundleNames, boolean archive) {
 		
-		Map<String,Properties> props = configurationService.loadAllConfigurationMap(bundleNames);
+		Map<String, ServiceReference<Importer>> importers = importerTrackerService.getFilteredImporters(bundleNames);
+		Map<String, ServiceReference<Exporter>> exporters = exporterTrackerService.getFilteredExporters(bundleNames);		
+		Map<String,Properties> props = configurationService.loadAllConfigurationMap(bundleNames, importers, exporters);
 		
 		ProcessIdentifierGenerator processIdentifier = new ConfigurationOverrideProcessIdentifier();
 		
@@ -134,6 +146,24 @@ public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService 
 		
 		return cfgFile;
 			
+	}
+	
+	@Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
+	protected void setImporterTracker(ImporterTracker trackerService) {
+		this.importerTrackerService = trackerService;
+	}
+
+	protected void unsetImporterTracker(ImporterTracker trackerService) {
+		this.importerTrackerService = null;
+	}
+	
+	@Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
+	protected void setExporterTracker(ExporterTracker trackerService) {
+		this.exporterTrackerService = trackerService;
+	}
+
+	protected void unsetExporterTracker(ExporterTracker trackerService) {
+		this.exporterTrackerService = null;
 	}
 
 }

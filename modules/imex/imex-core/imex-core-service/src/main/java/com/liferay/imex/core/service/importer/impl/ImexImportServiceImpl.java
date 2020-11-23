@@ -126,7 +126,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 			}
 			
 		} catch (ImexException | PortalException e) {
-			_log.error(e,e);
+			reportService.getError(_log, "doImport", e);
 		}
 		
 		reportService.getEndMessage(_log, "import process");

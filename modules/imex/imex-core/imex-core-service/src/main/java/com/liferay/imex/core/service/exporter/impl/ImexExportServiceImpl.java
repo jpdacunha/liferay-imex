@@ -119,7 +119,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			}
 			
 		} catch (ImexException e) {
-			_log.error(e,e);
+			reportService.getError(_log, "doExport", e);
 		}
 		
 		reportService.getEndMessage(_log, "export process");

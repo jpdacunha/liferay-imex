@@ -11,11 +11,13 @@ import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.service.ImexServiceBaseImpl;
 import com.liferay.imex.core.service.exporter.model.ExporterProcessIdentifierGenerator;
 import com.liferay.imex.core.util.exception.ImexException;
+import com.liferay.imex.core.util.statics.UserUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.FileUtil;
 
@@ -109,16 +111,17 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 					reportService.getStartMessage(_log, company);
 					
 					long companyId = company.getCompanyId();
+					String companyName = company.getName();
 					
 					File companyDir = initializeCompanyExportDirectory(exportDir, company);
 					
-					executeRegisteredExporters(exporters, companyDir, companyId);
+					executeRegisteredExporters(exporters, companyDir, companyId, companyName);
 					
 				}
 				
 			}
 			
-		} catch (ImexException e) {
+		} catch (ImexException | PortalException e) {
 			reportService.getError(_log, "doExport", e);
 		}
 		
@@ -167,7 +170,14 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			
 	}
 	
-	private void executeRegisteredExporters(Map<String, ServiceReference<Exporter>> exporters, File destDir, long companyId) {
+	private void executeRegisteredExporters(Map<String, ServiceReference<Exporter>> exporters, File destDir, long companyId, String companyName) {
+		
+		User user = UserUtil.getDefaultAdmin(companyId);
+		
+		if (user == null) {
+			reportService.getError(_log, "Company [" + companyName + "]", "Missing omni admin user");
+			return;
+		}
 				
 		for (Map.Entry<String ,ServiceReference<Exporter>> entry  : exporters.entrySet()) {
 			
@@ -192,7 +202,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 		
 			try {
 				Company company = companyLocalService.getCompany(companyId);
-				exporter.doExport(config.getProperties(), destDir, companyId, company.getLocale(), true);
+				exporter.doExport(user, config.getProperties(), destDir, companyId, company.getLocale(), true);
 			} catch (PortalException e) {
 				_log.error(e,e);
 			}

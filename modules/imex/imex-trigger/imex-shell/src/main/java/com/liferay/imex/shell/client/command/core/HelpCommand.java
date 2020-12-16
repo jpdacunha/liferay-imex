@@ -23,13 +23,13 @@ public class HelpCommand implements ImexCommand {
 		System.out.println("Export commands :");
 		System.out.println("  imex:le : List available exporters");
 		System.out.println("  imex:ex  : Launch export process for all available exporters");
-		System.out.println("  imex:ex <Exporter_Name> : Launch export process identify by name");
+		System.out.println("  imex:ex [Exporter_Name] : Launch export process identify by name");
 		System.out.println(" ");
 		
 		System.out.println("Import commands :");
 		System.out.println("  imex:li : List available importers");
 		System.out.println("  imex:im  : Launch import process for all available importers");
-		System.out.println("  imex:im <Importer_Name> : Launch import process identify by name");
+		System.out.println("  imex:im [Importer_Name] : Launch import process identify by name");
 		
 	}
 

@@ -44,7 +44,7 @@ public class ImexNormalizer {
 	 */
 	public static String getFriendlyURLByDirName(String s) {
 		
-		//Remove first slashes of urls
+		//Add first slashes of urls
 		if (s != null && !s.startsWith(StringPool.SLASH)) {
 			s = StringPool.SLASH + s;
 		}

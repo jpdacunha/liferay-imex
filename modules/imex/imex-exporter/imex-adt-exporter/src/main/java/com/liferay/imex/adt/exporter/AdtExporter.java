@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
@@ -72,7 +73,7 @@ public class AdtExporter implements Exporter {
 	protected ImexExecutionReportService reportService;
 
 	@Override
-	public void doExport(Properties config, File destDir, long companyId, Locale locale, boolean debug) {
+	public void doExport(User user, Properties config, File destDir, long companyId, Locale locale, boolean debug) {
 		
 		reportService.getStartMessage(_log, "ADT export process");
 		
@@ -256,13 +257,13 @@ public class AdtExporter implements Exporter {
 	 */
 	private File initializeAdtExportDirectory(File exportDir) throws ImexException {
 		
-		File rolesDir = new File(exportDir, FileNames.DIR_ADT);
-		boolean success = rolesDir.mkdirs();
+		File adtsDir = new File(exportDir, FileNames.DIR_ADT);
+		boolean success = adtsDir.mkdirs();
 		if (!success) {
-			throw new ImexException("Failed to create directory " + rolesDir);
+			throw new ImexException("Failed to create directory " + adtsDir);
 		}
 		
-		return rolesDir;
+		return adtsDir;
 		
 	}
 

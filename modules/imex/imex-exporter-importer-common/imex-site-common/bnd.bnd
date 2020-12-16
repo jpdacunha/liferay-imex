@@ -1,4 +1,7 @@
 Bundle-Name: imex-site-common
 Bundle-SymbolicName: imex.site.common
 Bundle-Version: 1.0.0
-Export-Package: com.liferay.imex.site.model.api
+Export-Package: \
+	com.liferay.imex.site.model.api,\
+	com.liferay.imex.site.model,\
+	com.liferay.imex.site

@@ -14,6 +14,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Role;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -56,7 +57,7 @@ public class RoleExporter implements Exporter {
 	protected ImexExecutionReportService reportService;
 
 	@Override
-	public void doExport(Properties config, File destDir, long companyId, Locale locale, boolean debug) {
+	public void doExport(User user, Properties config, File destDir, long companyId, Locale locale, boolean debug) {
 		
 		reportService.getStartMessage(_log, "ROLE export process");
 		

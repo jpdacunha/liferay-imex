@@ -28,6 +28,8 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true, service = ImexConfigurationService.class)
 public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	
+	private static final Log _log = LogFactoryUtil.getLog(ImexConfigurationServiceImpl.class);
+	
 	private static final String CONFIGURATION = "/configuration";
 
 	private static final String ARCHIVE = "/archive";
@@ -38,8 +40,6 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 
 	private static final String IMEX2 = "/imex";
 
-	private static final Log _log = LogFactoryUtil.getLog(ImexConfigurationServiceImpl.class);
-	
 	public final static String EXPORTER = "exporter";
 	public final static String IMPORTER = "importer";
 	public final static String IMEX = "imex";

@@ -48,6 +48,10 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 )
 public class SiteExporter implements Exporter {
 	
+	private static final String EXPORT_SITE_PRIVATE_PAGE_PARAMETER_PREFIX = "export.site.private.page.parameter.";
+
+	private static final String EXPORT_SITE_PUBLIC_PAGE_PARAMETER_PREFIX = "export.site.public.page.parameter.";
+
 	public static final String DESCRIPTION = "SITE exporter";
 	
 	private static final Log _log = LogFactoryUtil.getLog(SiteExporter.class);
@@ -126,31 +130,43 @@ public class SiteExporter implements Exporter {
 		
 		File siteDir = initializeSingleSiteExportDirectory(sitesDir, group, locale);
 		
-		boolean privateLayout;
-		String groupName = GroupUtil.getGroupName(group, locale);
-		
-		try {
+		if (siteDir != null) {
 			
-			processor.write(new ImExSite(group), siteDir, FileNames.getSiteFileName(group, locale, processor.getFileExtension()));
+			if (siteDir.exists()) {
+			
+				boolean privateLayout;
+				String groupName = GroupUtil.getGroupName(group, locale);
 				
-		} catch (Exception e) {
-			reportService.getError(_log, groupName, e);
-			if (debug) {
-				_log.error(e,e);
+				try {
+					
+					processor.write(new ImExSite(group), siteDir, FileNames.getSiteFileName(group, locale, processor.getFileExtension()));
+						
+				} catch (Exception e) {
+					reportService.getError(_log, groupName, e);
+					if (debug) {
+						_log.error(e,e);
+					}
+				}
+				
+				if (privatePagesEnabled) {
+					privateLayout = true;
+					doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
+				}
+		
+				if (publicPagesEnabled) {
+					privateLayout = false;
+					doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
+				}
+				
+				reportService.getOK(_log, groupName, "SITE : "  + groupName);
+				
+			} else {
+				reportService.getDNE(_log, siteDir.getAbsolutePath());
 			}
-		}
-		
-		if (privatePagesEnabled) {
-			privateLayout = true;
-			doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
-		}
-
-		if (publicPagesEnabled) {
-			privateLayout = false;
-			doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
-		}
-		
-		reportService.getOK(_log, groupName, "SITE : "  + groupName);
+			
+		} else {
+			_log.error("siteDir is null ...");						
+		}	
 		
 	}
 
@@ -159,9 +175,9 @@ public class SiteExporter implements Exporter {
 		
 		int exportType = ExportImportConfigurationConstants.TYPE_EXPORT_LAYOUT;
 		
-		String prefix = "export.site.public.page.parameter.";
+		String prefix = EXPORT_SITE_PUBLIC_PAGE_PARAMETER_PREFIX;
 		if (privateLayout) {
-			prefix = "export.site.private.page.parameter.";
+			prefix = EXPORT_SITE_PRIVATE_PAGE_PARAMETER_PREFIX;
 		}
 		
 		long groupId = group.getGroupId();
@@ -180,70 +196,9 @@ public class SiteExporter implements Exporter {
 		String fileName = FileNames.getLarSiteFileName(group, privateLayout, locale);
 		
 		larService.doExport(exportImportConfiguration, siteDir, fileName);
-		
-//		if (group != null) {
-//			
-//			long classNameId = classNameLocalService.getClassNameId(classType);			
-//			List<DDMTemplate> adts = dDMTemplateLocalService.getTemplates(group.getGroupId(), classNameId);
-//			
-//			if (adts != null && adts.size() > 0) {
-//			
-//				File groupDir = initializeSingleGroupDirectory(groupsDir, group);
-//				
-//				if (groupDir != null) {
-//					
-//					if (groupDir.exists()) {
-//				
-//						//Iterate over structures
-//						for(DDMTemplate ddmTemplate : adts){
-//												
-//							File adtDir = initializeSingleAdtExportDirectory(groupDir, classType);
-//							
-//							if (adtDir != null) {
-//								
-//								if (adtDir.exists()) {
-//							
-//									try {
-//										
-//										String groupName = GroupUtil.getGroupName(group, locale);
-//										
-//										processor.write(new ImExAdt(ddmTemplate, classType), adtDir, FileNames.getAdtFileName(ddmTemplate, group, locale, processor.getFileExtension()));
-//										reportService.getOK(_log, groupName, "ADT : "  + ddmTemplate.getName(locale) + ", type : " + classType);
-//										
-//									} catch (Exception e) {
-//										reportService.getError(_log, ddmTemplate.getName(locale), e);
-//										if (debug) {
-//											_log.error(e,e);
-//										}
-//									}
-//							
-//								} else {
-//									reportService.getDNE(_log, adtDir.getAbsolutePath());
-//								}
-//								
-//							} else {
-//								_log.error("adtDir is null ...");						
-//							}
-//							
-//						}
-//						
-//					} else {
-//						reportService.getDNE(_log, groupDir.getAbsolutePath());
-//					}
-//					
-//				} else {
-//					_log.error("groupDir is null ...");
-//				}
-//				
-//			} else {
-//				reportService.getEmpty(_log, group, locale, classType);				
-//			}
-//			
-//		} else {
-//			_log.error("Skipping null group ...");
-//		}
-//		
+			
 	}
+	
 
 	@Override
 	public String getProcessDescription() {

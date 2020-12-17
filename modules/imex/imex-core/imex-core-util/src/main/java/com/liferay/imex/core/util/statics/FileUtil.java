@@ -1,5 +1,6 @@
 package com.liferay.imex.core.util.statics;
 
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
@@ -9,6 +10,8 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 
 public class FileUtil {
+	
+	public final static String LAR_EXTENSION = ".lar";
 	
 	private static final Log _log = LogFactoryUtil.getLog(FileUtil.class);
 	
@@ -60,6 +63,22 @@ public class FileUtil {
 	    int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
 	    return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
 	    
+	}
+	
+	public static void isValidDirectory(File destinationDir) throws SystemException {
+		
+		if (destinationDir == null) {
+			throw new SystemException("Invalid null destination directory");
+		}
+		
+		if (!destinationDir.exists()) {
+			throw new SystemException("[" + destinationDir.getAbsolutePath() + "] does not exists");
+		}
+		
+		if (!destinationDir.isDirectory()) {
+			throw new SystemException("[" + destinationDir.getAbsolutePath() + "] is not a directory");
+		}
+		
 	}
 
 }

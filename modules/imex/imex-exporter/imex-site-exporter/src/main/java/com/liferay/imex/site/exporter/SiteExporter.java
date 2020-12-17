@@ -1,7 +1,6 @@
 package com.liferay.imex.site.exporter;
 
 import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationConstants;
-import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationParameterMapFactoryUtil;
 import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationSettingsMapFactoryUtil;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.imex.core.api.exporter.Exporter;
@@ -125,7 +124,6 @@ public class SiteExporter implements Exporter {
 	
 	private void doExport(User user, Properties config, Locale locale, boolean debug, boolean privatePagesEnabled, boolean publicPagesEnabled, File sitesDir, Group group) throws PortalException, ImexException { 
 		
-		
 		File siteDir = initializeSingleSiteExportDirectory(sitesDir, group, locale);
 		
 		boolean privateLayout;
@@ -134,8 +132,7 @@ public class SiteExporter implements Exporter {
 		try {
 			
 			processor.write(new ImExSite(group), siteDir, FileNames.getSiteFileName(group, locale, processor.getFileExtension()));
-			reportService.getOK(_log, groupName, "SITE : "  + groupName);
-			
+				
 		} catch (Exception e) {
 			reportService.getError(_log, groupName, e);
 			if (debug) {
@@ -152,68 +149,37 @@ public class SiteExporter implements Exporter {
 			privateLayout = false;
 			doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
 		}
+		
+		reportService.getOK(_log, groupName, "SITE : "  + groupName);
+		
 	}
 
 	
-	private void doExportLar(User user, Properties config, Group group, File adtDir, Locale locale, boolean privateLayout, boolean debug) throws PortalException {
+	private void doExportLar(User user, Properties config, Group group, File siteDir, Locale locale, boolean privateLayout, boolean debug) throws PortalException {
 		
 		int exportType = ExportImportConfigurationConstants.TYPE_EXPORT_LAYOUT;
+		
+		String prefix = "export.site.public.page.parameter.";
+		if (privateLayout) {
+			prefix = "export.site.private.page.parameter.";
+		}
 		
 		long groupId = group.getGroupId();
 		long userId = user.getUserId();
 		String name = "IMEX : site export process";
 		String description = "This an automatic site export triggered by IMEX";
 		
-		String dataStrategy = null; 
-		Boolean deleteMissingLayouts = null;
-		Boolean deletePortletData = null; 
-		Boolean deletions = null;
-		Boolean ignoreLastPublishDate = null; 
-		Boolean layoutSetPrototypeLinkEnabled = null;
-		Boolean layoutSetSettings = null; 
-		Boolean logo = null; 
-		Boolean permissions = null;
-		Boolean portletConfiguration = null; 
-		Boolean portletConfigurationAll = null;
-		List<String> portletConfigurationPortletIds = null; 
-		Boolean portletData = null;
-		Boolean portletDataAll = null; 
-		List<String> portletDataPortletIds = null;
-		Boolean portletSetupAll = null; 
-		List<String> portletSetupPortletIds = null;
-		String range = null;
-		Boolean themeReference = null;
-		Boolean updateLastPublishDate = null;
-		String userIdStrategy = null;
-		
-		Map<String, String[]> parameterMap = ExportImportConfigurationParameterMapFactoryUtil.buildParameterMap(
-				dataStrategy, 
-				deleteMissingLayouts, 
-				deletePortletData, 
-				deletions, 
-				ignoreLastPublishDate, 
-				layoutSetPrototypeLinkEnabled, 
-				layoutSetSettings, 
-				logo, 
-				permissions, 
-				portletConfiguration, 
-				portletConfigurationAll, 
-				portletConfigurationPortletIds, 
-				portletData, 
-				portletDataAll, 
-				portletDataPortletIds, 
-				portletSetupAll, 
-				portletSetupPortletIds, 
-				range, 
-				themeReference, 
-				updateLastPublishDate, 
-				userIdStrategy);
-		
 		long[] layoutIds = null;
+		
+		Map<String, String[]> parameterMap = larService.buildParameterMapFromProperties(config, prefix);
 		
 		Map<String, Serializable> settingsMap = ExportImportConfigurationSettingsMapFactoryUtil.buildExportLayoutSettingsMap(user, groupId, privateLayout, layoutIds, parameterMap);
 
 		ExportImportConfiguration exportImportConfiguration = larService.createExportImportConfiguration(groupId, userId, name, description, exportType, settingsMap, new ServiceContext());
+		
+		String fileName = FileNames.getLarSiteFileName(group, privateLayout, locale);
+		
+		larService.doExport(exportImportConfiguration, siteDir, fileName);
 		
 //		if (group != null) {
 //			

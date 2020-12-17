@@ -4,16 +4,21 @@ import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
 import com.liferay.exportimport.kernel.service.ExportImportLocalService;
 import com.liferay.imex.core.api.lar.ImexLarService;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.PropertiesUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -30,11 +35,19 @@ public class ImexLarServiceImpl implements ImexLarService {
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	private ExportImportConfigurationLocalService exportImportConfigurationLocalService;
 	
-	public void doImport(long userId, Group group, File groupDir, File larFile) throws SystemException, PortalException {
+	@Override
+	public void doExport(ExportImportConfiguration exportImportConfiguration, File destinationDir, String fileName) throws SystemException, PortalException {
 		
-		//ExportImportConfiguration exportImportConfiguration = 
+		com.liferay.imex.core.util.statics.FileUtil.isValidDirectory(destinationDir);	
 		
-		//_exportImportService.exportLayoutsAsFile(exportImportConfiguration)
+		if (Validator.isNull(fileName)) {
+			throw new SystemException("Invalid file name");
+		}
+		
+		File larFile = exportImportService.exportLayoutsAsFile(exportImportConfiguration);
+		
+		FileUtil.move(larFile, new File(destinationDir.getAbsolutePath() + StringPool.SLASH +  fileName));
+		
 		
 	}
 	
@@ -43,6 +56,27 @@ public class ImexLarServiceImpl implements ImexLarService {
 	
 		return exportImportConfigurationLocalService.addExportImportConfiguration(userId, groupId, name, description, type, settingsMap, serviceContext);
 		
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Map<String, String[]> buildParameterMapFromProperties(Properties props, String prefix) {
+		
+		if (props == null) {
+			return null;
+		}
+		
+		boolean removePrefix = true;
+		Properties parameterProperties = PropertiesUtil.getProperties(props, prefix, removePrefix);
+		
+		Map<String, String[]> parameterMap = new HashMap<String, String[]>();
+		for (Map.Entry entry : parameterProperties.entrySet()) {
+			String key = (String)entry.getKey();
+			String[] value = ((String)entry.getValue()).split(",");
+			parameterMap.put(key, value);
+		}
+		
+		return parameterMap;
 	}
 	
 }

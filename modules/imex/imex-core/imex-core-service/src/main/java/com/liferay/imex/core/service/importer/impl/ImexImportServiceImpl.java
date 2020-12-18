@@ -169,7 +169,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 			return;
 		}
 		
-		reportService.getStartMessage(_log, "[" + companyName + "] import process");
+		reportService.getStartMessage(_log, "company : [" + companyName + "] import process");
 		reportService.getMessage(_log, "Using user [" + user.getEmailAddress() + "] as default user");
 		
 		for (Map.Entry<String ,ServiceReference<Importer>> entry  : importers.entrySet()) {

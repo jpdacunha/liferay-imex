@@ -8,10 +8,12 @@ import com.liferay.imex.core.api.lar.ImexLarService;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.util.exception.ImexException;
+import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.site.FileNames;
 import com.liferay.imex.site.exporter.configuration.ImExSiteExporterPropsKeys;
 import com.liferay.imex.site.model.ImExSite;
+import com.liferay.imex.site.util.SiteCommonUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -86,7 +88,11 @@ public class SiteExporter implements Exporter {
 					
 					File sitesDir = initializeExportDirectory(destDir);
 					
-					List<Group> groups = groupLocalService.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+					List<Group> bddGroups = groupLocalService.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+					
+					List<Group> includedGroups = manageSitesExclusions(config, bddGroups);
+					
+					List<Group> groups = manageSitesOrder(config, includedGroups);
 					
 					for (Group group : groups) {
 											
@@ -108,8 +114,6 @@ public class SiteExporter implements Exporter {
 						}
 					}
 
-					// TODO : JDA Global Scope Export
-					
 				} catch (ImexException e) {
 					_log.error(e,e);
 					reportService.getError(_log, e);
@@ -124,7 +128,11 @@ public class SiteExporter implements Exporter {
 		reportService.getEndMessage(_log, "SITE export process");
 		
 	}
-
+	
+	@Override
+	public String getProcessDescription() {
+		return DESCRIPTION;
+	}
 	
 	private void doExport(User user, Properties config, Locale locale, boolean debug, boolean privatePagesEnabled, boolean publicPagesEnabled, File sitesDir, Group group) throws PortalException, ImexException { 
 		
@@ -170,6 +178,24 @@ public class SiteExporter implements Exporter {
 		
 	}
 
+	private List<Group> manageSitesOrder(Properties config, List<Group> groups) {
+		
+		String stringList = GetterUtil.getString(config.get(ImExSiteExporterPropsKeys.EXPORT_SITE_ORDER_FRIENDLYURL_LIST));
+		List<String> friendlyUrlsToExclude = CollectionUtil.getList(stringList);
+		
+		return SiteCommonUtil.managePriority(friendlyUrlsToExclude, groups);
+		
+	}
+	
+	private List<Group> manageSitesExclusions(Properties config, List<Group> groups) {
+		
+		String stringList = GetterUtil.getString(config.get(ImExSiteExporterPropsKeys.EXPORT_SITE_EXCLUDE_FRIENDLYURL_LIST));
+		List<String> friendlyUrlsToExclude = CollectionUtil.getList(stringList);
+		
+		return SiteCommonUtil.manageExclusions(friendlyUrlsToExclude, groups);
+		
+	}
+	
 	
 	private void doExportLar(User user, Properties config, Group group, File siteDir, Locale locale, boolean privateLayout, boolean debug) throws PortalException {
 		
@@ -197,12 +223,6 @@ public class SiteExporter implements Exporter {
 		
 		larService.doExport(exportImportConfiguration, siteDir, fileName);
 			
-	}
-	
-
-	@Override
-	public String getProcessDescription() {
-		return DESCRIPTION;
 	}
 	
 	/**
@@ -237,6 +257,30 @@ public class SiteExporter implements Exporter {
 		dir.mkdirs();		
 		return dir;
 		
+	}
+
+	public GroupLocalService getGroupLocalService() {
+		return groupLocalService;
+	}
+
+	public void setGroupLocalService(GroupLocalService groupLocalService) {
+		this.groupLocalService = groupLocalService;
+	}
+
+	public CompanyLocalService getCompanyLocalService() {
+		return companyLocalService;
+	}
+
+	public void setCompanyLocalService(CompanyLocalService companyLocalService) {
+		this.companyLocalService = companyLocalService;
+	}
+
+	public ImexLarService getLarService() {
+		return larService;
+	}
+
+	public void setLarService(ImexLarService larService) {
+		this.larService = larService;
 	}
 	
 }

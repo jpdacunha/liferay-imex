@@ -32,7 +32,7 @@ public class SiteCommonUtil {
 		}
 		
 		if (filteredResult == null || filteredResult.size() == 0) {
-			return null;
+			return groupDirs;
 		} else {
 			return filteredResult.toArray(new File[filteredResult.size()]);
 		}
@@ -80,7 +80,7 @@ public class SiteCommonUtil {
 		}
 		
 		if (orderedResult == null || orderedResult.size() == 0) {
-			return null;
+			return groupDirs;
 		} else {
 			
 			//Adding missing directories to the end 

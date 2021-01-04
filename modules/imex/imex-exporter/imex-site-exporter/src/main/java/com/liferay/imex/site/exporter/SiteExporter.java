@@ -147,7 +147,7 @@ public class SiteExporter implements Exporter {
 				
 				try {
 					
-					processor.write(new ImExSite(group), siteDir, FileNames.getSiteFileName(group, locale, processor.getFileExtension()));
+					processor.write(new ImExSite(group), siteDir, FileNames.getSiteFileName(group, processor.getFileExtension()));
 						
 				} catch (Exception e) {
 					reportService.getError(_log, groupName, e);

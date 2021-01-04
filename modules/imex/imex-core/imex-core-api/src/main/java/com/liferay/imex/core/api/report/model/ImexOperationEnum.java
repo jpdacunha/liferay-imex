@@ -4,7 +4,8 @@ public enum ImexOperationEnum {
 	
 	   CREATE ("CREATE"),
 	   UPDATE   ("UPDATE"),
-	   DELETE   ("DELETE");
+	   DELETE   ("DELETE"),
+	   SKIPPED   ("SKIPPED");
 	
 
     private final String value;

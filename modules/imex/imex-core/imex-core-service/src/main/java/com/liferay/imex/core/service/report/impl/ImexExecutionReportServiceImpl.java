@@ -196,13 +196,17 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 		
 	}
 	
+	public void getOK(Log logger, String key, String name, ImexOperationEnum operation) {
+		getOK(logger, key, name, null, operation);	
+	}
+	
 	public void getOK(Log logger, String key, String name, File file, ImexOperationEnum operation) {
 		
 		String message = "[" + operation.getValue() + "] [" + key + "]=>[" + name + "] [   OK  ]";		
 		if (file != null) {
 			message += " - (" + file.getAbsolutePath() + ")";
 		} else {
-			_log.warn("file is null");
+			_log.debug("file is null");
 		}
 		getMessage(logger, message , 4);
 		

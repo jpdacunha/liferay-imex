@@ -13,8 +13,10 @@ import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.site.FileNames;
 import com.liferay.imex.site.exporter.configuration.ImExSiteExporterPropsKeys;
 import com.liferay.imex.site.model.ImExSite;
+import com.liferay.imex.site.service.SiteCommonService;
 import com.liferay.imex.site.util.SiteCommonUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.exception.NoSuchGroupException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -72,6 +74,9 @@ public class SiteExporter implements Exporter {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexProcessor processor;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected SiteCommonService siteCommonService;
 
 	@Override
 	public void doExport(User user, Properties config, File destDir, long companyId, Locale locale, boolean debug) {
@@ -100,7 +105,7 @@ public class SiteExporter implements Exporter {
 						if (isSite) {
 							
 							reportService.getStartMessage(_log, group, locale);
-							doExport(user, config, locale, debug, privatePagesEnabled, publicPagesEnabled, sitesDir, group);
+							doExport(companyId, user, config, locale, debug, privatePagesEnabled, publicPagesEnabled, sitesDir, group);
 							reportService.getEndMessage(_log, group, locale);
 							
 						} else {
@@ -134,7 +139,7 @@ public class SiteExporter implements Exporter {
 		return DESCRIPTION;
 	}
 	
-	private void doExport(User user, Properties config, Locale locale, boolean debug, boolean privatePagesEnabled, boolean publicPagesEnabled, File sitesDir, Group group) throws PortalException, ImexException { 
+	private void doExport(long companyId, User user, Properties config, Locale locale, boolean debug, boolean privatePagesEnabled, boolean publicPagesEnabled, File sitesDir, Group group) throws PortalException, ImexException { 
 		
 		File siteDir = initializeSingleSiteExportDirectory(sitesDir, group, locale);
 		
@@ -144,11 +149,19 @@ public class SiteExporter implements Exporter {
 			
 				boolean privateLayout;
 				String groupName = GroupUtil.getGroupName(group, locale);
+				String parentGroupIdFriendlyUrl = null;
 				
 				try {
 					
-					processor.write(new ImExSite(group), siteDir, FileNames.getSiteFileName(group, processor.getFileExtension()));
+					parentGroupIdFriendlyUrl = siteCommonService.getParentSiteFriendlyURL(companyId, group.getParentGroupId());	
+					processor.write(new ImExSite(group, parentGroupIdFriendlyUrl), siteDir, FileNames.getSiteFileName(group, processor.getFileExtension()));
 						
+				} catch (NoSuchGroupException e1) {
+					reportService.getError(_log, groupName, "Site identified by [" + parentGroupIdFriendlyUrl + "] is a parent site an it does not exists. Maybe you can use [" + ImExSiteExporterPropsKeys.EXPORT_SITE_ORDER_FRIENDLYURL_LIST + "] to configure IMEX to import the parent site prior to child site.");
+					if (debug) {
+						_log.error(e1,e1);
+					}					
+					
 				} catch (Exception e) {
 					reportService.getError(_log, groupName, e);
 					if (debug) {

@@ -4,7 +4,6 @@ import com.liferay.counter.kernel.service.CounterLocalService;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
-import com.liferay.imex.core.api.report.model.ImexOperationEnum;
 import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.imex.core.util.statics.ImexNormalizer;
@@ -12,19 +11,25 @@ import com.liferay.imex.site.FileNames;
 import com.liferay.imex.site.importer.configuration.ImExSiteImporterPropsKeys;
 import com.liferay.imex.site.importer.service.ImportSiteBehaviorManagerService;
 import com.liferay.imex.site.model.ImExSite;
+import com.liferay.imex.site.model.OnExistsSiteMethodEnum;
 import com.liferay.imex.site.model.OnMissingSiteMethodEnum;
+import com.liferay.imex.site.service.SiteCommonService;
 import com.liferay.imex.site.util.SiteCommonUtil;
+import com.liferay.portal.kernel.exception.DuplicateGroupException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.UnicodeProperties;
 
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 import org.osgi.framework.Bundle;
@@ -61,6 +66,9 @@ public class SiteImporter implements Importer {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImportSiteBehaviorManagerService behaviorManagerService;
+		
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected SiteCommonService siteCommonService;
 
 	@Override
 	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
@@ -117,71 +125,84 @@ public class SiteImporter implements Importer {
 					
 					ImExSite imexSite = (ImExSite)processor.read(ImExSite.class, groupDir, siteDescriptorFileName);
 					
+					Group group = null;
+					
+					UnicodeProperties typeSettingsProperties = imexSite.getUnicodeProperties();
+					
 					boolean site = imexSite.isSite();
 					long userId = user.getUserId();
 					String className = imexSite.getClassName();
-					String name = imexSite.getName();
-					String description = imexSite.getDescription();
-					int type = imexSite.getType().getIntValue();
+					long classPK = imexSite.getClassPK();
+					Map<Locale, String> nameMap = imexSite.getNameMap();
+					Map<Locale, String> descriptionMap = imexSite.getDescriptionMap();
+					int type = imexSite.getType();
 					String friendlyURL = imexSite.getFriendlyURL();
 					boolean active = imexSite.isActive();
-					//TODO : JDA manage parent groupID for Phenix
-					long parentGroupId = GroupConstants.DEFAULT_PARENT_GROUP_ID;
-					int membershipRestriction = GroupConstants.DEFAULT_MEMBERSHIP_RESTRICTION;
-					boolean manualMembership = true;
+					int membershipRestriction = imexSite.getMemberShipRestriction();
+					boolean manualMembership = imexSite.isManualMemberShip();
+					boolean inheritContent = imexSite.isInheritContent();
+					
 					long liveGroupId = GroupConstants.DEFAULT_LIVE_GROUP_ID;
 					
-					//try {
+					long parentGroupId = siteCommonService.getSiteParentGroupId(companyId, imexSite.getParentGroupIdFriendlyUrl());
+					
+					String logPrefix = "SITE : "  + groupFriendlyUrl;
+					
+					try {
 						
 						OnMissingSiteMethodEnum createMethod = behaviorManagerService.getOnMissingBehavior(config, groupFriendlyUrl);
 
 						if (createMethod.getValue().equals(OnMissingSiteMethodEnum.CREATE.getValue())) {
 							
-//							group = GroupLocalServiceUtil.addGroup(userId, parentGroupId, className, classPK, liveGroupId, name, description, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
-//							doImportLars(groupDir, options, userId, group);
-//							GroupLocalServiceUtil.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
-							
-							reportService.getOK(_log, dirName, "SITE : "  + groupFriendlyUrl, ImexOperationEnum.CREATE);
+							group = groupLocalService.addGroup(userId, parentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
+							//TODO : JDA import LARS here
+							//doImportLars(groupDir, options, userId, group);
+							groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
 							
 						} else {
-							reportService.getOK(_log, dirName, "SITE : "  + groupFriendlyUrl, ImexOperationEnum.SKIPPED);
+							_log.debug("Site creation were skipped.");
 						}
 						
-					//} catch(DuplicateGroupException e) {
+						reportService.getOK(_log, dirName, logPrefix, createMethod.getValue());
 						
-//						//Chargement du group
-//						group = GroupLocalServiceUtil.getFriendlyURLGroup(companyId, friendlyURL);
-//						
-//						if (!duplicateMethod.getValue().equals(OnDuplicateMethodEnum.SKIP.getValue())) {
-//
-//							long groupId = group.getGroupId();
-//							
-//							//Si le group existe
-//							if (duplicateMethod.getValue().equals(OnDuplicateMethodEnum.UPDATE.getValue())) {
-//								
-//								GroupLocalServiceUtil.updateGroup(groupId, group.getParentGroupId(), name, description, type, true, 0, friendlyURL, active, serviceContext);
-//								
-//							} else if (duplicateMethod.getValue().equals(OnDuplicateMethodEnum.REPLACE.getValue())) {
-//								
-//								//Suppression du Group
-//								GroupLocalServiceUtil.deleteGroup(group);
-//													
-//								//Creation du group
-//								group = GroupLocalServiceUtil.addGroup(userId, parentGroupId, className, classPK, liveGroupId, name, description, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
-//								
-//							}
-//							
-//							//Importing LARS
-//							doImportLars(groupDir, options, userId, group);
-//							GroupLocalServiceUtil.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
-//							
-//							_log.info("[" + group.getFriendlyURL() + "] => ["  + duplicateMethod.getValue() + "] Done.");
-//							
-//						} else {
-//							_log.info("[" + group.getFriendlyURL() + "] => ["  + duplicateMethod.getValue() + "] Done.");
-//						}
+					} catch(DuplicateGroupException e) {
 						
-					//}
+						//Loading Liferay site
+						group = groupLocalService.getFriendlyURLGroup(companyId, friendlyURL);
+						
+						OnExistsSiteMethodEnum duplicateMethod = behaviorManagerService.getOnExistsBehavior(config, group);
+						
+						if (!duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.SKIP.getValue())) {
+
+							long groupId = group.getGroupId();
+							
+							//Si le group existe
+							if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.UPDATE.getValue())) {
+								
+								groupLocalService.updateGroup(groupId, parentGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, inheritContent, active, serviceContext);
+								
+							} else if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.REPLACE.getValue())) {
+								
+								//Suppression du Group
+								groupLocalService.deleteGroup(group);
+													
+								//Creation du group
+								group = groupLocalService.addGroup(userId, parentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
+								
+							}
+							
+							//Importing LARS
+							//TODO : JDA import LARS here
+							//doImportLars(groupDir, options, userId, group);
+							groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
+						
+							reportService.getOK(_log, dirName, logPrefix, duplicateMethod.getValue());
+							
+						} else {
+							reportService.getOK(_log, dirName, logPrefix, duplicateMethod.getValue());
+						}
+						
+					}
 					
 				} catch (Exception e) {
 					reportService.getError(_log, groupFriendlyUrl, e);
@@ -237,6 +258,66 @@ public class SiteImporter implements Importer {
 	@Override
 	public String getProcessDescription() {
 		return DESCRIPTION;
+	}
+
+
+	public ImexProcessor getProcessor() {
+		return processor;
+	}
+
+
+	public void setProcessor(ImexProcessor processor) {
+		this.processor = processor;
+	}
+
+
+	public GroupLocalService getGroupLocalService() {
+		return groupLocalService;
+	}
+
+
+	public void setGroupLocalService(GroupLocalService groupLocalService) {
+		this.groupLocalService = groupLocalService;
+	}
+
+
+	public CounterLocalService getCounterLocalService() {
+		return counterLocalService;
+	}
+
+
+	public void setCounterLocalService(CounterLocalService counterLocalService) {
+		this.counterLocalService = counterLocalService;
+	}
+
+
+	public ImexExecutionReportService getReportService() {
+		return reportService;
+	}
+
+
+	public void setReportService(ImexExecutionReportService reportService) {
+		this.reportService = reportService;
+	}
+
+
+	public ImportSiteBehaviorManagerService getBehaviorManagerService() {
+		return behaviorManagerService;
+	}
+
+
+	public void setBehaviorManagerService(ImportSiteBehaviorManagerService behaviorManagerService) {
+		this.behaviorManagerService = behaviorManagerService;
+	}
+
+
+	public SiteCommonService getSiteCommonService() {
+		return siteCommonService;
+	}
+
+
+	public void setSiteCommonService(SiteCommonService siteCommonService) {
+		this.siteCommonService = siteCommonService;
 	}
 
 }

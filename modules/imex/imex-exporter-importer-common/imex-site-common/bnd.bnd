@@ -5,4 +5,5 @@ Export-Package: \
 	com.liferay.imex.site.model.api,\
 	com.liferay.imex.site.model,\
 	com.liferay.imex.site,\
-	com.liferay.imex.site.util
+	com.liferay.imex.site.util,\
+	com.liferay.imex.site.service

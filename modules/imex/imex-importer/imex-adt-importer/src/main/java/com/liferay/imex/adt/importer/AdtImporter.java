@@ -42,7 +42,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 @Component(
 		immediate = true,
 		property = {
-			"imex.component.execution.priority=100",
+			"imex.component.execution.priority=90",
 			"imex.component.description=ADT importer",
 			"service.ranking:Integer=10"
 		},

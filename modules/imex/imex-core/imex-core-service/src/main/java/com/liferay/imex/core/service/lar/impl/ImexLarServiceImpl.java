@@ -9,6 +9,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.PropertiesUtil;
@@ -49,6 +50,31 @@ public class ImexLarServiceImpl implements ImexLarService {
 		FileUtil.move(larFile, new File(destinationDir.getAbsolutePath() + StringPool.SLASH +  fileName));
 		
 		
+	}
+	
+	@Override
+	public long doImport(User user, ExportImportConfiguration exportImportConfiguration, File sourceDir, String fileName) throws SystemException, PortalException {
+			
+		if (Validator.isNull(user)) {
+			throw new SystemException("Invalid user");
+		}
+		
+		com.liferay.imex.core.util.statics.FileUtil.isValidDirectory(sourceDir);	
+		
+		if (Validator.isNull(fileName)) {
+			throw new SystemException("Invalid file name");
+		}
+		
+		long userId = user.getUserId();
+		
+		File toImport = new File(sourceDir.getAbsolutePath() + StringPool.SLASH +  fileName);
+		
+		exportImportService.importLayouts(exportImportConfiguration, toImport);
+		
+		//TODO : JDA manage export in background
+		//return exportImportService.importLayoutsInBackground(userId, exportImportConfiguration, toImport);
+		
+		return 0;
 	}
 	
 	@Override

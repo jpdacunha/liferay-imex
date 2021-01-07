@@ -74,7 +74,7 @@ public class SiteCommonUtil {
 				_log.warn("Ambiguous value detected : more than one result is matching [" + friendlyUrl + "] in group directory list");
 				
 			} else {
-				_log.warn("[" + friendlyUrl + "] is marqued to be excluded but it's does not exists as a directory");
+				_log.debug("[" + friendlyUrl + "] is marqued to be excluded but it's does not exists as a directory");
 			}
 			
 		}

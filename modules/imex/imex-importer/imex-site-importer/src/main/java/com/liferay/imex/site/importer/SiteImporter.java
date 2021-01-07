@@ -1,7 +1,12 @@
 package com.liferay.imex.site.importer;
 
 import com.liferay.counter.kernel.service.CounterLocalService;
+import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationConstants;
+import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationSettingsMapFactoryUtil;
+import com.liferay.exportimport.kernel.exception.LARFileNameException;
+import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.imex.core.api.importer.Importer;
+import com.liferay.imex.core.api.lar.ImexLarService;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.util.statics.CollectionUtil;
@@ -27,6 +32,7 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -49,8 +55,13 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 public class SiteImporter implements Importer {
 	
 	private static final String DESCRIPTION = "SITE import";
+	
+	private static final String IMPORT_SITE_PRIVATE_PAGE_PARAMETER_PREFIX = "import.site.private.page.parameter.";
+
+	private static final String IMPORT_SITE_PUBLIC_PAGE_PARAMETER_PREFIX = "import.site.public.page.parameter.";
 
 	private static final Log _log = LogFactoryUtil.getLog(SiteImporter.class);
+
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexProcessor processor;
@@ -69,6 +80,9 @@ public class SiteImporter implements Importer {
 		
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected SiteCommonService siteCommonService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexLarService larService;
 
 	@Override
 	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
@@ -144,6 +158,7 @@ public class SiteImporter implements Importer {
 					
 					long liveGroupId = GroupConstants.DEFAULT_LIVE_GROUP_ID;
 					
+					//TODO : JDA : don't do that here manage site ancestors in separate process
 					long parentGroupId = siteCommonService.getSiteParentGroupId(companyId, imexSite.getParentGroupIdFriendlyUrl());
 					
 					String logPrefix = "SITE : "  + groupFriendlyUrl;
@@ -155,8 +170,7 @@ public class SiteImporter implements Importer {
 						if (createMethod.getValue().equals(OnMissingSiteMethodEnum.CREATE.getValue())) {
 							
 							group = groupLocalService.addGroup(userId, parentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
-							//TODO : JDA import LARS here
-							//doImportLars(groupDir, options, userId, group);
+							doImportLars(groupDir, config, user, group, locale, debug);
 							groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
 							
 						} else {
@@ -181,9 +195,12 @@ public class SiteImporter implements Importer {
 								
 								groupLocalService.updateGroup(groupId, parentGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, inheritContent, active, serviceContext);
 								
-							} else if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.REPLACE.getValue())) {
+							} else if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.RECREATE.getValue())) {
 								
 								//Suppression du Group
+								//TODO JDA : to avoid RequiredGroupException$MustNotDeleteGroupThatHasChild or other exceptions :
+								// Step 01 : update /create web site and import lars
+								// Step 02 : Manage site parent in séprate process.
 								groupLocalService.deleteGroup(group);
 													
 								//Creation du group
@@ -192,8 +209,7 @@ public class SiteImporter implements Importer {
 							}
 							
 							//Importing LARS
-							//TODO : JDA import LARS here
-							//doImportLars(groupDir, options, userId, group);
+							doImportLars(groupDir, config, user, group, locale, debug);
 							groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
 						
 							reportService.getOK(_log, dirName, logPrefix, duplicateMethod.getValue());
@@ -220,6 +236,62 @@ public class SiteImporter implements Importer {
 			
 		} else {
 			_log.error("Skipping null dir ...");
+		}
+	}
+	
+	private void doImportLars(File groupDir, Properties config, User user, Group group, Locale locale, boolean debug) throws Exception {
+		
+		boolean privatePagesEnabled = GetterUtil.getBoolean(config.get(ImExSiteImporterPropsKeys.IMPORT_SITE_PRIVATE_PAGE_ENABLED));
+		boolean publicPagesEnabled = GetterUtil.getBoolean(config.get(ImExSiteImporterPropsKeys.IMPORT_SITE_PUBLIC_PAGE_ENABLED));
+		
+		if (privatePagesEnabled) {
+			
+			doImportLar(groupDir, config, user, group, locale, debug, IMPORT_SITE_PRIVATE_PAGE_PARAMETER_PREFIX, true);
+			
+		} else {
+			reportService.getDisabled(_log, "Private pages import");
+		}
+	
+
+		if (publicPagesEnabled) {
+
+			doImportLar(groupDir, config, user, group, locale, debug, IMPORT_SITE_PUBLIC_PAGE_PARAMETER_PREFIX, false);
+			
+		} else {
+			reportService.getDisabled(_log, "Public pages import");
+		}
+			
+			
+	}
+	
+	private void doImportLar(File groupDir, Properties config, User user, Group group, Locale locale, boolean debug, String prefix, boolean privateLayout) throws Exception {
+		
+		long groupId = group.getGroupId();
+		long userId = user.getUserId();
+		String name = "IMEX : site import process";
+		String description = "This an automatic site import triggered by IMEX";
+		long[] layoutIds = null;
+		Map<String, String[]> parameterMap = null;
+		Map<String, Serializable> settingsMap = null;
+		int importType = ExportImportConfigurationConstants.TYPE_IMPORT_LAYOUT;
+		
+		String larFileName = FileNames.getLarSiteFileName(group, privateLayout);
+		
+		try {
+			
+			parameterMap = larService.buildParameterMapFromProperties(config, prefix);
+			settingsMap = ExportImportConfigurationSettingsMapFactoryUtil.buildImportLayoutSettingsMap(user, groupId, privateLayout, layoutIds, parameterMap);
+			ExportImportConfiguration exportImportConfiguration = larService.createExportImportConfiguration(groupId, userId, name, description, importType, settingsMap, new ServiceContext());
+			
+			larService.doImport(user, exportImportConfiguration, groupDir, larFileName);
+			
+		} catch (LARFileNameException e) {
+			
+			reportService.getMessage(_log, group.getFriendlyURL(), "[" + larFileName + "] is missing in [" + groupDir.getAbsolutePath() + "]");
+			if (debug) {
+				_log.error(e,e);
+			}
+			
 		}
 	}
 	
@@ -318,6 +390,16 @@ public class SiteImporter implements Importer {
 
 	public void setSiteCommonService(SiteCommonService siteCommonService) {
 		this.siteCommonService = siteCommonService;
+	}
+
+
+	public ImexLarService getLarService() {
+		return larService;
+	}
+
+
+	public void setLarService(ImexLarService larService) {
+		this.larService = larService;
 	}
 
 }

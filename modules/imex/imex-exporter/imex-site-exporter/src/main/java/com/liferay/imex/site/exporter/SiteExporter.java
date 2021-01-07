@@ -232,7 +232,7 @@ public class SiteExporter implements Exporter {
 
 		ExportImportConfiguration exportImportConfiguration = larService.createExportImportConfiguration(groupId, userId, name, description, exportType, settingsMap, new ServiceContext());
 		
-		String fileName = FileNames.getLarSiteFileName(group, privateLayout, locale);
+		String fileName = FileNames.getLarSiteFileName(group, privateLayout);
 		
 		larService.doExport(exportImportConfiguration, siteDir, fileName);
 			

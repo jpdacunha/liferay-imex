@@ -6,7 +6,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 public enum OnExistsSiteMethodEnum {
 	
 	SKIP ("SKIP"),
-	REPLACE ("REPLACE"),
+	RECREATE ("RECREATE"),
 	UPDATE ("UPDATE");
 	
 	private static Log _log = LogFactoryUtil.getLog(OnExistsSiteMethodEnum.class);

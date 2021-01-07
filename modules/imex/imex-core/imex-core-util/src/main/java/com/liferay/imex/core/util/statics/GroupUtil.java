@@ -27,7 +27,7 @@ public class GroupUtil {
 		}
 		
 		if (Validator.isNull(name)) {
-			_log.warn("Undefined group name for locale:[" + locale + "], group:[" + group.getFriendlyURL() + "] : using friendly url as group name.");
+			_log.debug("Undefined group name for locale:[" + locale + "], group:[" + group.getFriendlyURL() + "] : using friendly url as group name.");
 			return ImexNormalizer.getDirNameByFriendlyURL(group.getFriendlyURL());
 		}
 		

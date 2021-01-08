@@ -11,4 +11,10 @@ public interface SiteCommonService {
 
 	public long getSiteParentGroupId(long companyId, String parentGroupIdFriendlyUrl) throws PortalException;
 
+	public void eraseSiteHierarchy(Group group) throws PortalException;
+
+	public Group attachToParentSite(Group group, long parentGroupId) throws PortalException;
+
+	public Group detachGroupFromParent(Group group) throws PortalException;
+
 }

@@ -30,12 +30,15 @@ import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.osgi.framework.Bundle;
@@ -92,6 +95,8 @@ public class SiteImporter implements Importer {
 		boolean enabled = GetterUtil.getBoolean(config.get(ImExSiteImporterPropsKeys.IMPORT_SITE_ENABLED));
 		
 		if (enabled) {
+			
+			Map<String, String> toUpdateParentGroups = new HashMap<String, String>();
 		
 			try {
 				
@@ -103,11 +108,11 @@ public class SiteImporter implements Importer {
 				
 				File[] groupDirs = manageSitesOrder(config, includedArray);
 				
-				for (File groupDir : groupDirs) {
+				//Updating site datas and importing LAR
+				doUpdateSitesDatas(companyId, user, config, groupDirs, locale, toUpdateParentGroups, debug);
 				
-					this.doSiteImport(bundle, serviceContext, companyId, user, config, groupDir, locale, debug);
-					
-				}
+				//Updating site hierarchie
+				doUpdateSitesHierarchy(companyId, toUpdateParentGroups, debug);
 
 			} catch (Exception e) {
 				_log.error(e,e);
@@ -121,8 +126,52 @@ public class SiteImporter implements Importer {
 		reportService.getEndMessage(_log, "SITE import process");		
 	}
 	
+	private void doUpdateSitesDatas(long companyId, User user, Properties config, File[] groupDirs, Locale locale, Map<String, String> toUpdateParentGroups, boolean debug) {
+		
+		for (File groupDir : groupDirs) {
+			
+			try {
+				this.doUpdateSiteDatas(companyId, user, config, groupDir, locale, toUpdateParentGroups, debug);
+			} catch (Exception e) {
+				reportService.getError(_log, groupDir.getAbsolutePath(), e);
+				if (debug) {
+					_log.error(e,e);
+				}
+			}
+				
+		}
+	
+	}
+	
+	private void doUpdateSitesHierarchy(long companyId, Map<String, String> toUpdateParentGroups, boolean debug) {
+		
+		for (Entry<String, String> entry : toUpdateParentGroups.entrySet()) {
+			
+			String friendlyURL = null;
+			try {
+				
+				friendlyURL = entry.getKey();
+				String parentGroupIdFriendlyUrl = entry.getValue();
+				long parentGroupId = siteCommonService.getSiteParentGroupId(companyId, parentGroupIdFriendlyUrl);
+				Group parentGroup = groupLocalService.getGroup(parentGroupId);
+				Group group = groupLocalService.getFriendlyURLGroup(companyId, friendlyURL);
+				
+				siteCommonService.attachToParentSite(group, parentGroupId);
+				
+				reportService.getOK(_log, parentGroup.getFriendlyURL(), friendlyURL, "hierarchy updated");
+				
+			} catch (Exception e) {
+				reportService.getError(_log, friendlyURL, e);
+				if (debug) {
+					_log.error(e,e);
+				}
+			}
+			
+		}
+		
+	}
 
-	private void doSiteImport(Bundle bundle, ServiceContext serviceContext, long companyId, User user, Properties config, File groupDir, Locale locale, boolean debug) {
+	private void doUpdateSiteDatas(long companyId, User user, Properties config, File groupDir, Locale locale, Map<String, String> toUpdateParentGroups, boolean debug) throws Exception {
 			
 		if (groupDir != null) {
 			
@@ -135,96 +184,95 @@ public class SiteImporter implements Importer {
 				
 				String siteDescriptorFileName = FileNames.getSiteFileName(groupFriendlyUrl, processor.getFileExtension());
 				
+				ImExSite imexSite = (ImExSite)processor.read(ImExSite.class, groupDir, siteDescriptorFileName);
+				
+				Group group = null;
+				
+				UnicodeProperties typeSettingsProperties = imexSite.getUnicodeProperties();
+				ServiceContext serviceContext = new ServiceContext();
+				
+				boolean site = imexSite.isSite();
+				long userId = user.getUserId();
+				String className = imexSite.getClassName();
+				long classPK = imexSite.getClassPK();
+				Map<Locale, String> nameMap = imexSite.getNameMap();
+				Map<Locale, String> descriptionMap = imexSite.getDescriptionMap();
+				int type = imexSite.getType();
+				String friendlyURL = imexSite.getFriendlyURL();
+				boolean active = imexSite.isActive();
+				int membershipRestriction = imexSite.getMemberShipRestriction();
+				boolean manualMembership = imexSite.isManualMemberShip();
+				boolean inheritContent = imexSite.isInheritContent();
+				
+				long liveGroupId = GroupConstants.DEFAULT_LIVE_GROUP_ID;
+				long defaultParentGroupId = GroupConstants.DEFAULT_PARENT_GROUP_ID;
+				
+				String logPrefix = "SITE : "  + groupFriendlyUrl;
+				
 				try {
 					
-					ImExSite imexSite = (ImExSite)processor.read(ImExSite.class, groupDir, siteDescriptorFileName);
-					
-					Group group = null;
-					
-					UnicodeProperties typeSettingsProperties = imexSite.getUnicodeProperties();
-					
-					boolean site = imexSite.isSite();
-					long userId = user.getUserId();
-					String className = imexSite.getClassName();
-					long classPK = imexSite.getClassPK();
-					Map<Locale, String> nameMap = imexSite.getNameMap();
-					Map<Locale, String> descriptionMap = imexSite.getDescriptionMap();
-					int type = imexSite.getType();
-					String friendlyURL = imexSite.getFriendlyURL();
-					boolean active = imexSite.isActive();
-					int membershipRestriction = imexSite.getMemberShipRestriction();
-					boolean manualMembership = imexSite.isManualMemberShip();
-					boolean inheritContent = imexSite.isInheritContent();
-					
-					long liveGroupId = GroupConstants.DEFAULT_LIVE_GROUP_ID;
-					
-					//TODO : JDA : don't do that here manage site ancestors in separate process
-					long parentGroupId = siteCommonService.getSiteParentGroupId(companyId, imexSite.getParentGroupIdFriendlyUrl());
-					
-					String logPrefix = "SITE : "  + groupFriendlyUrl;
-					
-					try {
-						
-						OnMissingSiteMethodEnum createMethod = behaviorManagerService.getOnMissingBehavior(config, groupFriendlyUrl);
+					OnMissingSiteMethodEnum createMethod = behaviorManagerService.getOnMissingBehavior(config, groupFriendlyUrl);
 
-						if (createMethod.getValue().equals(OnMissingSiteMethodEnum.CREATE.getValue())) {
-							
-							group = groupLocalService.addGroup(userId, parentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
-							doImportLars(groupDir, config, user, group, locale, debug);
-							groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
-							
-						} else {
-							_log.debug("Site creation were skipped.");
-						}
+					if (createMethod.getValue().equals(OnMissingSiteMethodEnum.CREATE.getValue())) {
 						
-						reportService.getOK(_log, dirName, logPrefix, createMethod.getValue());
+						group = groupLocalService.addGroup(userId, defaultParentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
+						doImportLars(groupDir, config, user, group, locale, debug);
+						groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
 						
-					} catch(DuplicateGroupException e) {
-						
-						//Loading Liferay site
-						group = groupLocalService.getFriendlyURLGroup(companyId, friendlyURL);
-						
-						OnExistsSiteMethodEnum duplicateMethod = behaviorManagerService.getOnExistsBehavior(config, group);
-						
-						if (!duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.SKIP.getValue())) {
-
-							long groupId = group.getGroupId();
-							
-							//Si le group existe
-							if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.UPDATE.getValue())) {
-								
-								groupLocalService.updateGroup(groupId, parentGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, inheritContent, active, serviceContext);
-								
-							} else if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.RECREATE.getValue())) {
-								
-								//Suppression du Group
-								//TODO JDA : to avoid RequiredGroupException$MustNotDeleteGroupThatHasChild or other exceptions :
-								// Step 01 : update /create web site and import lars
-								// Step 02 : Manage site parent in séprate process.
-								groupLocalService.deleteGroup(group);
-													
-								//Creation du group
-								group = groupLocalService.addGroup(userId, parentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
-								
-							}
-							
-							//Importing LARS
-							doImportLars(groupDir, config, user, group, locale, debug);
-							groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
-						
-							reportService.getOK(_log, dirName, logPrefix, duplicateMethod.getValue());
-							
-						} else {
-							reportService.getOK(_log, dirName, logPrefix, duplicateMethod.getValue());
-						}
-						
+					} else {
+						_log.debug("Site creation were skipped.");
 					}
 					
-				} catch (Exception e) {
-					reportService.getError(_log, groupFriendlyUrl, e);
-					if (debug) {
-						_log.error(e,e);
+					reportService.getOK(_log, dirName, logPrefix, createMethod.getValue());
+					
+				} catch(DuplicateGroupException e) {
+					
+					//Loading Liferay site
+					group = groupLocalService.getFriendlyURLGroup(companyId, friendlyURL);
+					
+					OnExistsSiteMethodEnum duplicateMethod = behaviorManagerService.getOnExistsBehavior(config, group);
+					
+					if (!duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.SKIP.getValue())) {
+
+						long groupId = group.getGroupId();
+						
+						//Si le group existe
+						if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.UPDATE.getValue())) {
+							
+							groupLocalService.updateGroup(groupId, defaultParentGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, inheritContent, active, serviceContext);
+							
+						} else if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.RECREATE.getValue())) {
+							
+							//Reseting parent group
+							siteCommonService.eraseSiteHierarchy(group);
+							
+							//Deleting site
+							group = groupLocalService.deleteGroup(group);
+												
+							//Creating site again
+							group = groupLocalService.addGroup(userId, defaultParentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
+							
+						}
+						
+						//Importing LARS
+						doImportLars(groupDir, config, user, group, locale, debug);
+						groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
+					
+						reportService.getOK(_log, dirName, logPrefix, duplicateMethod.getValue());
+						
+					} else {
+						reportService.getOK(_log, dirName, logPrefix, duplicateMethod.getValue());
 					}
+					
+				}
+				
+				//Registering sites hierarchy to update
+				String parentGroupIdFriendlyUrl = imexSite.getParentGroupIdFriendlyUrl();
+				
+				if (group != null && Validator.isNotNull(parentGroupIdFriendlyUrl)) {
+					toUpdateParentGroups.put(groupFriendlyUrl, parentGroupIdFriendlyUrl);
+				} else {
+					_log.debug("Ste identified by [" + groupFriendlyUrl + "] has no parent group");
 				}
 				
 				reportService.getEndMessage(_log, groupFriendlyUrl);

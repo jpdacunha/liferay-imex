@@ -24,6 +24,7 @@ import java.util.Properties;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.pmw.tinylog.Logger;
 
 @Component(immediate = true, service = ImexLarService.class)
 public class ImexLarServiceImpl implements ImexLarService {
@@ -67,10 +68,15 @@ public class ImexLarServiceImpl implements ImexLarService {
 		
 		long userId = user.getUserId();
 		
-		File toImport = new File(sourceDir.getAbsolutePath() + StringPool.SLASH +  fileName);
+		String larFullPath = sourceDir.getAbsolutePath() + StringPool.SLASH +  fileName;
+		File toImport = new File(larFullPath);
 		
-		exportImportService.importLayouts(exportImportConfiguration, toImport);
-		
+		if (toImport != null && toImport.exists() && toImport.isFile()) {
+			exportImportService.importLayouts(exportImportConfiguration, toImport);
+		} else {
+			Logger.info("["  + larFullPath + "] does not exists or is not a valid file ignoring import");
+		}
+	
 		//TODO : JDA manage export in background
 		//return exportImportService.importLayoutsInBackground(userId, exportImportConfiguration, toImport);
 		

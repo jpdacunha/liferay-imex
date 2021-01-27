@@ -19,7 +19,7 @@ public interface ImexLarService {
 
 	public void doExport(ExportImportConfiguration exportImportConfiguration, File destinationDir, String fileName) throws SystemException, PortalException;
 
-	public long doImport(User user, ExportImportConfiguration exportImportConfiguration, File sourceDir, String fileName)
+	public void doImport(User user, ExportImportConfiguration exportImportConfiguration, File sourceDir, String fileName)
 			throws SystemException, PortalException;
 		
 }

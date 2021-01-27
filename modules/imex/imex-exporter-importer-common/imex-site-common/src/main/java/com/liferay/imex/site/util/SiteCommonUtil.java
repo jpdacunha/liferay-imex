@@ -14,6 +14,8 @@ public class SiteCommonUtil {
 	
 	private static final Log _log = LogFactoryUtil.getLog(SiteCommonUtil.class);
 	
+	public static final long[] ALL_LAYOUTS = {0};
+	
 	public static File[] manageExclusions(List<String> friendlyUrlsToExclude, File[] groupDirs) {
 		
 		if (groupDirs == null || groupDirs.length == 0) {

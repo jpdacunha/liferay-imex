@@ -168,14 +168,14 @@ public class SiteExporter implements Exporter {
 						_log.error(e,e);
 					}
 				}
-				
-				if (privatePagesEnabled) {
-					privateLayout = true;
-					doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
-				}
 		
 				if (publicPagesEnabled) {
 					privateLayout = false;
+					doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
+				}
+				
+				if (privatePagesEnabled) {
+					privateLayout = true;
 					doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
 				}
 				
@@ -224,7 +224,7 @@ public class SiteExporter implements Exporter {
 		String name = "IMEX : site export process";
 		String description = "This an automatic site export triggered by IMEX";
 		
-		long[] layoutIds = null;
+		long[] layoutIds = SiteCommonUtil.ALL_LAYOUTS;
 		
 		Map<String, String[]> parameterMap = larService.buildParameterMapFromProperties(config, prefix);
 		

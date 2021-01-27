@@ -1,6 +1,11 @@
 package com.liferay.imex.site.service.impl;
 
+import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.site.service.SiteCommonService;
+import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -29,18 +34,27 @@ public class SiteCommonServiceImpl implements SiteCommonService {
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected GroupFinder groupFinder;
 	
-	private static final int MAX_CHILDS = 500;
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexExecutionReportService reportService;
 	
 	@Override
 	@Transactional
 	public void eraseSiteHierarchy(Group group) throws PortalException {
 		
-		List<Long> siteChilds = groupFinder.findByC_P(group.getCompanyId(), group.getGroupId(), -1, MAX_CHILDS);
+		ClassLoader classLoader = getClass().getClassLoader();
+		
+		DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(Group.class, classLoader)
+	            .add(RestrictionsFactoryUtil.eq("parentGroupId", group.getGroupId()))
+	            .setProjection(ProjectionFactoryUtil.property("groupId"));
+		
+		List<Long> siteChilds = groupLocalService.dynamicQuery(dynamicQuery);
 		
 		for (long childGroupId : siteChilds) {
+			
 			Group childGroup = groupLocalService.getGroup(childGroupId);
-			_log.info("Detaching [" + childGroup.getFriendlyURL() + "] from [" + group.getFriendlyURL() + "] ...");
 			this.detachGroupFromParent(childGroup);
+			reportService.getMessage(_log, "Detached [" + childGroup.getFriendlyURL() + "] from [" + group.getFriendlyURL() + "] ...");
+			
 		}
 				
 	}
@@ -55,9 +69,23 @@ public class SiteCommonServiceImpl implements SiteCommonService {
 	}
 	
 	@Override
-	public Group attachToParentSite(Group group, long parentGroupId) throws PortalException {
+	public Group attachToParentSite(Group group, String parentGroupFriendlyURL) throws PortalException {
+		
+		long companyId = group.getCompanyId();
+		long parentGroupId = getSiteParentGroupId(companyId, parentGroupFriendlyURL);
+		Group returnedGroup = attachToParentSite(group, parentGroupId);
+		if (parentGroupId != GroupConstants.DEFAULT_PARENT_GROUP_ID) {
+			reportService.getMessage(_log, "Attached [" + group.getFriendlyURL() + "] to [" + parentGroupFriendlyURL + "] ...");
+		} else {
+			_log.debug("[" + group.getFriendlyURL() + "] was attached to default group");
+		}
+		return returnedGroup;
+	}
+	
+	private Group attachToParentSite(Group group, long parentGroupId) throws PortalException {
 			
-		return groupLocalService.updateGroup(group.getGroupId(), parentGroupId, group.getNameMap(), group.getDescriptionMap(), group.getType(), group.isManualMembership(), group.getMembershipRestriction(), group.getFriendlyURL(), group.isInheritContent(), group.isActive(), new ServiceContext());
+		Group returnedGroup = groupLocalService.updateGroup(group.getGroupId(), parentGroupId, group.getNameMap(), group.getDescriptionMap(), group.getType(), group.isManualMembership(), group.getMembershipRestriction(), group.getFriendlyURL(), group.isInheritContent(), group.isActive(), new ServiceContext());
+		return returnedGroup;
 		
 	}
 	
@@ -114,6 +142,14 @@ public class SiteCommonServiceImpl implements SiteCommonService {
 
 	public void setGroupFinder(GroupFinder groupFinder) {
 		this.groupFinder = groupFinder;
+	}
+
+	public ImexExecutionReportService getReportService() {
+		return reportService;
+	}
+
+	public void setReportService(ImexExecutionReportService reportService) {
+		this.reportService = reportService;
 	}
 
 }

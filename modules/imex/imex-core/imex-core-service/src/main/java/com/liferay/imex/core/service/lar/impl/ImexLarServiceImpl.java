@@ -1,5 +1,6 @@
 package com.liferay.imex.core.service.lar.impl;
 
+import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationConstants;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
 import com.liferay.exportimport.kernel.service.ExportImportLocalService;
@@ -24,7 +25,6 @@ import java.util.Properties;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.pmw.tinylog.Logger;
 
 @Component(immediate = true, service = ImexLarService.class)
 public class ImexLarServiceImpl implements ImexLarService {
@@ -54,7 +54,7 @@ public class ImexLarServiceImpl implements ImexLarService {
 	}
 	
 	@Override
-	public long doImport(User user, ExportImportConfiguration exportImportConfiguration, File sourceDir, String fileName) throws SystemException, PortalException {
+	public void doImport(User user, ExportImportConfiguration exportImportConfiguration, File sourceDir, String fileName) throws SystemException, PortalException {
 			
 		if (Validator.isNull(user)) {
 			throw new SystemException("Invalid user");
@@ -66,21 +66,15 @@ public class ImexLarServiceImpl implements ImexLarService {
 			throw new SystemException("Invalid file name");
 		}
 		
-		long userId = user.getUserId();
-		
 		String larFullPath = sourceDir.getAbsolutePath() + StringPool.SLASH +  fileName;
 		File toImport = new File(larFullPath);
 		
 		if (toImport != null && toImport.exists() && toImport.isFile()) {
 			exportImportService.importLayouts(exportImportConfiguration, toImport);
 		} else {
-			Logger.info("["  + larFullPath + "] does not exists or is not a valid file ignoring import");
+			_log.info("["  + larFullPath + "] does not exists or is not a valid file ignoring import");
 		}
-	
-		//TODO : JDA manage export in background
-		//return exportImportService.importLayoutsInBackground(userId, exportImportConfiguration, toImport);
-		
-		return 0;
+
 	}
 	
 	@Override

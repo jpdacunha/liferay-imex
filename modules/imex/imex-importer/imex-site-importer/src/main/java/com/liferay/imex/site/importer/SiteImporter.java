@@ -145,29 +145,34 @@ public class SiteImporter implements Importer {
 	
 	private void doUpdateSitesHierarchy(long companyId, Map<String, String> toUpdateParentGroups, boolean debug) {
 		
-		for (Entry<String, String> entry : toUpdateParentGroups.entrySet()) {
+		reportService.getStartMessage(_log, "Managing sites hierarchy");
+		
+		if (toUpdateParentGroups.size() == 0) {
+			reportService.getEmpty(_log, "no hierarchy to manage");
+		} else {
 			
-			String friendlyURL = null;
-			try {
+			for (Entry<String, String> entry : toUpdateParentGroups.entrySet()) {
 				
-				friendlyURL = entry.getKey();
-				String parentGroupIdFriendlyUrl = entry.getValue();
-				long parentGroupId = siteCommonService.getSiteParentGroupId(companyId, parentGroupIdFriendlyUrl);
-				Group parentGroup = groupLocalService.getGroup(parentGroupId);
-				Group group = groupLocalService.getFriendlyURLGroup(companyId, friendlyURL);
-				
-				siteCommonService.attachToParentSite(group, parentGroupId);
-				
-				reportService.getOK(_log, parentGroup.getFriendlyURL(), friendlyURL, "hierarchy updated");
-				
-			} catch (Exception e) {
-				reportService.getError(_log, friendlyURL, e);
-				if (debug) {
-					_log.error(e,e);
+				String friendlyURL = null;
+				try {
+					
+					friendlyURL = entry.getKey();
+					String parentGroupIdFriendlyUrl = entry.getValue();
+					Group group = groupLocalService.getFriendlyURLGroup(companyId, friendlyURL);
+					siteCommonService.attachToParentSite(group, parentGroupIdFriendlyUrl);
+					
+				} catch (Exception e) {
+					reportService.getError(_log, friendlyURL, e);
+					if (debug) {
+						_log.error(e,e);
+					}
 				}
-			}
+				
+			}	
 			
 		}
+		
+		reportService.getEndMessage(_log, "Managing sites hierarchy");
 		
 	}
 
@@ -318,7 +323,7 @@ public class SiteImporter implements Importer {
 		long userId = user.getUserId();
 		String name = "IMEX : site import process";
 		String description = "This an automatic site import triggered by IMEX";
-		long[] layoutIds = null;
+		long[] layoutIds = SiteCommonUtil.ALL_LAYOUTS;
 		Map<String, String[]> parameterMap = null;
 		Map<String, Serializable> settingsMap = null;
 		int importType = ExportImportConfigurationConstants.TYPE_IMPORT_LAYOUT;

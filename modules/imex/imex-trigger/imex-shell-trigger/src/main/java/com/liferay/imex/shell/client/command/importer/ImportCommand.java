@@ -1,7 +1,7 @@
 package com.liferay.imex.shell.client.command.importer;
 
 import com.liferay.imex.core.api.importer.ImexImportService;
-import com.liferay.imex.shell.client.ImexCommand;
+import com.liferay.imex.shell.trigger.ImexCommand;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

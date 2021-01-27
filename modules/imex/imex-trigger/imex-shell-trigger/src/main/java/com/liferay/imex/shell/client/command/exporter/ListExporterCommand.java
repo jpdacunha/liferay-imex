@@ -3,8 +3,8 @@ package com.liferay.imex.shell.client.command.exporter;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.util.configuration.OSGIServicePropsKeys;
-import com.liferay.imex.shell.client.ImexCommand;
 import com.liferay.imex.shell.client.util.TableBuilder;
+import com.liferay.imex.shell.trigger.ImexCommand;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 

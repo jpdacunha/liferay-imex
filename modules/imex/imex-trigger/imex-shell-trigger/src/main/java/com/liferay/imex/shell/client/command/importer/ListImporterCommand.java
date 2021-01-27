@@ -13,8 +13,8 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ImporterTracker;
 import com.liferay.imex.core.util.configuration.OSGIServicePropsKeys;
-import com.liferay.imex.shell.client.ImexCommand;
 import com.liferay.imex.shell.client.util.TableBuilder;
+import com.liferay.imex.shell.trigger.ImexCommand;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 

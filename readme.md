@@ -92,3 +92,6 @@ Example : imex-site-exporter => imex.site.exporter
  
 
 # How to create a new Importer
+In order to create a new importer in imex please follow this steps
+
+## Step 01

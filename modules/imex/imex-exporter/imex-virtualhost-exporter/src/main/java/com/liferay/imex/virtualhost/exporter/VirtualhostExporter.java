@@ -3,15 +3,25 @@ package com.liferay.imex.virtualhost.exporter;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
-import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.virtualhost.FileNames;
 import com.liferay.imex.virtualhost.exporter.configuration.ImExVirtualhostExporterPropsKeys;
+import com.liferay.imex.virtualhost.model.ImexVirtualhost;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.VirtualHost;
+import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.LayoutSetLocalService;
+import com.liferay.portal.kernel.service.VirtualHostLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.io.File;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -31,6 +41,8 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 	)
 public class VirtualhostExporter implements Exporter {
 	
+	private static final int DEFAULT_LAYOUTSET_ID = 0;
+	
 	public static final String DESCRIPTION = "Virtualhost exporter";
 	
 	private static final Log _log = LogFactoryUtil.getLog(VirtualhostExporter.class);
@@ -40,6 +52,18 @@ public class VirtualhostExporter implements Exporter {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexExecutionReportService reportService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected VirtualHostLocalService virtualHostLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected GroupLocalService groupLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected LayoutSetLocalService layoutSetLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected CompanyLocalService companyLocalService;
 
 	@Override
 	public void doExport(User user, Properties config, File virtualhostDir, long companyId, Locale locale, boolean debug) {
@@ -52,9 +76,49 @@ public class VirtualhostExporter implements Exporter {
 			
 			try {
 				
-				//Company company = companyLocalService.getCompany(companyId);
+				Company company = companyLocalService.getCompany(companyId);
+				//TODO : JDA filter by company here => Bug ti fix
+				List<VirtualHost> hosts  = virtualHostLocalService.getVirtualHosts(QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 				
-				
+				for (VirtualHost virtualHost : hosts) {
+					
+					String hostname = virtualHost.getHostname();
+					
+					try {
+						
+						Group group = null;
+						boolean publicVirtualHost = true;
+						long layoutSetId = virtualHost.getLayoutSetId();
+						String groupFriendlyURL = com.liferay.petra.string.StringPool.BLANK;
+						
+						if (layoutSetId != DEFAULT_LAYOUTSET_ID) {
+							LayoutSet layoutSet = layoutSetLocalService.getLayoutSet(layoutSetId);
+							publicVirtualHost =  !layoutSet.isPrivateLayout();
+							group = groupLocalService.getGroup(layoutSet.getGroupId());
+							groupFriendlyURL = group.getFriendlyURL(); 
+						}
+					
+						String companyWebId = company.getWebId();						
+						boolean companyVirtualHost = (layoutSetId == DEFAULT_LAYOUTSET_ID);
+						
+						ImexVirtualhost imexVirtualhost = new ImexVirtualhost(
+								companyWebId, 
+								groupFriendlyURL, 
+								publicVirtualHost, 
+								companyVirtualHost, 
+								hostname);
+						
+						processor.write(imexVirtualhost, virtualhostDir, FileNames.getVirtualhostFileName(virtualHost, company, group, processor.getFileExtension()));
+						reportService.getOK(_log, "Virtualhost : "  + hostname + " for group : " + groupFriendlyURL);
+						
+					} catch (Exception e) {
+						reportService.getError(_log, "Virtualhost : "  + hostname, e);
+						if (debug) {
+							_log.error(e,e);
+						}
+					}
+					
+				}
 				
 			} catch (Exception e) {
 				_log.error(e,e);
@@ -104,6 +168,38 @@ public class VirtualhostExporter implements Exporter {
 
 	public void setReportService(ImexExecutionReportService reportService) {
 		this.reportService = reportService;
+	}
+
+	public VirtualHostLocalService getVirtualHostLocalService() {
+		return virtualHostLocalService;
+	}
+
+	public void setVirtualHostLocalService(VirtualHostLocalService virtualHostLocalService) {
+		this.virtualHostLocalService = virtualHostLocalService;
+	}
+
+	public GroupLocalService getGroupLocalService() {
+		return groupLocalService;
+	}
+
+	public void setGroupLocalService(GroupLocalService groupLocalService) {
+		this.groupLocalService = groupLocalService;
+	}
+
+	public LayoutSetLocalService getLayoutSetLocalService() {
+		return layoutSetLocalService;
+	}
+
+	public void setLayoutSetLocalService(LayoutSetLocalService layoutSetLocalService) {
+		this.layoutSetLocalService = layoutSetLocalService;
+	}
+
+	public CompanyLocalService getCompanyLocalService() {
+		return companyLocalService;
+	}
+
+	public void setCompanyLocalService(CompanyLocalService companyLocalService) {
+		this.companyLocalService = companyLocalService;
 	}
 
 }

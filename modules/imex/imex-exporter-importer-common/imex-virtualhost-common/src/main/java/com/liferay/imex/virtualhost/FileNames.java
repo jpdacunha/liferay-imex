@@ -1,17 +1,26 @@
 package com.liferay.imex.virtualhost;
 
 
+import com.liferay.imex.core.util.statics.ImexNormalizer;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.VirtualHost;
 
-import java.security.acl.Group;
 
 public class FileNames {
 	
 	public static final String DIR_VIRTUALHOST = "/virtualhost";
 	public static final String VIRTUALHOST_FILENAME = "virtualhost";
 	
-	public static String getVirtualhostFileName(Group group, String extension) {
-		return getVirtualhostFileNameBegin() + extension;
+	public static String getVirtualhostFileName(VirtualHost virtualHost, Company company, Group group,  String extension) {
+		
+		String groupName = StringPool.BLANK;
+		if (group != null) {
+			groupName = StringPool.MINUS + ImexNormalizer.getDirNameByFriendlyURL(group.getFriendlyURL());
+		}
+		
+		return getVirtualhostFileNameBegin() + StringPool.MINUS + ImexNormalizer.convertToKey(company.getWebId()) + groupName + StringPool.MINUS + ImexNormalizer.convertToKey(virtualHost.getHostname()) + extension;
 	}
 	
 	public static String getVirtualhostFileNameBegin() {

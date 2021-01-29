@@ -16,9 +16,16 @@ public class ImexVirtualhost implements Serializable {
 	public String groupFriendlyURL;
 	public boolean publicVirtualHost;
 	public boolean companyVirtualHost;
-	public boolean defaultVirtualHost;
 	public String hostname;
 	
+	public ImexVirtualhost(String companyWebId, String groupFriendlyURL, boolean publicVirtualHost, boolean companyVirtualHost, String hostname) {
+		super();
+		this.companyWebId = companyWebId;
+		this.groupFriendlyURL = groupFriendlyURL;
+		this.publicVirtualHost = publicVirtualHost;
+		this.companyVirtualHost = companyVirtualHost;
+		this.hostname = hostname;
+	}
 	public String getCompanyWebId() {
 		return companyWebId;
 	}
@@ -42,12 +49,6 @@ public class ImexVirtualhost implements Serializable {
 	}
 	public void setCompanyVirtualHost(boolean companyVirtualHost) {
 		this.companyVirtualHost = companyVirtualHost;
-	}
-	public boolean isDefaultVirtualHost() {
-		return defaultVirtualHost;
-	}
-	public void setDefaultVirtualHost(boolean defaultVirtualHost) {
-		this.defaultVirtualHost = defaultVirtualHost;
 	}
 	public String getHostname() {
 		return hostname;

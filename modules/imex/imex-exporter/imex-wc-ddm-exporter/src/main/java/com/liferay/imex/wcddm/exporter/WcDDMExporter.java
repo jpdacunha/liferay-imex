@@ -75,7 +75,7 @@ public class WcDDMExporter implements Exporter {
 	protected ImexExecutionReportService reportService;
 
 	@Override
-	public void doExport(User user, Properties config, File destDir, long companyId, Locale locale, boolean debug) {
+	public void doExport(User user, Properties config, File wcDdmDir, long companyId, Locale locale, boolean debug) {
 		
 		reportService.getStartMessage(_log, "WEBCONTENT export process");
 		
@@ -86,9 +86,7 @@ public class WcDDMExporter implements Exporter {
 			try {
 				
 				Company company = companyLocalService.getCompany(companyId);
-				
-				File wcDdmDir = initializeWCDDMExportDirectory(destDir);
-				
+					
 				List<Group> groups = groupLocalService.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 				
 				for (Group group : groups) {
@@ -244,23 +242,15 @@ public class WcDDMExporter implements Exporter {
 		
 	}
 
-
 	/**
-	 * Create root role directory (/role)
-	 * @param exportDir
-	 * @return
-	 * @throws ImexException
+	 * Return root directory name
+	 *
 	 */
-	private File initializeWCDDMExportDirectory(File exportDir) throws ImexException {
+	@Override
+	public String getExporterRootDirectory() {
 		
-		File rolesDir = new File(exportDir, FileNames.DIR_WCDDM);
-		boolean success = rolesDir.mkdirs();
-		if (!success) {
-			throw new ImexException("Failed to create directory " + rolesDir);
-		}
-		
-		return rolesDir;
-		
+		return FileNames.DIR_WCDDM;
+
 	}
 
 }

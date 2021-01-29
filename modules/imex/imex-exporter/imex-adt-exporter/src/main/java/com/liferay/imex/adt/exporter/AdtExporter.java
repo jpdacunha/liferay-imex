@@ -73,7 +73,7 @@ public class AdtExporter implements Exporter {
 	protected ImexExecutionReportService reportService;
 
 	@Override
-	public void doExport(User user, Properties config, File destDir, long companyId, Locale locale, boolean debug) {
+	public void doExport(User user, Properties config, File adtDir, long companyId, Locale locale, boolean debug) {
 		
 		reportService.getStartMessage(_log, "ADT export process");
 		
@@ -89,8 +89,6 @@ public class AdtExporter implements Exporter {
 				try {
 					
 					Company company = companyLocalService.getCompany(companyId);
-					
-					File adtDir = initializeAdtExportDirectory(destDir);
 					
 					List<Group> groups = groupLocalService.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 					
@@ -250,21 +248,14 @@ public class AdtExporter implements Exporter {
 
 
 	/**
-	 * Create root directory
-	 * @param exportDir
-	 * @return
-	 * @throws ImexException
+	 * Return root directory name
+	 *
 	 */
-	private File initializeAdtExportDirectory(File exportDir) throws ImexException {
+	@Override
+	public String getExporterRootDirectory() {
 		
-		File adtsDir = new File(exportDir, FileNames.DIR_ADT);
-		boolean success = adtsDir.mkdirs();
-		if (!success) {
-			throw new ImexException("Failed to create directory " + adtsDir);
-		}
-		
-		return adtsDir;
-		
+		return FileNames.DIR_ADT;
+
 	}
 
 }

@@ -2,6 +2,10 @@ package com.liferay.imex.core.api.configuration;
 
 public interface ImExCorePropsKeys {
 	
+	public final static String DEFAULT_PROFILE_NAME = "imex.default.profile.name";
+	
+	public final static String MANAGES_PROFILES_LIST = "imex.managed.profiles.list";
+	
 	public final static String ARCHIVE_HISTORY_NUMBER = "imex.archive.history.number";
 	
 	public final static String DISPLAY_EXECUTION_IN_LIFERAY_LOGS = "imex.display.execution.in.liferay.logs";

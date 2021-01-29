@@ -1,0 +1,4 @@
+Bundle-Name: imex-virtualhost-exporter
+Bundle-SymbolicName: imex.virtualhost.exporter
+Bundle-Version: 1.0.0
+

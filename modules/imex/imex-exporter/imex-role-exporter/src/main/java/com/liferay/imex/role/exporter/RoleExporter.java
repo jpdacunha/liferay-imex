@@ -57,7 +57,7 @@ public class RoleExporter implements Exporter {
 	protected ImexExecutionReportService reportService;
 
 	@Override
-	public void doExport(User user, Properties config, File destDir, long companyId, Locale locale, boolean debug) {
+	public void doExport(User user, Properties config, File rolesDir, long companyId, Locale locale, boolean debug) {
 		
 		reportService.getStartMessage(_log, "ROLE export process");
 		
@@ -66,9 +66,7 @@ public class RoleExporter implements Exporter {
 		if (enabled) {
 		
 			try {
-				
-				File rolesDir = initializeRolesExportDirectory(destDir);
-				
+					
 				List<Role> roles = roleLocalService.getRoles(companyId);
 				for (Role role : roles) {
 					this.doRoleExport(config, role, rolesDir, debug);
@@ -168,21 +166,14 @@ public class RoleExporter implements Exporter {
 	}
 
 	/**
-	 * Create root role directory (/role)
-	 * @param exportDir
-	 * @return
-	 * @throws ImexException
+	 * Return root directory name
+	 *
 	 */
-	private File initializeRolesExportDirectory(File exportDir) throws ImexException {
+	@Override
+	public String getExporterRootDirectory() {
 		
-		File rolesDir = new File(exportDir, FileNames.DIR_ROLE);
-		boolean success = rolesDir.mkdirs();
-		if (!success) {
-			throw new ImexException("Failed to create directory " + rolesDir);
-		}
-		
-		return rolesDir;
-		
+		return FileNames.DIR_ROLE;
+
 	}
 
 	@Override

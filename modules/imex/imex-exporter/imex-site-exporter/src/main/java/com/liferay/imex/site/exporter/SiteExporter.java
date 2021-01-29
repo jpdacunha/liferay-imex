@@ -12,7 +12,7 @@ import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.site.FileNames;
 import com.liferay.imex.site.exporter.configuration.ImExSiteExporterPropsKeys;
-import com.liferay.imex.site.model.ImExSite;
+import com.liferay.imex.site.model.ImexSite;
 import com.liferay.imex.site.service.SiteCommonService;
 import com.liferay.imex.site.util.SiteCommonUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -79,7 +79,7 @@ public class SiteExporter implements Exporter {
 	protected SiteCommonService siteCommonService;
 
 	@Override
-	public void doExport(User user, Properties config, File destDir, long companyId, Locale locale, boolean debug) {
+	public void doExport(User user, Properties config, File sitesDir, long companyId, Locale locale, boolean debug) {
 		
 		reportService.getStartMessage(_log, "SITE export process");
 		
@@ -90,9 +90,7 @@ public class SiteExporter implements Exporter {
 		if (enabled) {
 			
 				try {
-					
-					File sitesDir = initializeExportDirectory(destDir);
-					
+						
 					List<Group> bddGroups = groupLocalService.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 					
 					List<Group> includedGroups = manageSitesExclusions(config, bddGroups);
@@ -154,7 +152,7 @@ public class SiteExporter implements Exporter {
 				try {
 					
 					parentGroupIdFriendlyUrl = siteCommonService.getParentSiteFriendlyURL(companyId, group.getParentGroupId());	
-					processor.write(new ImExSite(group, parentGroupIdFriendlyUrl), siteDir, FileNames.getSiteFileName(group, processor.getFileExtension()));
+					processor.write(new ImexSite(group, parentGroupIdFriendlyUrl), siteDir, FileNames.getSiteFileName(group, processor.getFileExtension()));
 						
 				} catch (NoSuchGroupException e1) {
 					reportService.getError(_log, groupName, "Site identified by [" + parentGroupIdFriendlyUrl + "] is a parent site an it does not exists. Maybe you can use [" + ImExSiteExporterPropsKeys.EXPORT_SITE_ORDER_FRIENDLYURL_LIST + "] to configure IMEX to import the parent site prior to child site.");
@@ -239,21 +237,14 @@ public class SiteExporter implements Exporter {
 	}
 	
 	/**
-	 * Create root directory
-	 * @param exportDir
-	 * @return
-	 * @throws ImexException
+	 * Return root directory name
+	 *
 	 */
-	private File initializeExportDirectory(File exportDir) throws ImexException {
+	@Override
+	public String getExporterRootDirectory() {
 		
-		File sitesDir = new File(exportDir, FileNames.DIR_SITE);
-		boolean success = sitesDir.mkdirs();
-		if (!success) {
-			throw new ImexException("Failed to create directory " + sitesDir);
-		}
-		
-		return sitesDir;
-		
+		return FileNames.DIR_SITE;
+
 	}
 	
 	/**

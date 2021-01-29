@@ -1,6 +1,7 @@
 package com.liferay.imex.core.service.exporter.impl;
 
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
+import com.liferay.imex.core.api.configuration.ImExCorePropsKeys;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.exporter.Exporter;
@@ -11,6 +12,7 @@ import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.service.ImexServiceBaseImpl;
 import com.liferay.imex.core.service.exporter.model.ExporterProcessIdentifierGenerator;
 import com.liferay.imex.core.util.exception.ImexException;
+import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.UserUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -20,11 +22,14 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -62,9 +67,9 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 	public String doExport(String... names) {		
 		return doExport(Arrays.asList(names));		
 	}
-
+	
 	@Override
-	public String doExport(List<String> bundleNames) {
+	public String doExport(List<String> bundleNames, String profileId) {
 		
 		//Generate an unique identifier for this export process
 		ProcessIdentifierGenerator identifier = new ExporterProcessIdentifierGenerator();
@@ -103,7 +108,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 				File exportDir = initializeExportDirectory();
 				
 				reportService.getPropertyMessage(_log, "IMEX export path", exportDir.toString());
-				
+							
 				List<Company> companies = companyLocalService.getCompanies();
 				
 				for (Company company : companies) {
@@ -115,7 +120,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 					
 					File companyDir = initializeCompanyExportDirectory(exportDir, company);
 					
-					executeRegisteredExporters(exporters, companyDir, companyId, companyName);
+					executeRegisteredExporters(exporters, companyDir, companyId, companyName, profileId);
 					
 				}
 				
@@ -128,7 +133,56 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 		reportService.getEndMessage(_log, "export process");
 		
 		return identifierStr;
+		
+	}
 
+	@Override
+	public String doExport(List<String> bundleNames) {
+	
+		return doExport(bundleNames, null);
+
+	}
+	
+	private String getValidProfile(String profileId, Bundle bundle, Exporter exporter, Properties configAsProperties) throws ImexException {
+		
+		//Manage profile
+		String profile = null;
+		
+		if (exporter.isProfiled()) {
+			
+			profile =  GetterUtil.getString(configAsProperties.get(ImExCorePropsKeys.DEFAULT_PROFILE_NAME));
+			
+			if (Validator.isNull(profile)) {
+				throw new ImexException("Missing mandatory parameter value [" + ImExCorePropsKeys.DEFAULT_PROFILE_NAME + "]. Please check your configuration file");
+			}
+			
+			if (Validator.isNotNull(profileId)) {
+				
+				String[] supportedProfiles = CollectionUtil.getArray(configAsProperties.getProperty(ImExCorePropsKeys.MANAGES_PROFILES_LIST));
+				
+				if (supportedProfiles != null  && supportedProfiles.length > 0) {
+					
+					if (!Arrays.asList(supportedProfiles).contains(profileId)) {
+						throw new ImexException("Unsupported profile [" + profileId + "]. Please check [" + ImExCorePropsKeys.MANAGES_PROFILES_LIST + "] parameter to manage supported profiles list.");
+					}
+					
+					profile = profileId;
+					
+					
+				} else {
+					_log.warn("Imex will user default profile because no supported profiles was found. Please check [" + ImExCorePropsKeys.MANAGES_PROFILES_LIST + "] if you want to define a profile list.");
+				}
+				
+			} else {
+				_log.debug("[" + bundle.getSymbolicName() + "] is currently using default profile");
+			}
+			
+		} else {
+			_log.debug("[" + bundle.getSymbolicName() + "] does not support profile management");
+		}
+		
+		return profile;
+		
 	}
 
 	private File initializeCompanyExportDirectory(File exportDir, Company company) throws ImexException {
@@ -170,7 +224,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			
 	}
 	
-	private void executeRegisteredExporters(Map<String, ServiceReference<Exporter>> exporters, File destDir, long companyId, String companyName) {
+	private void executeRegisteredExporters(Map<String, ServiceReference<Exporter>> exporters, File companyDir, long companyId, String companyName, String profileId) throws ImexException {
 		
 		User user = UserUtil.getDefaultAdmin(companyId);
 		
@@ -194,15 +248,42 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			configurationService.loadExporterAndCoreConfiguration(bundle, config);
 			reportService.displayConfigurationLoadingInformation(config, _log, bundle);
 			
-			if (config.getProperties() == null || config.getProperties().size() == 0) {
+			Properties configAsProperties = config.getProperties();
+			if (configAsProperties == null || configAsProperties.size() == 0) {
 				reportService.getMessage(_log, bundle, "has no defined configuration.");
 			} else {
-				reportService.displayProperties(config.getProperties(), bundle, _log);
+				reportService.displayProperties(configAsProperties, bundle, _log);
 			}
-		
+			
+			//Manage Root directory
+			String exporterRootDirName = exporter.getExporterRootDirectory();
+			File exporterRootDir = new File(companyDir, exporterRootDirName);
+			boolean success = exporterRootDir.mkdirs();
+			if (!success) {
+				throw new ImexException("Failed to create directory " + exporterRootDir);
+			}
+			
+			File destDir = exporterRootDir;
+			
+			//Manage Profile
+			String profileDirName = getValidProfile(profileId, bundle, exporter, configAsProperties);
+			if (Validator.isNotNull(profileDirName)) {
+				
+				File profileDir = new File(exporterRootDir, profileDirName);
+				success = profileDir.mkdirs();
+				if (!success) {
+					throw new ImexException("Failed to create directory " + profileDir);
+				}
+				
+				destDir = profileDir;
+				
+			} else {
+				_log.debug("Exporter [" + bundle.getSymbolicName() + "] is not configured to use profiles");
+			}
+			
 			try {
 				Company company = companyLocalService.getCompany(companyId);
-				exporter.doExport(user, config.getProperties(), destDir, companyId, company.getLocale(), true);
+				exporter.doExport(user, configAsProperties, destDir, companyId, company.getLocale(), true);
 			} catch (PortalException e) {
 				_log.error(e,e);
 			}
@@ -212,7 +293,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 		}
 
 	}
-	
+
 	@Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
 	protected void setExporterTracker(ExporterTracker trackerService) {
 		this.trackerService = trackerService;

@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class ImExSite implements Serializable {
+public class ImexSite implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -45,7 +45,7 @@ public class ImExSite implements Serializable {
 
 	private boolean inheritContent;
 
-	public ImExSite() {
+	public ImexSite() {
 		
 	}
 	
@@ -54,7 +54,7 @@ public class ImExSite implements Serializable {
 		return DEFAULT_CLASS_PK;
 	}
 	
-	public ImExSite(Group group, String parentGroupIdFriendlyUrl) {
+	public ImexSite(Group group, String parentGroupIdFriendlyUrl) {
 		
 		this.className = group.getClassName();
 		this.nameMap = group.getNameMap();

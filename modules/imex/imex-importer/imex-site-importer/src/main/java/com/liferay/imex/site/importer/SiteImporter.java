@@ -15,7 +15,7 @@ import com.liferay.imex.core.util.statics.ImexNormalizer;
 import com.liferay.imex.site.FileNames;
 import com.liferay.imex.site.importer.configuration.ImExSiteImporterPropsKeys;
 import com.liferay.imex.site.importer.service.ImportSiteBehaviorManagerService;
-import com.liferay.imex.site.model.ImExSite;
+import com.liferay.imex.site.model.ImexSite;
 import com.liferay.imex.site.model.OnExistsSiteMethodEnum;
 import com.liferay.imex.site.model.OnMissingSiteMethodEnum;
 import com.liferay.imex.site.service.SiteCommonService;
@@ -189,7 +189,7 @@ public class SiteImporter implements Importer {
 				
 				String siteDescriptorFileName = FileNames.getSiteFileName(groupFriendlyUrl, processor.getFileExtension());
 				
-				ImExSite imexSite = (ImExSite)processor.read(ImExSite.class, groupDir, siteDescriptorFileName);
+				ImexSite imexSite = (ImexSite)processor.read(ImexSite.class, groupDir, siteDescriptorFileName);
 				
 				Group group = null;
 				

@@ -3,4 +3,5 @@ Bundle-SymbolicName: imex.virtualhost.common
 Bundle-Version: 1.0.0
 Export-Package: \
 	com.liferay.imex.virtualhost.model,\
-	com.liferay.imex.virtualhost
+	com.liferay.imex.virtualhost,\
+	com.liferay.imex.virtualhost.service

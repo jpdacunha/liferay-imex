@@ -6,7 +6,7 @@ import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.virtualhost.FileNames;
 import com.liferay.imex.virtualhost.exporter.configuration.ImExVirtualhostExporterPropsKeys;
 import com.liferay.imex.virtualhost.model.ImexVirtualhost;
-import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.imex.virtualhost.service.VirtualhostCommonService;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
@@ -64,6 +64,9 @@ public class VirtualhostExporter implements Exporter {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected CompanyLocalService companyLocalService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected VirtualhostCommonService virtualHostCommonService;
 
 	@Override
 	public void doExport(User user, Properties config, File virtualhostDir, long companyId, Locale locale, boolean debug) {
@@ -77,8 +80,7 @@ public class VirtualhostExporter implements Exporter {
 			try {
 				
 				Company company = companyLocalService.getCompany(companyId);
-				//TODO : JDA filter by company here => Bug ti fix
-				List<VirtualHost> hosts  = virtualHostLocalService.getVirtualHosts(QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+				List<VirtualHost> hosts  = virtualHostCommonService.getCompanyVirtualHost(companyId);
 				
 				for (VirtualHost virtualHost : hosts) {
 					
@@ -92,10 +94,12 @@ public class VirtualhostExporter implements Exporter {
 						String groupFriendlyURL = com.liferay.petra.string.StringPool.BLANK;
 						
 						if (layoutSetId != DEFAULT_LAYOUTSET_ID) {
+							
 							LayoutSet layoutSet = layoutSetLocalService.getLayoutSet(layoutSetId);
 							publicVirtualHost =  !layoutSet.isPrivateLayout();
 							group = groupLocalService.getGroup(layoutSet.getGroupId());
 							groupFriendlyURL = group.getFriendlyURL(); 
+							
 						}
 					
 						String companyWebId = company.getWebId();						
@@ -200,6 +204,14 @@ public class VirtualhostExporter implements Exporter {
 
 	public void setCompanyLocalService(CompanyLocalService companyLocalService) {
 		this.companyLocalService = companyLocalService;
+	}
+
+	public VirtualhostCommonService getVirtualHostCommonService() {
+		return virtualHostCommonService;
+	}
+
+	public void setVirtualHostCommonService(VirtualhostCommonService virtualHostCommonService) {
+		this.virtualHostCommonService = virtualHostCommonService;
 	}
 
 }

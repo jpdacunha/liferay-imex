@@ -20,7 +20,7 @@ public class FileNames {
 			groupName = StringPool.MINUS + ImexNormalizer.getDirNameByFriendlyURL(group.getFriendlyURL());
 		}
 		
-		return getVirtualhostFileNameBegin() + StringPool.MINUS + ImexNormalizer.convertToKey(company.getWebId()) + groupName + StringPool.MINUS + ImexNormalizer.convertToKey(virtualHost.getHostname()) + extension;
+		return getVirtualhostFileNameBegin() + ImexNormalizer.convertToKey(company.getWebId()) + groupName + StringPool.MINUS + ImexNormalizer.convertToKey(virtualHost.getHostname()) + extension;
 	}
 	
 	public static String getVirtualhostFileNameBegin() {

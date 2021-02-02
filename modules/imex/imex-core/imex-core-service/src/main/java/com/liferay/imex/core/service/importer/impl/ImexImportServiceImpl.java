@@ -22,12 +22,15 @@ import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -69,7 +72,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 	}
 
 	@Override
-	public String doImport(List<String> bundleNames) { 
+	public String doImport(List<String> bundleNames, String profileId) { 
 		
 		//Generate an unique identifier for this import process
 		ProcessIdentifierGenerator identifier = new ImporterProcessIdentifier();
@@ -118,7 +121,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 					File companyDir = getCompanyImportDirectory(importDir, company);
 					
 					if (companyDir != null) {
-						executeRegisteredImporters(importers, companyDir, companyId, companyName);
+						executeRegisteredImporters(importers, companyDir, companyId, companyName, profileId);
 					}
 					
 				}
@@ -132,6 +135,13 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 		reportService.getEndMessage(_log, "import process");
 		
 		return identifierStr;
+
+	}
+	
+	@Override
+	public String doImport(List<String> bundleNames) {
+	
+		return doImport(bundleNames, null);
 
 	}
 
@@ -160,7 +170,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 		
 	}
 	
-	private void executeRegisteredImporters(Map<String, ServiceReference<Importer>> importers, File companyDir, long companyId, String companyName) {
+	private void executeRegisteredImporters(Map<String, ServiceReference<Importer>> importers, File companyDir, long companyId, String companyName, String profileId) throws ImexException {
 				
 		User user = UserUtil.getDefaultAdmin(companyId);
 		
@@ -178,55 +188,107 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 			
 			Bundle bundle = reference.getBundle();
 			
-			Importer Importer = bundle.getBundleContext().getService(reference);
+			Importer importer = bundle.getBundleContext().getService(reference);
 			
-			reportService.getStartMessage(_log, Importer.getProcessDescription(), 1);
+			reportService.getStartMessage(_log, importer.getProcessDescription(), 1);
 			
 			//Loading configuration for each Importer
 			ImexProperties config = new ImexProperties();
 			configurationService.loadImporterAndCoreConfiguration(bundle, config);
 			reportService.displayConfigurationLoadingInformation(config, _log, bundle);
 			
-			if (config.getProperties() == null || config.getProperties().size() == 0) {
+			Properties configAsProperties = config.getProperties();
+			if (configAsProperties == null || configAsProperties.size() == 0) {
 				reportService.getMessage(_log, bundle, "has no defined configuration.");
 			} else {
-				reportService.displayProperties(config.getProperties(), bundle, _log);
+				reportService.displayProperties(configAsProperties, bundle, _log);
 			}
 			
 			try {
 				
-				Company company = companyLocalService.getCompany(companyId);
+				//Manage Root directory
+				File destDir = getRootDirectory(companyDir, importer);
 				
-				ServiceContext serviceContext = new ServiceContext();
-				serviceContext.setCompanyId(companyId);
-				serviceContext.setPathMain(PortalUtil.getPathMain());
-				serviceContext.setUserId(user.getUserId());
-				if (user != null) {
-					serviceContext.setSignedIn(!user.isDefaultUser());
-				}
+				if (destDir != null) {
 				
-				//Managing locale
-				Locale locale = company.getLocale();
-				//This is a workaround because Liferay is not abble to manage default locale correctly in batch mode
-				LocaleThreadLocal.setDefaultLocale(locale);
-				
-				if (locale == null) {
-					reportService.getError(_log, IMEX_IMPORT_SERVICE_ERROR, "company default locale is null");
+					//Manage Profile
+					String profileDirName = getValidProfile(profileId, bundle, importer, configAsProperties);
+					if (Validator.isNotNull(profileDirName)) {
+						
+						File profileDir = new File(destDir, profileDirName);			
+						destDir = profileDir;
+						
+					} else {
+						_log.debug("Importer [" + bundle.getSymbolicName() + "] is not configured to use profiles");
+					}
+					
+					Company company = companyLocalService.getCompany(companyId);
+					
+					ServiceContext serviceContext = new ServiceContext();
+					serviceContext.setCompanyId(companyId);
+					serviceContext.setPathMain(PortalUtil.getPathMain());
+					serviceContext.setUserId(user.getUserId());
+					if (user != null) {
+						serviceContext.setSignedIn(!user.isDefaultUser());
+					}
+					
+					try {
+						reportService.getMessage(_log, ">>>>>>>>>>>>>>>>> Destination dir is [" + destDir.getCanonicalPath() + "]");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+						
+					//Managing locale
+					Locale locale = company.getLocale();
+					//This is a workaround because Liferay is not able to manage default locale correctly in batch mode
+					LocaleThreadLocal.setDefaultLocale(locale);
+					
+					if (locale == null) {
+						reportService.getError(_log, IMEX_IMPORT_SERVICE_ERROR, "company default locale is null");
+					} else {
+						reportService.getMessage(_log, "Using [" + locale + "] as default locale");
+					}
+					
+					importer.doImport(bundle, serviceContext, user, configAsProperties, destDir, companyId, locale, true);
+					
 				} else {
-					reportService.getMessage(_log, "Using [" + locale + "] as default locale");
+					reportService.getSkipped(_log, "[" + bundle.getSymbolicName() + "]");
+					
 				}
-				
-				Importer.doImport(bundle, serviceContext, user, config.getProperties(), companyDir, companyId, locale, true);
 				
 			} catch (PortalException e) {
 				_log.error(e,e);
 			}
 								
-			reportService.getEndMessage(_log, Importer.getProcessDescription(), 1);
+			reportService.getEndMessage(_log, importer.getProcessDescription(), 1);
 			
 		}
 		
 		reportService.getEndMessage(_log, "[" + companyName + "] import process");
+		
+	}
+	
+	private File getRootDirectory(File companyDir, Importer importer) throws ImexException {
+		
+		String exporterRootDirName = importer.getRootDirectoryName();
+		
+		if (Validator.isNull(exporterRootDirName)) {
+			throw new ImexException("Missing required parameter root exporter name for [" + importer.getClass().getName() + "]");
+		}
+		
+		File dir = new File(companyDir, exporterRootDirName);
+		
+		if (!dir.exists() || !dir.isDirectory()) {
+			dir = null;
+			try {
+				reportService.getDNE(_log, "["  + companyDir.getCanonicalPath() + "/" + exporterRootDirName + "]");
+			} catch(IOException e) {
+				_log.error(e,e);
+			}
+				
+		}
+		
+		return dir;
 		
 	}
 	

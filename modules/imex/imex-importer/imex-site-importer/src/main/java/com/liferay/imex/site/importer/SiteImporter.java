@@ -88,7 +88,7 @@ public class SiteImporter implements Importer {
 	protected ImexLarService larService;
 
 	@Override
-	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
+	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File dir, long companyId, Locale locale, boolean debug) {
 		
 		reportService.getStartMessage(_log, "SITE import process");
 		
@@ -99,8 +99,6 @@ public class SiteImporter implements Importer {
 			Map<String, String> toUpdateParentGroups = new HashMap<String, String>();
 		
 			try {
-				
-				File dir = getSiteImportDirectory(companyDir);
 				
 				File[] filesystemGroupDirs = FileUtil.listFiles(dir);
 				
@@ -366,18 +364,15 @@ public class SiteImporter implements Importer {
 		
 	}
 	
-	private File getSiteImportDirectory(File companyDir) {
+	/**
+	 * Return root directory name
+	 *
+	 */
+	@Override
+	public String getRootDirectoryName() {
 		
-		File dir = new File(companyDir, FileNames.DIR_SITE);
-			
-		if (dir.exists()) {
-			return dir;
-		} else {
-			reportService.getDNE(_log, dir);
-		}
-		
-		return null;
-		
+		return FileNames.DIR_SITE;
+
 	}
 
 	@Override

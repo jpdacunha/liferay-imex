@@ -170,7 +170,7 @@ public class RoleExporter implements Exporter {
 	 *
 	 */
 	@Override
-	public String getExporterRootDirectory() {
+	public String getRootDirectoryName() {
 		
 		return FileNames.DIR_ROLE;
 

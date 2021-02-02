@@ -54,7 +54,7 @@ public class RoleImporter implements Importer {
 	protected ImexExecutionReportService reportService;
 
 	@Override
-	public void doImport(Bundle bundle, ServiceContext serviceContex, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
+	public void doImport(Bundle bundle, ServiceContext serviceContex, User user, Properties config, File rolesDir, long companyId, Locale locale, boolean debug) {
 		
 		reportService.getStartMessage(_log, "ROLE import process");
 		
@@ -63,9 +63,7 @@ public class RoleImporter implements Importer {
 		if (enabled) {
 		
 			try {
-				
-				File rolesDir = getRolesImportDirectory(companyDir);
-				
+
 				File[] rolesDirs = FileUtil.listFiles(rolesDir);
 				for (File roleDir : rolesDirs) {
 					this.doRoleImport(companyId, user, config, roleDir, debug);
@@ -145,19 +143,16 @@ public class RoleImporter implements Importer {
 		}
 
 	}
+	
+	/**
+	 * Return root directory name
+	 *
+	 */
+	@Override
+	public String getRootDirectoryName() {
+		
+		return FileNames.DIR_ROLE;
 
-	private File getRolesImportDirectory(File companyDir) {
-		
-		File rolesDir = new File(companyDir, FileNames.DIR_ROLE);
-		
-		if (rolesDir.exists()) {
-			return rolesDir;
-		} else {
-			reportService.getDNE(_log, rolesDir);
-		}
-		
-		return null;
-		
 	}
 
 	@Override

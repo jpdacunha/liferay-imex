@@ -241,7 +241,7 @@ public class SiteExporter implements Exporter {
 	 *
 	 */
 	@Override
-	public String getExporterRootDirectory() {
+	public String getRootDirectoryName() {
 		
 		return FileNames.DIR_SITE;
 

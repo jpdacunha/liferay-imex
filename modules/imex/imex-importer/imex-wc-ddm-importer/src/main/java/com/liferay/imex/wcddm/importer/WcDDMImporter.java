@@ -88,7 +88,7 @@ public class WcDDMImporter implements Importer {
 	private DDM _ddm;
 
 	@Override
-	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
+	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File dir, long companyId, Locale locale, boolean debug) {
 		
 		reportService.getStartMessage(_log, "Web Content DDM import process");
 		
@@ -97,8 +97,6 @@ public class WcDDMImporter implements Importer {
 		if (enabled) {
 		
 			try {
-				
-				File dir = getWCDDMImportDirectory(companyDir);
 				
 				File[] groupDirs = FileUtil.listFiles(dir);
 				for (File groupDir : groupDirs) {
@@ -349,19 +347,15 @@ public class WcDDMImporter implements Importer {
 		return template;
 	}
 	
+	/**
+	 * Return root directory name
+	 *
+	 */
+	@Override
+	public String getRootDirectoryName() {
+		
+		return FileNames.DIR_WCDDM;
 
-	private File getWCDDMImportDirectory(File companyDir) {
-		
-		File dir = new File(companyDir, FileNames.DIR_WCDDM);
-		
-		if (dir.exists()) {
-			return dir;
-		} else {
-			reportService.getDNE(_log, dir);
-		}
-		
-		return null;
-		
 	}
 
 	@Override

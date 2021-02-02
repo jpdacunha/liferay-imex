@@ -330,7 +330,7 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 			configurator = Configurator.defaultConfig();
 			configurator.level(Level.DEBUG);
 			
-			configurator.formatPattern("{date:yyyy-MM-dd HH:mm:ss} {level} [{thread}][{context:" + ImexExecutionReportService.IDENTIFIER_KEY + "}] : {message}");
+			configurator.formatPattern("{date:yyyy-MM-dd HH:mm:ss} {level} [{thread}] [{context:" + ImexExecutionReportService.IDENTIFIER_KEY + "}] : {message}");
 			
 			if (_log.isDebugEnabled()) {
 				_log.debug("IMEX output log path : " + logsPath);

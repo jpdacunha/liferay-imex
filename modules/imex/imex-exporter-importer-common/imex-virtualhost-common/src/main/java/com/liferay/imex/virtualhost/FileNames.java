@@ -21,6 +21,7 @@ public class FileNames {
 		}
 		
 		return getVirtualhostFileNameBegin() + ImexNormalizer.convertToKey(company.getWebId()) + groupName + StringPool.MINUS + ImexNormalizer.convertToKey(virtualHost.getHostname()) + extension;
+	
 	}
 	
 	public static String getVirtualhostFileNameBegin() {

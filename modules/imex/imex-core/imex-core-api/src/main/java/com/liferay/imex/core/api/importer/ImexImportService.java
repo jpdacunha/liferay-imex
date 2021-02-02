@@ -9,4 +9,6 @@ public interface ImexImportService {
 	public String doImport(List<String> bundleNames);
 
 	public String doImport(String... bundleNames);
+
+	public String doImport(List<String> bundleNames, String profileId);
 }

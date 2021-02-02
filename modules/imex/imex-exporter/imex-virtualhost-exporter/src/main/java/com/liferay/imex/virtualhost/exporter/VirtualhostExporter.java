@@ -142,7 +142,7 @@ public class VirtualhostExporter implements Exporter {
 	 *
 	 */
 	@Override
-	public String getExporterRootDirectory() {
+	public String getRootDirectoryName() {
 		
 		return FileNames.DIR_VIRTUALHOST;
 

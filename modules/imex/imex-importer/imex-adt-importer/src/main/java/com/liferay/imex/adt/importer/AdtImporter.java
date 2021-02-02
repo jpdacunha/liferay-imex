@@ -81,7 +81,7 @@ public class AdtImporter implements Importer {
 	protected ImexExecutionReportService reportService;
 
 	@Override
-	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File companyDir, long companyId, Locale locale, boolean debug) {
+	public void doImport(Bundle bundle, ServiceContext serviceContext, User user, Properties config, File dir, long companyId, Locale locale, boolean debug) {
 		
 		reportService.getStartMessage(_log, "ADT import process");
 		
@@ -90,8 +90,6 @@ public class AdtImporter implements Importer {
 		if (enabled) {
 		
 			try {
-				
-				File dir = getAdtImportDirectory(companyDir);
 				
 				File[] groupDirs = FileUtil.listFiles(dir);
 				for (File groupDir : groupDirs) {
@@ -257,18 +255,15 @@ public class AdtImporter implements Importer {
 		
 	}
 
-	private File getAdtImportDirectory(File companyDir) {
+	/**
+	 * Return root directory name
+	 *
+	 */
+	@Override
+	public String getRootDirectoryName() {
 		
-		File dir = new File(companyDir, FileNames.DIR_ADT);
-		
-		if (dir.exists()) {
-			return dir;
-		} else {
-			reportService.getDNE(_log, dir);
-		}
-		
-		return null;
-		
+		return FileNames.DIR_ADT;
+
 	}
 
 	@Override

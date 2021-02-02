@@ -231,12 +231,6 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 					if (user != null) {
 						serviceContext.setSignedIn(!user.isDefaultUser());
 					}
-					
-					try {
-						reportService.getMessage(_log, ">>>>>>>>>>>>>>>>> Destination dir is [" + destDir.getCanonicalPath() + "]");
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
 						
 					//Managing locale
 					Locale locale = company.getLocale();

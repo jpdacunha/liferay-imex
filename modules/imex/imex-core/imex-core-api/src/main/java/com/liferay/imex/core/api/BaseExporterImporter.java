@@ -12,5 +12,7 @@ public interface BaseExporterImporter {
 	}
 	
 	public String getRootDirectoryName();
+	
+	public String getProcessDescription();
 
 }

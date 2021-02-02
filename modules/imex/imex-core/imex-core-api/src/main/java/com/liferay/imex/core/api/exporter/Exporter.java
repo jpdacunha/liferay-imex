@@ -11,6 +11,4 @@ public interface Exporter extends BaseExporterImporter {
 	
 	public void doExport(User user, Properties config, File destDir, long companyId, Locale locale, boolean debug);
 	
-	public String getProcessDescription();
-	
 }

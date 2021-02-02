@@ -3,17 +3,51 @@ package com.liferay.imex.core.util.statics;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class FileUtil {
 	
 	public final static String LAR_EXTENSION = ".lar";
 	
 	private static final Log _log = LogFactoryUtil.getLog(FileUtil.class);
+	
+	public static File[] listFilesByExtension(File directory, String extension) {
+		
+		File[] files = listFiles(directory);
+		
+		if (Validator.isNull(extension)) {
+			return files;
+		} else {
+			_log.debug("No extension provided returning all files");
+		}
+		
+		if (files != null ) {
+			
+			List<File> filesList = Arrays.asList(files);
+			
+			Predicate<File> byExtension = file -> file.getName().endsWith(extension);
+			
+			List<File> result = filesList.stream().filter(byExtension).collect(Collectors.toList());
+			
+			File[] resultArray = new File[result.size()];
+			
+			return result.toArray(resultArray);
+			
+		} else {
+			return files;
+		}
+
+		
+	}
 	
 	public static File[] listFiles(File file) {
 		
@@ -34,6 +68,7 @@ public class FileUtil {
 			}
 			
 		}
+		
 		return result;
 		
 	}

@@ -1,6 +1,7 @@
 package com.liferay.imex.virtualhost.exporter;
 
 import com.liferay.imex.core.api.exporter.Exporter;
+import com.liferay.imex.core.api.exporter.ProfiledExporter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.virtualhost.FileNames;
@@ -39,7 +40,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 		
 		service = Exporter.class
 	)
-public class VirtualhostExporter implements Exporter {
+public class VirtualhostExporter implements ProfiledExporter {
 	
 	private static final int DEFAULT_LAYOUTSET_ID = 0;
 	
@@ -146,11 +147,6 @@ public class VirtualhostExporter implements Exporter {
 		
 		return FileNames.DIR_VIRTUALHOST;
 
-	}
-	
-	@Override
-	public boolean isProfiled() {
-		return true;
 	}
 
 	@Override

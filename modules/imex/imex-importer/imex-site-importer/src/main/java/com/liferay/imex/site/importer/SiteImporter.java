@@ -50,7 +50,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 		immediate = true,
 		property = {
 			"imex.component.execution.priority=100",
-			"imex.component.description=SITE importer",
+			"imex.component.description=Site importer",
 			"service.ranking:Integer=10"
 		},
 		service = Importer.class

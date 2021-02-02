@@ -13,7 +13,5 @@ import org.osgi.framework.Bundle;
 public interface Importer extends BaseExporterImporter {
 	
 	public void doImport(Bundle bundle, ServiceContext rootServiceContext, User exportUser, Properties config, File srcDir, long companyId, Locale locale, boolean debug);
-	
-	public String getProcessDescription();
 
 }

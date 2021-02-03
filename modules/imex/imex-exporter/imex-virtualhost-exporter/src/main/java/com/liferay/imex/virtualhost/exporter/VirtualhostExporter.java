@@ -42,8 +42,6 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 	)
 public class VirtualhostExporter implements ProfiledExporter {
 	
-	private static final int DEFAULT_LAYOUTSET_ID = 0;
-	
 	public static final String DESCRIPTION = "Virtualhost exporter";
 	
 	private static final Log _log = LogFactoryUtil.getLog(VirtualhostExporter.class);
@@ -94,7 +92,7 @@ public class VirtualhostExporter implements ProfiledExporter {
 						long layoutSetId = virtualHost.getLayoutSetId();
 						String groupFriendlyURL = com.liferay.petra.string.StringPool.BLANK;
 						
-						if (layoutSetId != DEFAULT_LAYOUTSET_ID) {
+						if (layoutSetId != VirtualhostCommonService.DEFAULT_LAYOUTSET_ID) {
 							
 							LayoutSet layoutSet = layoutSetLocalService.getLayoutSet(layoutSetId);
 							publicVirtualHost =  !layoutSet.isPrivateLayout();
@@ -104,7 +102,7 @@ public class VirtualhostExporter implements ProfiledExporter {
 						}
 					
 						String companyWebId = company.getWebId();						
-						boolean companyVirtualHost = (layoutSetId == DEFAULT_LAYOUTSET_ID);
+						boolean companyVirtualHost = (layoutSetId == VirtualhostCommonService.DEFAULT_LAYOUTSET_ID);
 						
 						ImexVirtualhost imexVirtualhost = new ImexVirtualhost(
 								companyWebId, 

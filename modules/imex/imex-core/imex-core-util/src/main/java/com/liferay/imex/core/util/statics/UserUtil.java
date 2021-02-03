@@ -32,6 +32,7 @@ public class UserUtil {
 	public static User getDefaultAdmin(long companyId) {
 		
 		try {
+			
 			Role r = RoleLocalServiceUtil.getRole(companyId, RoleConstants.ADMINISTRATOR);
 			List<User> users = UserLocalServiceUtil.getRoleUsers(r.getRoleId());
 			User omniadmin = null;
@@ -48,6 +49,7 @@ public class UserUtil {
 			}
 			
 			return omniadmin;
+			
 		} catch (SystemException | PortalException e) {
 			_log.error(e,e);
 		}

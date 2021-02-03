@@ -61,8 +61,6 @@ public class ImexVirtualhost implements Serializable {
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
 	}
-	
-	
-	
-	
+
+
 }

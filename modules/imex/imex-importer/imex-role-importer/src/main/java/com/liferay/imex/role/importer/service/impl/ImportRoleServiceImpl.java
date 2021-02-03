@@ -44,12 +44,12 @@ public class ImportRoleServiceImpl implements ImportRoleService {
 			if (uuid != null) {
 				
 				role = roleLocalService.getRoleByUuidAndCompanyId(uuid, companyId);
-				//Role existe
+				//Role exists
 				if (role != null) {
 					
 					String roleName = role.getName();
 					//if role name is different of name defined in imex file then update roleName
-					if ((roleName == null ) || (roleName != null && !roleName.equalsIgnoreCase(imexRole.getName()))){
+					if ((roleName == null) || (roleName != null && !roleName.equalsIgnoreCase(imexRole.getName()))){
 						
 						role.setName(imexRole.getName());
 						roleLocalService.updateRole(role);

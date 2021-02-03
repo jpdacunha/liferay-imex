@@ -32,6 +32,19 @@ public class VirtualhostCommonServiceImpl implements VirtualhostCommonService {
 		
 		
 	}
+	
+	@Override
+	public List<VirtualHost> getLayoutSetIdVirtualHosts(long companyId, long layoutSetId) {
+		
+		ClassLoader classLoader = getClass().getClassLoader();
+
+		DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(VirtualHost.class, classLoader);
+
+		dynamicQuery.add(RestrictionsFactoryUtil.eq("companyId", companyId));
+		dynamicQuery.add(RestrictionsFactoryUtil.eq("layoutSetId", layoutSetId));
+
+		return virtualHostLocalService.dynamicQuery(dynamicQuery);
+	}
 
 	public VirtualHostLocalService getVirtualHostLocalService() {
 		return virtualHostLocalService;

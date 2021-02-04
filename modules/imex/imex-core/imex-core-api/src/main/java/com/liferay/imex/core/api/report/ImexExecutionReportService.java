@@ -65,6 +65,8 @@ public interface ImexExecutionReportService {
 	
 	public void getOK(Log logger, String key, String name, File file, ImexOperationEnum operation);
 	
+	public void getOK(Log logger, String key, String name, File file);
+	
 	public void getOK(Log logger, String key, String name, ImexOperationEnum operation);
 	
 	/* Error messages */ 

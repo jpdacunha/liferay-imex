@@ -8,6 +8,7 @@ import com.liferay.imex.virtualhost.FileNames;
 import com.liferay.imex.virtualhost.exporter.configuration.ImExVirtualhostExporterPropsKeys;
 import com.liferay.imex.virtualhost.model.ImexVirtualhost;
 import com.liferay.imex.virtualhost.service.VirtualhostCommonService;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
@@ -90,26 +91,31 @@ public class VirtualhostExporter implements ProfiledExporter {
 						Group group = null;
 						boolean publicVirtualHost = true;
 						long layoutSetId = virtualHost.getLayoutSetId();
-						String groupFriendlyURL = com.liferay.petra.string.StringPool.BLANK;
+						boolean defaultVirtualHost = virtualHost.getDefaultVirtualHost();
+						String groupFriendlyURL = StringPool.BLANK;
+						String languageId = StringPool.BLANK;
+						boolean isCompanyLayoutSet = layoutSetId == VirtualhostCommonService.DEFAULT_LAYOUTSET_ID;
 						
-						if (layoutSetId != VirtualhostCommonService.DEFAULT_LAYOUTSET_ID) {
+						if (!isCompanyLayoutSet) {
 							
 							LayoutSet layoutSet = layoutSetLocalService.getLayoutSet(layoutSetId);
 							publicVirtualHost =  !layoutSet.isPrivateLayout();
 							group = groupLocalService.getGroup(layoutSet.getGroupId());
-							groupFriendlyURL = group.getFriendlyURL(); 
+							groupFriendlyURL = group.getFriendlyURL();
+							languageId = virtualHost.getLanguageId();
 							
 						}
 					
-						String companyWebId = company.getWebId();						
-						boolean companyVirtualHost = (layoutSetId == VirtualhostCommonService.DEFAULT_LAYOUTSET_ID);
+						String companyWebId = company.getWebId();
 						
 						ImexVirtualhost imexVirtualhost = new ImexVirtualhost(
 								companyWebId, 
 								groupFriendlyURL, 
 								publicVirtualHost, 
-								companyVirtualHost, 
-								hostname);
+								isCompanyLayoutSet, 
+								hostname,
+								defaultVirtualHost,
+								languageId);
 						
 						processor.write(imexVirtualhost, virtualhostDir, FileNames.getVirtualhostFileName(virtualHost, company, group, processor.getFileExtension()));
 						reportService.getOK(_log, "Virtualhost : "  + hostname + " for group : " + groupFriendlyURL);

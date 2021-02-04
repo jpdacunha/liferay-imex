@@ -5,16 +5,15 @@ import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ProfiledImporter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
-import com.liferay.imex.core.api.report.model.ImexOperationEnum;
 import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.virtualhost.FileNames;
 import com.liferay.imex.virtualhost.importer.configuration.ImExVirtualHostImporterPropsKeys;
+import com.liferay.imex.virtualhost.importer.model.ExtendedImexVirtualhost;
 import com.liferay.imex.virtualhost.model.ImexVirtualhost;
 import com.liferay.imex.virtualhost.service.VirtualhostCommonService;
 import com.liferay.portal.kernel.exception.NoSuchCompanyException;
 import com.liferay.portal.kernel.exception.NoSuchGroupException;
-import com.liferay.portal.kernel.exception.NoSuchVirtualHostException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -22,7 +21,6 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.model.VirtualHost;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutSetLocalService;
@@ -32,9 +30,16 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
@@ -91,11 +96,16 @@ public class VirtualhostImporter implements ProfiledImporter {
 		
 			try {
 				
-				File[] files = FileUtil.listFilesByExtension(srcDir, processor.getFileExtension());
-				for (File virtualHostFile : files) {
+				List<ExtendedImexVirtualhost> virtualHosts = deserialiseFiles(srcDir);
+				
+				if (virtualHosts.size() > 0) {
+										
+					Map<Long, TreeMap<String, String>> layoutSetHostnames = converToUpdatableMap(companyId, virtualHosts);
 					
-					doImportVirtualHost(companyId, locale, virtualHostFile);
+					updateVirtualHosts(companyId, locale, layoutSetHostnames);
 					
+				} else {
+					reportService.getEmpty(_log, "virtualhost list");
 				}
 								
 			} catch (Exception e) {
@@ -111,35 +121,55 @@ public class VirtualhostImporter implements ProfiledImporter {
 		
 	}
 
-	private void doImportVirtualHost(long companyId, Locale locale, File virtualHostFile) throws Exception, PortalException {
+	private void updateVirtualHosts(long companyId, Locale locale, Map<Long, TreeMap<String, String>> layoutSetHostnames) throws PortalException {
+		
+		//Updating bunch of virtualhosts for each layoutSet - The Liferay method destriy all existing virtualhosts first
+		for (Entry<Long, TreeMap<String,String>> entry : layoutSetHostnames.entrySet()) {
+			
+			long layoutSetId = entry.getKey();
+			TreeMap<String,String> currentLayoutSetHostnames = entry.getValue();
+			
+			virtualHostLocalService.updateVirtualHosts(companyId, layoutSetId, currentLayoutSetHostnames);
+			
+			Company company = companyLocalService.getCompanyById(companyId);
+			
+			String name = "Company : " + company.getName();
+			
+			if (layoutSetId != VirtualhostCommonService.DEFAULT_LAYOUTSET_ID) {
+				LayoutSet layoutSet = layoutSetLocalService.getLayoutSet(layoutSetId);
+				Group group = layoutSet.getGroup();
+				name = "Site : " + GroupUtil.getGroupName(group, locale);
+			}
+			
+			reportService.getOK(_log, name, "Virtual Hosts : "  + currentLayoutSetHostnames);
+			
+		}
+		
+	}
 
-		/**
-		 * TOTO upgrade Liferay version and switch to manage defaultLayoutSet	public List<VirtualHost> updateVirtualHosts(long companyId, final long layoutSetId, TreeMap<String, String> hostnames) is not available because is introduced by 
-		 * another fixpack. Use of this method in futur version instead of using 
-		 */
+	private Map<Long, TreeMap<String, String>> converToUpdatableMap(long companyId, List<ExtendedImexVirtualhost> virtualHosts) throws PortalException {
 		
+		//Constructing structured map to update
+		Map<Long, TreeMap<String, String>> layoutSetHostnames = new HashMap<Long, TreeMap<String,String>>();
 		
-		ImexVirtualhost virtualHostObj = (ImexVirtualhost)processor.read(ImexVirtualhost.class, virtualHostFile);
-		
-		String companyWebId = virtualHostObj.getCompanyWebId();
-		
-		String groupFriendlyURL = virtualHostObj.getGroupFriendlyURL();
-		
-		boolean isPublicVirtualHost = virtualHostObj.isPublicVirtualHost();
-		
-		if (Validator.isNotNull(companyWebId)) {
-		
+		for (ExtendedImexVirtualhost extendedVirtualHostObj : virtualHosts) {
+			
+			ImexVirtualhost virtualHostObj = extendedVirtualHostObj.getVirtualhost();
+			
+			String companyWebId = virtualHostObj.getCompanyWebId();
+			String groupFriendlyURL = virtualHostObj.getGroupFriendlyURL();
+			boolean isPublicVirtualHost = virtualHostObj.isPublicVirtualHost();
+			long layoutSetId = VirtualhostCommonService.DEFAULT_LAYOUTSET_ID;
+			boolean isCompanyVirtualHost = virtualHostObj.isCompanyVirtualHost();
+			File virtualHostFile = extendedVirtualHostObj.getSourceFile();
+			String originFileName = virtualHostFile.getName();
+			String languageId = virtualHostObj.getLanguageId();
+			
 			try {
 				
 				//Verify if company exists
-				Company company = companyLocalService.getCompanyByWebId(companyWebId);
+				companyLocalService.getCompanyByWebId(companyWebId);
 				
-				boolean isCompanyVirtualHost = virtualHostObj.isCompanyVirtualHost();
-				
-				String name = "Company : " + company.getName();
-				
-				long layoutSetId = VirtualhostCommonService.DEFAULT_LAYOUTSET_ID;
-						
 				if (!isCompanyVirtualHost) {
 					
 					//Verify if group exists
@@ -149,54 +179,78 @@ public class VirtualhostImporter implements ProfiledImporter {
 					
 					layoutSetId = layoutSet.getLayoutSetId();
 					
-					name = "Site : " + GroupUtil.getGroupName(group, locale);
 				}
-					
+				
 				String hostname = virtualHostObj.getHostname();
+				TreeMap<String, String> currentLayoutSetHostnames = null;
 				
 				if (Validator.isNotNull(hostname)) {
 				
-					ImexOperationEnum operation = ImexOperationEnum.UPDATE;
+					TreeMap<String, String> treeMap = layoutSetHostnames.get(layoutSetId);
 					
-					try {
-
-						//To identify if virtualhost exists or not
-						virtualHostLocalService.getVirtualHost(companyId, layoutSetId);
+					if (treeMap == null) {
 						
-						virtualHostLocalService.updateVirtualHost(companyId, layoutSetId, hostname);
+						layoutSetHostnames.put(layoutSetId, new TreeMap<String, String>());
 						
-						
-					} catch (NoSuchVirtualHostException e) {
-						
-						operation = ImexOperationEnum.CREATE;
-						
-						long virtualHostId = counterLocalService.increment();
-						
-						VirtualHost virtualHost = virtualHostLocalService.createVirtualHost(virtualHostId);
-						virtualHost.setHostname(hostname);
-						virtualHost.setLayoutSetId(layoutSetId);
-						virtualHost.setCompanyId(companyId);
-						virtualHostLocalService.addVirtualHost(virtualHost);
-						
+					} else {
+						_log.debug("Updating existing TreeMap");
 					}
 					
-					reportService.getOK(_log, name, "Virtual Host : "  + hostname, virtualHostFile, operation);
+					currentLayoutSetHostnames = layoutSetHostnames.get(layoutSetId);
+					
+					if (!currentLayoutSetHostnames.containsKey(hostname)) {
+						currentLayoutSetHostnames.put(hostname, languageId);
+					} else {
+						_log.debug("Current TreeMap already contains [" + hostname + "]");
+					}
 					
 				} else {
-					reportService.getError(_log, virtualHostFile.getName(), "missing required information hostname");
+					reportService.getError(_log, originFileName, "missing required information hostname");
 				}
-																	
+				
 			} catch(NoSuchCompanyException e) {
 				reportService.getDNE(_log, "company identified by [" + companyWebId + "]");
-				reportService.getSkipped(_log, virtualHostFile.getName());
+				reportService.getSkipped(_log, originFileName);
 			} catch(NoSuchGroupException e) {
 				reportService.getDNE(_log, "group identified by [" + groupFriendlyURL + "]");
-				reportService.getSkipped(_log, virtualHostFile.getName());
+				reportService.getSkipped(_log, originFileName);
 			}
-		
-		} else {
-			reportService.getSkipped(_log, virtualHostFile.getName());
+			
 		}
+		return layoutSetHostnames;
+		
+	}
+
+	private List<ExtendedImexVirtualhost> deserialiseFiles(File srcDir) throws Exception {
+		
+		File[] files = FileUtil.listFilesByExtension(srcDir, processor.getFileExtension());
+		
+		//Constructing deserialized list
+		List<ExtendedImexVirtualhost> virtualHosts = new ArrayList<ExtendedImexVirtualhost>();
+		
+		for (File virtualHostFile : files) {
+			ImexVirtualhost virtualHostObj = (ImexVirtualhost)processor.read(ImexVirtualhost.class, virtualHostFile);
+			virtualHosts.add(new ExtendedImexVirtualhost(virtualHostFile, virtualHostObj));
+		}
+		
+		if (virtualHosts.size() > 0) {
+			//Ordering Default virtualhosts first
+			Collections.sort(virtualHosts, new Comparator<ExtendedImexVirtualhost>(){
+	
+		        @Override
+		        public int compare(ExtendedImexVirtualhost mall1, ExtendedImexVirtualhost mall2){
+	
+		            boolean b1 = mall1.isDefaultVirtualHost();
+		            boolean b2 = mall2.isDefaultVirtualHost();
+		         
+		            return  Boolean.compare(b1, b2);
+		        }
+		        
+		    });
+		}
+	
+		return virtualHosts;
+		
 	}
 	
 	@Override

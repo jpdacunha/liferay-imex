@@ -17,20 +17,25 @@ public class ImexVirtualhost implements Serializable {
 	public boolean publicVirtualHost;
 	public boolean companyVirtualHost;
 	public String hostname;
+	public boolean defaultVirtualHost;
+	public String languageId;
 	
 	public ImexVirtualhost() {
 		super();
 	}
 
-	public ImexVirtualhost(String companyWebId, String groupFriendlyURL, boolean publicVirtualHost, boolean companyVirtualHost, String hostname) {
+	public ImexVirtualhost(String companyWebId, String groupFriendlyURL, boolean publicVirtualHost,
+			boolean companyVirtualHost, String hostname, boolean defaultVirtualHost, String languageId) {
 		super();
 		this.companyWebId = companyWebId;
 		this.groupFriendlyURL = groupFriendlyURL;
 		this.publicVirtualHost = publicVirtualHost;
 		this.companyVirtualHost = companyVirtualHost;
 		this.hostname = hostname;
+		this.defaultVirtualHost = defaultVirtualHost;
+		this.languageId = languageId;
 	}
-	
+
 	public String getCompanyWebId() {
 		return companyWebId;
 	}
@@ -60,6 +65,22 @@ public class ImexVirtualhost implements Serializable {
 	}
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
+	}
+
+	public boolean isDefaultVirtualHost() {
+		return defaultVirtualHost;
+	}
+
+	public void setDefaultVirtualHost(boolean defaultVirtualHost) {
+		this.defaultVirtualHost = defaultVirtualHost;
+	}
+
+	public String getLanguageId() {
+		return languageId;
+	}
+
+	public void setLanguageId(String languageId) {
+		this.languageId = languageId;
 	}
 
 

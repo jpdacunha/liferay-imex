@@ -202,13 +202,27 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 	
 	public void getOK(Log logger, String key, String name, File file, ImexOperationEnum operation) {
 		
-		String message = "[" + operation.getValue() + "] [" + key + "]=>[" + name + "] [   OK  ]";		
+		String message = StringPool.BLANK;
+		
+		if (operation != null) {
+			message += "[" + operation.getValue() + "] ";
+		}
+		
+		message = "[" + key + "]=>[" + name + "] [   OK  ]";	
+		
 		if (file != null) {
 			message += " - (" + file.getAbsolutePath() + ")";
 		} else {
 			_log.debug("file is null");
 		}
+		
 		getMessage(logger, message , 4);
+		
+	}
+	
+	public void getOK(Log logger, String key, String name, File file) {
+		
+		getOK(logger, key, name, file, null);
 		
 	}
 	
@@ -219,7 +233,8 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 	}
 	
 	public void getError(Log logger, Exception e) {
-		getError(logger, "[An unexpected error occured]", e.getMessage());
+		String stacktrace = ExceptionUtils.getStackTrace(e);
+		getError(logger, "[An unexpected error occured]", stacktrace);
 	}
 	
 	public void getError(Log logger, String name, Exception e) {

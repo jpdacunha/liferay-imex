@@ -90,42 +90,26 @@ public class AdtExporter implements Exporter {
 				
 				try {
 					
-					Company company = companyLocalService.getCompany(companyId);
-					
 					List<Group> groups = groupLocalService.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 					
 					for (Group group : groups) {
-						
-						reportService.getStartMessage(_log, group, locale);
-						for (String classType : types) {
-							
-							boolean isSite = group.isSite() && !group.getFriendlyURL().equals("/control_panel");
-							if (isSite) {
 								
-								doExport(config, group, adtDir, locale, debug, classType, rawContentToExport);
-								
+						boolean isSite = group.isSite() && !group.getFriendlyURL().equals("/control_panel");
+						if (isSite) {
+							reportService.getStartMessage(_log, group, locale);
+							for (String classType : types) {
+									doExport(config, group, adtDir, locale, debug, classType, rawContentToExport);	
 							}
-							
+							reportService.getEndMessage(_log, group, locale);
+						} else {
+							reportService.getSkipped(_log, "group : " + GroupUtil.getGroupName(group, locale));
 						}
-						reportService.getEndMessage(_log, group, locale);
 
 					}
-
-					// Global Scope Export
-					Group companyGroup = company.getGroup();
-					reportService.getStartMessage(_log, companyGroup, locale);
-
-					for (String classType : types) {			
-						doExport(config, companyGroup, adtDir, locale, debug, classType, rawContentToExport);	
-					}
-					
-					reportService.getEndMessage(_log, companyGroup, locale);
 					
 				} catch (ImexException e) {
 					_log.error(e,e);
 					reportService.getError(_log, e);
-				} catch (PortalException e) {
-					_log.error(e,e);
 				}
 				
 			} else {
@@ -154,7 +138,7 @@ public class AdtExporter implements Exporter {
 				if (groupDir != null) {
 					
 					if (groupDir.exists()) {
-				
+						
 						//Iterate over structures
 						for(DDMTemplate ddmTemplate : adts){
 												
@@ -170,12 +154,14 @@ public class AdtExporter implements Exporter {
 										
 										ImExAdt imexAdt = new ImExAdt(ddmTemplate, classType);
 										
-										processor.write(imexAdt, adtDir, FileNames.getAdtFileName(ddmTemplate, group, locale, processor.getFileExtension()));
+										processor.write(imexAdt, adtDir, FileNames.getAdtFileName(ddmTemplate, locale, processor.getFileExtension()));
 										
-										String rawFileName = FileNames.getAdtFileName(ddmTemplate, group, locale, StringPool.PERIOD + imexAdt.getLangType());
+										String rawFileName = FileNames.getGroupAdtFileName(ddmTemplate, group, locale, StringPool.PERIOD + imexAdt.getLangType());
 										rawContentToExport.add(new ExporterRawContent(rawFileName, imexAdt.getData()));
 										
+					
 										reportService.getOK(_log, groupName, "ADT : "  + ddmTemplate.getName(locale) + ", type : " + classType);
+										
 										
 									} catch (Exception e) {
 										reportService.getError(_log, ddmTemplate.getName(locale), e);
@@ -226,12 +212,7 @@ public class AdtExporter implements Exporter {
 	 */
 	private File initializeSingleGroupDirectory(File groupsDir, Group group) throws ImexException {
 		
-		String name = group.getFriendlyURL();
-		if (group.isCompany()) {
-			name = GroupUtil.GLOBAL;
-		}
-		
-		name = ImexNormalizer.getDirNameByFriendlyURL(name);
+		String name = GroupUtil.getGroupFriendlyUrlAsName(group);
 		File dir = new File(groupsDir, name);
 		dir.mkdirs();		
 		return dir;

@@ -45,7 +45,7 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 	
 	private Boolean displayInLiferayLogs = null;
 
-	protected final static String PREFIX = "[IMEX] : ";
+	protected final static String PREFIX = "[" + ImExCorePropsKeys.IMEX_PREFIX.toUpperCase() + "] : ";
 	
 	/* Root methods */
 

@@ -37,6 +37,8 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	private static final String LOGS = "/logs";
 
 	private static final String DATA = "/data";
+	
+	private static final String RAW_DATA = "/data-raw";
 
 	private static final String IMEX2 = "/imex";
 
@@ -267,6 +269,11 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	@Override
 	public String getImexDataPath() {
 		return getImexPath() + DATA;
+	}
+	
+	@Override
+	public String getImexRawDataPath() {
+		return getImexPath() + RAW_DATA;
 	}
 	
 	@Override

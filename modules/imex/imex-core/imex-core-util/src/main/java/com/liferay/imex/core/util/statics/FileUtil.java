@@ -18,6 +18,8 @@ public class FileUtil {
 	
 	public final static String LAR_EXTENSION = ".lar";
 	public final static String XML_EXTENSION = ".xml";
+	public final static String ZIP_EXTENSION = ".zip";
+	public final static String JSON_EXTENSION = ".json";
 	
 	private static final Log _log = LogFactoryUtil.getLog(FileUtil.class);
 	

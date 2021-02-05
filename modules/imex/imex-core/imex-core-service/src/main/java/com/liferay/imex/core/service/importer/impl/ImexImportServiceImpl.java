@@ -76,7 +76,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 		
 		//Generate an unique identifier for this import process
 		ProcessIdentifierGenerator identifier = new ImporterProcessIdentifier();
-		String identifierStr = identifier.generateUniqueIdentifier();
+		String identifierStr = identifier.getOrGenerateUniqueIdentifier();
 		
 		LoggingContext.put(ImexExecutionReportService.IDENTIFIER_KEY, identifierStr);
 				
@@ -106,7 +106,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 				ImexProperties coreConfig = new ImexProperties();
 				configurationService.loadCoreConfiguration(coreConfig);
 				reportService.displayConfigurationLoadingInformation(coreConfig, _log);
-				imexArchiverService.archiveData(coreConfig.getProperties(), identifier);
+				imexArchiverService.archiveDataDirectory(coreConfig.getProperties(), identifier);
 				
 				File importDir = getImportDirectory();
 				reportService.getPropertyMessage(_log, "IMEX import path", importDir.toString());

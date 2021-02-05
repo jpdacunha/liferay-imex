@@ -34,5 +34,20 @@ public class GroupUtil {
 		return ImexNormalizer.convertToKey(name);
 		
 	}
+	
+	/**
+	 * Return groupName from FriendlyURL
+	 * @param group
+	 * @return
+	 */
+	public static String getGroupFriendlyUrlAsName(Group group) {
+		String name = group.getFriendlyURL();
+		if (group.isCompany()) {
+			name = GLOBAL;
+		}
+		
+		name = ImexNormalizer.getDirNameByFriendlyURL(name);
+		return name;
+	}
 
 }

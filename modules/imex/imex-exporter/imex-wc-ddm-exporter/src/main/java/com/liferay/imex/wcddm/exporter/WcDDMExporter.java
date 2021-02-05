@@ -20,10 +20,8 @@ import com.liferay.imex.wcddm.model.ImExTemplate;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
@@ -88,8 +86,6 @@ public class WcDDMExporter implements Exporter {
 		
 			try {
 				
-				Company company = companyLocalService.getCompany(companyId);
-					
 				List<Group> groups = groupLocalService.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 				
 				for (Group group : groups) {
@@ -104,18 +100,10 @@ public class WcDDMExporter implements Exporter {
 					}
 
 				}
-
-				// Global Scope Export
-				Group companyGroup = company.getGroup();
-				reportService.getStartMessage(_log, companyGroup, locale);
-				doExport(config, companyGroup, wcDdmDir, locale, rawContentToExport, debug);
-				reportService.getEndMessage(_log, companyGroup, locale);
 				
 			} catch (ImexException e) {
 				_log.error(e,e);
 				reportService.getError(_log, e); 
-			} catch (PortalException e) {
-				_log.error(e,e);
 			}
 			
 		} else {
@@ -208,9 +196,9 @@ public class WcDDMExporter implements Exporter {
 	private void writeTemplate(Group group, Locale locale, List<ExporterRawContent> rawContentToExport, File structureDir, String groupName, DDMTemplate ddmTemplate) throws Exception {
 		
 		ImExTemplate imexTemplate = new ImExTemplate(ddmTemplate);
-		processor.write(imexTemplate, structureDir, FileNames.getTemplateFileName(ddmTemplate, group, locale, processor.getFileExtension()));
+		processor.write(imexTemplate, structureDir, FileNames.getTemplateFileName(ddmTemplate, locale, processor.getFileExtension()));
 		
-		String rawFileName = FileNames.getTemplateFileName(ddmTemplate, group, locale, StringPool.PERIOD + imexTemplate.getLangType());
+		String rawFileName = FileNames.getGroupTemplateFileName(ddmTemplate, group, locale, StringPool.PERIOD + imexTemplate.getLangType());
 		rawContentToExport.add(new ExporterRawContent(rawFileName, imexTemplate.getData()));
 		
 	}
@@ -218,9 +206,9 @@ public class WcDDMExporter implements Exporter {
 	private void writeStructure(Group group, Locale locale, List<ExporterRawContent> rawContentToExport, DDMStructure ddmStructure, File structureDir) throws Exception {
 		
 		ImExStructure imexStructure = new ImExStructure(ddmStructure);
-		processor.write(imexStructure, structureDir, FileNames.getStructureFileName(ddmStructure, group, locale, processor.getFileExtension()));
+		processor.write(imexStructure, structureDir, FileNames.getStructureFileName(ddmStructure, locale, processor.getFileExtension()));
 		
-		String rawFileName = FileNames.getStructureFileName(ddmStructure, group, locale, FileUtil.XML_EXTENSION);
+		String rawFileName = FileNames.getGroupStructureFileName(ddmStructure, group, locale, FileUtil.JSON_EXTENSION);
 		rawContentToExport.add(new ExporterRawContent(rawFileName, imexStructure.getData()));
 		
 	}
@@ -239,12 +227,7 @@ public class WcDDMExporter implements Exporter {
 	 */
 	private File initializeSingleGroupDirectory(File groupsDir, Group group) throws ImexException {
 		
-		String name = group.getFriendlyURL();
-		if (group.isCompany()) {
-			name = GroupUtil.GLOBAL;
-		}
-		
-		name = ImexNormalizer.getDirNameByFriendlyURL(name);
+		String name = GroupUtil.getGroupFriendlyUrlAsName(group);
 		File dir = new File(groupsDir, name);
 		dir.mkdirs();		
 		return dir;

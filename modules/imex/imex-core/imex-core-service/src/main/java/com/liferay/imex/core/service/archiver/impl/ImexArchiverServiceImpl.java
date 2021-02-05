@@ -35,8 +35,7 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 	
 	public final static String ARCHIVAGE_ERROR = "Archive service error";
 	
-	public final static String ARCHIVE_FILENAME_PREFIX = "imex.";
-	public final static String ARCHIVE_FILENAME_SUFFIX = ".zip";
+	public final static String ARCHIVE_FILENAME_PREFIX = ImExCorePropsKeys.IMEX_PREFIX + ".";
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexConfigurationService configurationService;
@@ -45,15 +44,15 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 	protected ImexExecutionReportService reportService;
 	
 	@Override
-	public void archiveData(Properties coreConfig, ProcessIdentifierGenerator processIdentifier) {
+	public void archiveDataDirectory(Properties coreConfig, ProcessIdentifierGenerator processIdentifier) {
 		
 		int nbArchiveToKeep = GetterUtil.getInteger(coreConfig.get(ImExCorePropsKeys.ARCHIVE_HISTORY_NUMBER));
-		archiveData(nbArchiveToKeep, processIdentifier);
+		archiveDataDirectory(nbArchiveToKeep, processIdentifier);
 		
 	}
 	
 	@Override
-	public void archiveData(int nbArchiveToKeep, ProcessIdentifierGenerator processIdentifier) {
+	public void archiveDataDirectory(int nbArchiveToKeep, ProcessIdentifierGenerator processIdentifier) {
 		
 		File dataDirectory = new File(configurationService.getImexDataPath());
 		archive(dataDirectory, nbArchiveToKeep, processIdentifier);
@@ -61,30 +60,41 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 	}
 	
 	@Override
-	public void archiveCfg(Properties coreConfig, ProcessIdentifierGenerator processIdentifier) {
+	public void archiveCfgDirectory(Properties coreConfig, ProcessIdentifierGenerator processIdentifier) {
 		
 		int nbArchiveToKeep = GetterUtil.getInteger(coreConfig.get(ImExCorePropsKeys.ARCHIVE_HISTORY_NUMBER));
-		archiveCfg(nbArchiveToKeep, processIdentifier);
+		archiveCfgDirectory(nbArchiveToKeep, processIdentifier);
 		
 	}
 	
 	@Override
-	public void archiveCfg(int nbArchiveToKeep, ProcessIdentifierGenerator processIdentifier) {
+	public void archiveCfgDirectory(int nbArchiveToKeep, ProcessIdentifierGenerator processIdentifier) {
 		
 		File cfgDir = new File(configurationService.getImexCfgOverridePath());
 		archive(cfgDir, nbArchiveToKeep, processIdentifier);	
 		
 	}
-
-	private void archive(File toArchiveDirectory, int nbArchiveToKeep, ProcessIdentifierGenerator processIdentifier) {
+	
+	@Override
+	public void archiveAndClean(Properties coreConfig, File toArchiveDirectory, File archiveDestinationDirectory, ProcessIdentifierGenerator processIdentifier) {
+		
+		int nbArchiveToKeep = GetterUtil.getInteger(coreConfig.get(ImExCorePropsKeys.ARCHIVE_HISTORY_NUMBER));
+		archiveAndClean(toArchiveDirectory, archiveDestinationDirectory, nbArchiveToKeep, processIdentifier);
+		
+	}
+	
+	private void archiveAndClean(File toArchiveDirectory, File archiveDestinationDirectory, int nbArchiveToKeep, ProcessIdentifierGenerator processIdentifier) {
 		
 		reportService.getSeparator(_log);
 		reportService.getStartMessage(_log, "Archiving process");
-		reportService.getPropertyMessage(_log, "Nb archive history to keep" , nbArchiveToKeep + "");
+		reportService.getPropertyMessage(_log, "Nb archive history to keep" , nbArchiveToKeep + "", 4);
 		
 		if (nbArchiveToKeep > 0) {
 			
-			File archiveDestinationDirectory = initializeArchiveDestinationDirectory();
+			if (archiveDestinationDirectory == null) {
+				//Settind default archive directory if no dir provided
+				archiveDestinationDirectory = initializeArchiveDestinationDirectory();
+			}
 			
 			if (archiveDestinationDirectory != null && archiveDestinationDirectory.isDirectory()) {
 				
@@ -109,9 +119,16 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 		
 	}
 	
-	private void cleanup(File destinationDir, ProcessIdentifierGenerator processIdentifier, int nbArchiveToKeep) {
+
+	private void archive(File toArchiveDirectory, int nbArchiveToKeep, ProcessIdentifierGenerator processIdentifier) {
 		
-		File[] listFiles = destinationDir.listFiles();
+		archiveAndClean(toArchiveDirectory, null, nbArchiveToKeep, processIdentifier);
+		
+	}
+	
+	private void cleanup(File toCleanDir, ProcessIdentifierGenerator processIdentifier, int nbArchiveToKeep) {
+		
+		File[] listFiles = toCleanDir.listFiles();
 		
 		if (listFiles.length > 0) {
 			
@@ -131,9 +148,8 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 					}
 					return answer;
 				}
-				
+			// to delete the file but keep the most recent <nbArchiveToKeep>	
 			}).skip(nbArchiveToKeep)
-					// to delete the file but keep the most recent <nbArchiveToKeep>
 					// .forEach(x -> ((File) x).delete());
 					// or display the filenames which would be deleted
 					.forEach((x) -> {
@@ -156,7 +172,7 @@ public class ImexArchiverServiceImpl implements ImexArchiverService {
 	
 	private String getArchiveFileName(File dataDirectory, ProcessIdentifierGenerator processIdentifier) {
 	
-		return ARCHIVE_FILENAME_PREFIX + dataDirectory.getName() + StringPool.PERIOD + processIdentifier.generateProcessTypeUniqueIdentifier() + ARCHIVE_FILENAME_SUFFIX;
+		return ARCHIVE_FILENAME_PREFIX + dataDirectory.getName() + StringPool.PERIOD + processIdentifier.generateProcessTypeUniqueIdentifier() + FileUtil.ZIP_EXTENSION;
 		
 	}
 

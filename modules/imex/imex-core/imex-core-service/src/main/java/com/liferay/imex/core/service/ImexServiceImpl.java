@@ -64,7 +64,7 @@ public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService 
 		
 		ProcessIdentifierGenerator processIdentifier = new ConfigurationOverrideProcessIdentifier();
 		
-		String identifier = processIdentifier.generateUniqueIdentifier();
+		String identifier = processIdentifier.getOrGenerateUniqueIdentifier();
 		LoggingContext.put(ImexExecutionReportService.IDENTIFIER_KEY, identifier);
 		
 		reportService.getStartMessage(_log, "CFG_OVERRIDE process");
@@ -78,7 +78,7 @@ public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService 
 				
 				ImexProperties coreConfig = new ImexProperties();
 				configurationService.loadCoreConfiguration(coreConfig);
-				imexArchiverService.archiveCfg(coreConfig.getProperties(), processIdentifier);
+				imexArchiverService.archiveCfgDirectory(coreConfig.getProperties(), processIdentifier);
 				
 			}
 			

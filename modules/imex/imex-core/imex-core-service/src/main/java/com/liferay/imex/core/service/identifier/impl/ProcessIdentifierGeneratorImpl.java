@@ -12,26 +12,41 @@ public abstract class ProcessIdentifierGeneratorImpl implements ProcessIdentifie
 	
 	private SimpleDateFormat formater =  new SimpleDateFormat("yyyyMMdd-HHmmss-SSSSSS");
 
-	private String processType;
+	private String processTypeDescription;
 	
-	private String smallProcessType;
+	private String smallProcessTypeDescription;
+	
+	private String uniqueIdentifier;
+	
+	private String processTypeUniqueIdentifier;
 
 	public ProcessIdentifierGeneratorImpl(String identifier, String smallProcessType) {
 		super();
-		this.processType = identifier;
-		this.smallProcessType = smallProcessType;
+		this.processTypeDescription = identifier;
+		this.smallProcessTypeDescription = smallProcessType;
 	}
 	
-	public String generateUniqueIdentifier() {
-		return smallProcessType + StringPool.PERIOD + formater.format(new Date()) + StringPool.PERIOD + RandomStringUtils.randomAlphanumeric(4);
+	public String getOrGenerateUniqueIdentifier() {
+		
+		if (uniqueIdentifier == null) {
+			uniqueIdentifier = smallProcessTypeDescription + StringPool.PERIOD + formater.format(new Date()) + StringPool.PERIOD + RandomStringUtils.randomAlphanumeric(4);
+		}
+		
+		return uniqueIdentifier;
+		
 	}
 	
 	public String generateProcessTypeUniqueIdentifier() {
-		return processType + StringPool.PERIOD + generateUniqueIdentifier();
+		
+		if (processTypeUniqueIdentifier == null) {
+			processTypeUniqueIdentifier = processTypeDescription + StringPool.PERIOD + getOrGenerateUniqueIdentifier();
+		}
+		return processTypeUniqueIdentifier;
+		
 	}
 
 	public String getProcessType() {
-		return processType;
+		return processTypeDescription;
 	}
 	
 }

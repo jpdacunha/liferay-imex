@@ -78,12 +78,18 @@ public class ImexServiceReferenceMap<T> {
 	public Map<String, ServiceReference<T>> getMap() {
 		
 		List<ServiceReference<T>> list = new ArrayList<>();
-		for (Entry<String, ServiceReference<T>> entry : map.entrySet()) {			
-			list.add(entry.getValue());			
+		
+		//Since this is a synchronized map . See synchroninzed map documentation
+		synchronized(map) {
+			for (Entry<String, ServiceReference<T>> entry : map.entrySet()) {			
+				list.add(entry.getValue());			
+			}
 		}
+		
 		Collections.sort(list, new ImexServiceReferenceComparator());
 		
 		Map<String, ServiceReference<T>> copiedMap = new LinkedHashMap<>();
+		
 		
 		for (ServiceReference<T> serviceReference : list) {
 			copiedMap.put(ImexServiceReferenceMap.getKey(serviceReference), serviceReference);			

@@ -12,6 +12,7 @@ import com.liferay.imex.core.api.identifier.ProcessIdentifierGenerator;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.service.ImexServiceBaseImpl;
 import com.liferay.imex.core.service.exporter.model.ExporterProcessIdentifierGenerator;
+import com.liferay.imex.core.service.exporter.model.RawExporterProcessIdentifierGeneratorWrapper;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.UserUtil;
 import com.liferay.petra.string.StringPool;
@@ -26,6 +27,9 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
@@ -77,7 +83,10 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 		
 		//Generate an unique identifier for this export process
 		ProcessIdentifierGenerator identifier = new ExporterProcessIdentifierGenerator();
-		String identifierStr = identifier.generateUniqueIdentifier();
+		String identifierStr = identifier.getOrGenerateUniqueIdentifier();
+		
+		//TODO : JDA manage debug mode
+		boolean debug = true;
 		
 		LoggingContext.put(ImexExecutionReportService.IDENTIFIER_KEY, identifierStr);
 		
@@ -103,11 +112,13 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 				
 			} else {
 				
-				//Archive actual files before importing
+				//Reading configuration
 				ImexProperties coreConfig = new ImexProperties();
 				configurationService.loadCoreConfiguration(coreConfig);
 				reportService.displayConfigurationLoadingInformation(coreConfig, _log);
-				imexArchiverService.archiveData(coreConfig.getProperties(), identifier);
+				
+				//Archive actual files before importing
+				imexArchiverService.archiveDataDirectory(coreConfig.getProperties(), identifier);
 				
 				File exportDir = initializeExportDirectory();
 				
@@ -124,12 +135,14 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 					
 					File companyDir = initializeCompanyExportDirectory(exportDir, company);
 					
-					executeRegisteredExporters(exporters, companyDir, companyId, companyName, profileId);
+					executeRegisteredExporters(exporters, companyDir, companyId, companyName, profileId, debug);
 					
 				}
 				
+				reportService.getSeparator(_log);
+				
 				//Executing raw export
-				executeRawExport();
+				executeRawExport((ExporterProcessIdentifierGenerator)identifier, debug);
 				
 			}
 			
@@ -163,6 +176,24 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 		
 	}
 	
+	private File initializeRawExportDirectory() throws ImexException {
+		
+		String exportRawDataFilePath = configurationService.getImexRawDataPath();
+		
+		File exportRawDataFile = new File(exportRawDataFilePath);
+		
+		if (!exportRawDataFile.exists()) {
+			exportRawDataFile.mkdirs();
+		}
+		
+		if (!exportRawDataFile.exists()) {
+			throw new ImexException("Failed to create directory " + exportRawDataFile);
+		}	
+		
+		return exportRawDataFile;
+			
+	}
+	
 	private File initializeExportDirectory() throws ImexException {
 				
 		String exportFilePath = configurationService.getImexDataPath();
@@ -189,7 +220,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			
 	}
 	
-	private void executeRegisteredExporters(Map<String, ServiceReference<Exporter>> exporters, File companyDir, long companyId, String companyName, String profileId) throws ImexException {
+	private void executeRegisteredExporters(Map<String, ServiceReference<Exporter>> exporters, File companyDir, long companyId, String companyName, String profileId, boolean debug) throws ImexException {
 		
 		User user = UserUtil.getDefaultAdmin(companyId);
 		
@@ -251,8 +282,8 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 				Company company = companyLocalService.getCompany(companyId);
 				
 				//Trigger Exporter specific code
-				exporter.doExport(user, configAsProperties, destDir, companyId, company.getLocale(), this.rawExportContentList, true);
-			
+				exporter.doExport(user, configAsProperties, destDir, companyId, company.getLocale(), this.rawExportContentList, debug);
+				
 					
 			} catch (PortalException e) {
 				_log.error(e,e);
@@ -264,35 +295,72 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 
 	}
 	
-	private void executeRawExport() {
+	private void executeRawExport(ExporterProcessIdentifierGenerator rootIdentifier, boolean debug) throws ImexException, IOException {
 		
 		ImexProperties config = new ImexProperties();
 		configurationService.loadCoreConfiguration(config);
-		Properties configAsProperties = config.getProperties();
+		Properties coreConfigAsProperties = config.getProperties();
 		
-		boolean rawExportEnabled =  GetterUtil.getBoolean(configAsProperties.get(ImExCorePropsKeys.RAW_CONTENT_EXPORTER_ENABLED));
+		boolean rawExportEnabled =  GetterUtil.getBoolean(coreConfigAsProperties.get(ImExCorePropsKeys.RAW_CONTENT_EXPORTER_ENABLED));
 		
 		if (rawExportEnabled) {
 			
-			reportService.getStartMessage(_log, "Raw export process", 1);
+			ProcessIdentifierGenerator identifier = new RawExporterProcessIdentifierGeneratorWrapper(rootIdentifier);
 			
-			for (ExporterRawContent content : rawExportContentList) {
+			String randomAlphanumeric = RandomStringUtils.randomAlphanumeric(4);
+			File tempDir = Files.createTempDirectory(randomAlphanumeric).toFile();
+			
+			if (!tempDir.exists()) {
+				throw new ImexException("Failed to create directory " + tempDir);
+			}	
+			
+			File exportDir = initializeRawExportDirectory();
+			
+			reportService.getStartMessage(_log, "Raw export process (human readable format)", 1);
+			
+			//Since this a synchronized list
+			synchronized (rawExportContentList) {
+				for (ExporterRawContent content : rawExportContentList) {
 				
-				reportService.getOK(_log, content.getFileName());
-				
+					writeRawContentInDir(tempDir, content, debug);
+					
+				}
 			}
 			
-			reportService.getEndMessage(_log, "Raw export process", 1);
+			imexArchiverService.archiveAndClean(coreConfigAsProperties, tempDir, exportDir, identifier);
+			
+			FileUtil.deltree(tempDir);
 			
 			rawExportContentList.clear();
+			
+			reportService.getEndMessage(_log, "Raw export process", 1);
 			
 		} else {
 			
 			if (rawExportContentList.size() > 0) {
-				reportService.getDisabled(_log, "raw content expor");
+				reportService.getDisabled(_log, "raw content export");
 				reportService.getMessage(_log, "See [" + ImExCorePropsKeys.RAW_CONTENT_EXPORTER_ENABLED + "] to enable this feature", 4);
 			}
 		
+		}
+		
+	}
+
+	private void writeRawContentInDir(File tempDir, ExporterRawContent content, boolean debug) throws IOException {
+		
+		FileWriter fileWriter = null;
+		try {
+			File currentFile = new File(tempDir, content.getFileName());
+			if (currentFile.exists()) {
+				reportService.getError(_log, "Ambiguous file name detected", "[" + currentFile.getAbsolutePath() + "] already exists");
+			}
+			fileWriter = new FileWriter(currentFile);
+			fileWriter.write(content.getFileContent());
+			if (debug) {
+				reportService.getOK(_log, currentFile.getAbsolutePath());
+			}
+		} finally {
+			IOUtils.closeQuietly(fileWriter);
 		}
 		
 	}

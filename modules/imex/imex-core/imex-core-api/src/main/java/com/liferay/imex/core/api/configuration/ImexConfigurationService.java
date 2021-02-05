@@ -25,6 +25,8 @@ public interface ImexConfigurationService {
 	
 	public String getImexDataPath(); 
 	
+	public String getImexRawDataPath(); 
+	
 	public String getImexArchivePath();
 	
 	public String getImexCfgOverridePath();

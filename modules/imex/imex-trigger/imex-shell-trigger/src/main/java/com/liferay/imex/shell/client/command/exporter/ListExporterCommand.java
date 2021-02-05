@@ -32,7 +32,7 @@ public class ListExporterCommand implements ImexCommand {
 	
 	private ExporterTracker trackerService;
 	
-	private final static String[] COLUMN_NAMES = {"Ranking", "Bundle Name", "Description", "Execution priority"}; 
+	private final static String[] COLUMN_NAMES = {"Ranking", "Bundle Name", "Description", "Execution priority", "Profiled"}; 
 
 	public void le() {
 		
@@ -51,10 +51,14 @@ public class ListExporterCommand implements ImexCommand {
 				String ranking = (Integer)serviceReference.getProperty(OSGIServicePropsKeys.SERVICE_RANKING) + "";
 				String description = (String)serviceReference.getProperty(OSGIServicePropsKeys.IMEX_COMPONENT_DESCRIPTION);
 				String priority = (String)serviceReference.getProperty(OSGIServicePropsKeys.IMEX_COMPONENT_EXECUTION_PRIORITY);
+				
 				Bundle bundle = serviceReference.getBundle();
+				Exporter exporter = bundle.getBundleContext().getService(serviceReference);
+				
+				boolean supportProfile = exporter.isProfiled();
 				
 				if (bundle != null) {
-					tableBuilder.addRow(ranking, bundle.getSymbolicName(), description, priority);
+					tableBuilder.addRow(ranking, bundle.getSymbolicName(), description, priority, supportProfile + "");
 				}
 				
 			}

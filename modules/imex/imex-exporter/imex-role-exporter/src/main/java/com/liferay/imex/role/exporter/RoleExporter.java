@@ -1,6 +1,7 @@
 package com.liferay.imex.role.exporter;
 
 import com.liferay.imex.core.api.exporter.Exporter;
+import com.liferay.imex.core.api.exporter.model.ExporterRawContent;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.util.exception.ImexException;
@@ -57,7 +58,7 @@ public class RoleExporter implements Exporter {
 	protected ImexExecutionReportService reportService;
 
 	@Override
-	public void doExport(User user, Properties config, File rolesDir, long companyId, Locale locale, boolean debug) {
+	public void doExport(User user, Properties config, File rolesDir, long companyId, Locale locale, List<ExporterRawContent> rawContentToExport, boolean debug) {
 		
 		reportService.getStartMessage(_log, "ROLE export process");
 		

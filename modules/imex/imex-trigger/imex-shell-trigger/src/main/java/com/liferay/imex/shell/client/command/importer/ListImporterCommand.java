@@ -1,5 +1,13 @@
 package com.liferay.imex.shell.client.command.importer;
 
+import com.liferay.imex.core.api.importer.Importer;
+import com.liferay.imex.core.api.importer.ImporterTracker;
+import com.liferay.imex.core.util.configuration.OSGIServicePropsKeys;
+import com.liferay.imex.shell.client.util.TableBuilder;
+import com.liferay.imex.shell.trigger.ImexCommand;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+
 import java.util.Map;
 
 import org.osgi.framework.Bundle;
@@ -9,14 +17,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-
-import com.liferay.imex.core.api.importer.Importer;
-import com.liferay.imex.core.api.importer.ImporterTracker;
-import com.liferay.imex.core.util.configuration.OSGIServicePropsKeys;
-import com.liferay.imex.shell.client.util.TableBuilder;
-import com.liferay.imex.shell.trigger.ImexCommand;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 @Component(
 		  immediate=true,
@@ -32,7 +32,7 @@ public class ListImporterCommand implements ImexCommand {
 	
 	private ImporterTracker trackerService;
 	
-	private final static String[] COLUMN_NAMES = {"Ranking", "Bundle Name", "Description", "Execution priority"}; 
+	private final static String[] COLUMN_NAMES = {"Ranking", "Bundle Name", "Description", "Execution priority", "Profiled"}; 
 
 	public void li() {
 		
@@ -51,10 +51,14 @@ public class ListImporterCommand implements ImexCommand {
 				String ranking = (Integer)serviceReference.getProperty(OSGIServicePropsKeys.SERVICE_RANKING) + "";
 				String description = (String)serviceReference.getProperty(OSGIServicePropsKeys.IMEX_COMPONENT_DESCRIPTION);
 				String priority = (String)serviceReference.getProperty(OSGIServicePropsKeys.IMEX_COMPONENT_EXECUTION_PRIORITY);
+				
 				Bundle bundle = serviceReference.getBundle();
+				Importer importer = bundle.getBundleContext().getService(serviceReference);
+				
+				boolean supportProfile = importer.isProfiled();
 				
 				if (bundle != null) {
-					tableBuilder.addRow(ranking, bundle.getSymbolicName(), description, priority);
+					tableBuilder.addRow(ranking, bundle.getSymbolicName(), description, priority, supportProfile + "");
 				}
 				
 			}

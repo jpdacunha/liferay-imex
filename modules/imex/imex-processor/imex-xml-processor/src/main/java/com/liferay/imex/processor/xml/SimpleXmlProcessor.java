@@ -15,8 +15,14 @@ import org.simpleframework.xml.stream.Format;
 import org.simpleframework.xml.stream.HyphenStyle;
 import org.simpleframework.xml.stream.Style;
 
-@Component(immediate = true, service = ImexProcessor.class)
+@Component(
+		immediate = true, 
+		service = ImexProcessor.class,
+		property = {"outputFormat=xml"}
+)
 public class SimpleXmlProcessor implements ImexProcessor {
+	
+	private final static String XML = "xml";
 	
 	private static final Log _log = LogFactoryUtil.getLog(SimpleXmlProcessor.class);
 
@@ -39,7 +45,7 @@ public class SimpleXmlProcessor implements ImexProcessor {
 
 	@Override
 	public String getFileExtension() {
-		return ".xml";
+		return "." + XML;
 	}
 
 	@Override

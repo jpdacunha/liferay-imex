@@ -1,11 +1,13 @@
 package com.liferay.imex.core.service.exporter.impl;
 
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
+import com.liferay.imex.core.api.configuration.ImExCorePropsKeys;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.exporter.ImexExportService;
+import com.liferay.imex.core.api.exporter.model.ExporterRawContent;
 import com.liferay.imex.core.api.identifier.ProcessIdentifierGenerator;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.service.ImexServiceBaseImpl;
@@ -20,10 +22,13 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -40,6 +45,8 @@ import org.pmw.tinylog.LoggingContext;
 public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexExportService {
 	
 	private static final Log _log = LogFactoryUtil.getLog(ImexExportServiceImpl.class);
+	
+	private List<ExporterRawContent> rawExportContentList = Collections.synchronizedList(new ArrayList<ExporterRawContent>());
 	
 	private ExporterTracker trackerService;
 
@@ -120,6 +127,9 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 					executeRegisteredExporters(exporters, companyDir, companyId, companyName, profileId);
 					
 				}
+				
+				//Executing raw export
+				executeRawExport();
 				
 			}
 			
@@ -237,16 +247,54 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			}
 			
 			try {
+				
 				Company company = companyLocalService.getCompany(companyId);
-				exporter.doExport(user, configAsProperties, destDir, companyId, company.getLocale(), true);
+				
+				//Trigger Exporter specific code
+				exporter.doExport(user, configAsProperties, destDir, companyId, company.getLocale(), this.rawExportContentList, true);
+			
+					
 			} catch (PortalException e) {
 				_log.error(e,e);
 			}
-												
+						
 			reportService.getEndMessage(_log, exporter.getProcessDescription(), 1);
 			
 		}
 
+	}
+	
+	private void executeRawExport() {
+		
+		ImexProperties config = new ImexProperties();
+		configurationService.loadCoreConfiguration(config);
+		Properties configAsProperties = config.getProperties();
+		
+		boolean rawExportEnabled =  GetterUtil.getBoolean(configAsProperties.get(ImExCorePropsKeys.RAW_CONTENT_EXPORTER_ENABLED));
+		
+		if (rawExportEnabled) {
+			
+			reportService.getStartMessage(_log, "Raw export process", 1);
+			
+			for (ExporterRawContent content : rawExportContentList) {
+				
+				reportService.getOK(_log, content.getFileName());
+				
+			}
+			
+			reportService.getEndMessage(_log, "Raw export process", 1);
+			
+			rawExportContentList.clear();
+			
+		} else {
+			
+			if (rawExportContentList.size() > 0) {
+				reportService.getDisabled(_log, "raw content expor");
+				reportService.getMessage(_log, "See [" + ImExCorePropsKeys.RAW_CONTENT_EXPORTER_ENABLED + "] to enable this feature", 4);
+			}
+		
+		}
+		
 	}
 
 	@Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)

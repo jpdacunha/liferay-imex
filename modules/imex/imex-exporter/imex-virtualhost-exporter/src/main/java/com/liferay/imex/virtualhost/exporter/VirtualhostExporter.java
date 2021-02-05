@@ -2,6 +2,7 @@ package com.liferay.imex.virtualhost.exporter;
 
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ProfiledExporter;
+import com.liferay.imex.core.api.exporter.model.ExporterRawContent;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.virtualhost.FileNames;
@@ -69,7 +70,7 @@ public class VirtualhostExporter implements ProfiledExporter {
 	protected VirtualhostCommonService virtualHostCommonService;
 
 	@Override
-	public void doExport(User user, Properties config, File virtualhostDir, long companyId, Locale locale, boolean debug) {
+	public void doExport(User user, Properties config, File virtualhostDir, long companyId, Locale locale, List<ExporterRawContent> rawContentToExport, boolean debug) {
 	
 		reportService.getStartMessage(_log, "Virtualhost export process");
 		

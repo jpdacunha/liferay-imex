@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class FileUtil {
 	
 	public final static String LAR_EXTENSION = ".lar";
+	public final static String XML_EXTENSION = ".xml";
 	
 	private static final Log _log = LogFactoryUtil.getLog(FileUtil.class);
 	

@@ -4,6 +4,7 @@ import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationCo
 import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationSettingsMapFactoryUtil;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.imex.core.api.exporter.Exporter;
+import com.liferay.imex.core.api.exporter.model.ExporterRawContent;
 import com.liferay.imex.core.api.lar.ImexLarService;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
@@ -79,7 +80,7 @@ public class SiteExporter implements Exporter {
 	protected SiteCommonService siteCommonService;
 
 	@Override
-	public void doExport(User user, Properties config, File sitesDir, long companyId, Locale locale, boolean debug) {
+	public void doExport(User user, Properties config, File sitesDir, long companyId, Locale locale, List<ExporterRawContent> rawContentToExport, boolean debug) {
 		
 		reportService.getStartMessage(_log, "SITE export process");
 		

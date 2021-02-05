@@ -3,6 +3,7 @@ package com.liferay.imex.expando.exporter;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalService;
 import com.liferay.imex.core.api.exporter.Exporter;
+import com.liferay.imex.core.api.exporter.model.ExporterRawContent;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.expando.FileNames;
@@ -14,6 +15,7 @@ import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 
 import java.io.File;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -60,7 +62,7 @@ public class ExpandoExporter implements Exporter{
 	protected ImexExecutionReportService reportService;
 	
 	@Override
-	public void doExport(User user, Properties config, File destDir, long companyId, Locale locale, boolean debug) {
+	public void doExport(User user, Properties config, File destDir, long companyId, Locale locale, List<ExporterRawContent> rawContentToExport, boolean debug) {
 		// TODO Auto-generated method stub
 		
 	}

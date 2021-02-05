@@ -6,9 +6,11 @@ import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalService;
 import com.liferay.imex.core.api.exporter.Exporter;
+import com.liferay.imex.core.api.exporter.model.ExporterRawContent;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.util.exception.ImexException;
+import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.core.util.statics.ImexNormalizer;
 import com.liferay.imex.wcddm.FileNames;
@@ -16,6 +18,7 @@ import com.liferay.imex.wcddm.exporter.configuration.ImExWCDDmExporterPropsKeys;
 import com.liferay.imex.wcddm.model.ImExStructure;
 import com.liferay.imex.wcddm.model.ImExTemplate;
 import com.liferay.journal.model.JournalArticle;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -75,7 +78,7 @@ public class WcDDMExporter implements Exporter {
 	protected ImexExecutionReportService reportService;
 
 	@Override
-	public void doExport(User user, Properties config, File wcDdmDir, long companyId, Locale locale, boolean debug) {
+	public void doExport(User user, Properties config, File wcDdmDir, long companyId, Locale locale, List<ExporterRawContent> rawContentToExport, boolean debug) {
 		
 		reportService.getStartMessage(_log, "WEBCONTENT export process");
 		
@@ -95,7 +98,7 @@ public class WcDDMExporter implements Exporter {
 					if (isSite) {
 						
 						reportService.getStartMessage(_log, group, locale);
-						doExport(config, group, wcDdmDir, locale, debug);
+						doExport(config, group, wcDdmDir, locale, rawContentToExport, debug);
 						reportService.getEndMessage(_log, group, locale);
 						
 					}
@@ -105,7 +108,7 @@ public class WcDDMExporter implements Exporter {
 				// Global Scope Export
 				Group companyGroup = company.getGroup();
 				reportService.getStartMessage(_log, companyGroup, locale);
-				doExport(config, companyGroup, wcDdmDir, locale, debug);
+				doExport(config, companyGroup, wcDdmDir, locale, rawContentToExport, debug);
 				reportService.getEndMessage(_log, companyGroup, locale);
 				
 			} catch (ImexException e) {
@@ -123,7 +126,7 @@ public class WcDDMExporter implements Exporter {
 		
 	}
 	
-	public void doExport(Properties config, Group group, File groupsDir, Locale locale, boolean debug) throws ImexException {
+	public void doExport(Properties config, Group group, File groupsDir, Locale locale, List<ExporterRawContent> rawContentToExport, boolean debug) throws ImexException {
 		
 		if (group != null) {
 			
@@ -151,7 +154,7 @@ public class WcDDMExporter implements Exporter {
 							
 									try {
 										
-										processor.write(new ImExStructure(ddmStructure), structureDir, FileNames.getStructureFileName(ddmStructure, group, locale, processor.getFileExtension()));
+										writeStructure(group, locale, rawContentToExport, ddmStructure, structureDir);
 										
 										String groupName = GroupUtil.getGroupName(group, locale);
 										reportService.getOK(_log, groupName, "STRUCTURE : "  + ddmStructure.getName(locale));
@@ -160,8 +163,10 @@ public class WcDDMExporter implements Exporter {
 										
 										//Iterate over templates
 										for(DDMTemplate ddmTemplate : ddmTemplates){
-											processor.write(new ImExTemplate(ddmTemplate), structureDir, FileNames.getTemplateFileName(ddmTemplate, group, locale, processor.getFileExtension()));
+											
+											writeTemplate(group, locale, rawContentToExport, structureDir, groupName, ddmTemplate);
 											reportService.getOK(_log, groupName, "TEMPLATE : "  + ddmTemplate.getName(locale));
+											
 										}
 										reportService.getSeparator(_log);
 										
@@ -197,6 +202,26 @@ public class WcDDMExporter implements Exporter {
 		} else {
 			_log.error("Skipping null group ...");
 		}
+		
+	}
+
+	private void writeTemplate(Group group, Locale locale, List<ExporterRawContent> rawContentToExport, File structureDir, String groupName, DDMTemplate ddmTemplate) throws Exception {
+		
+		ImExTemplate imexTemplate = new ImExTemplate(ddmTemplate);
+		processor.write(imexTemplate, structureDir, FileNames.getTemplateFileName(ddmTemplate, group, locale, processor.getFileExtension()));
+		
+		String rawFileName = FileNames.getTemplateFileName(ddmTemplate, group, locale, StringPool.PERIOD + imexTemplate.getLangType());
+		rawContentToExport.add(new ExporterRawContent(rawFileName, imexTemplate.getData()));
+		
+	}
+
+	private void writeStructure(Group group, Locale locale, List<ExporterRawContent> rawContentToExport, DDMStructure ddmStructure, File structureDir) throws Exception {
+		
+		ImExStructure imexStructure = new ImExStructure(ddmStructure);
+		processor.write(imexStructure, structureDir, FileNames.getStructureFileName(ddmStructure, group, locale, processor.getFileExtension()));
+		
+		String rawFileName = FileNames.getStructureFileName(ddmStructure, group, locale, FileUtil.XML_EXTENSION);
+		rawContentToExport.add(new ExporterRawContent(rawFileName, imexStructure.getData()));
 		
 	}
 	

@@ -7,12 +7,14 @@ import com.liferay.imex.adt.FileNames;
 import com.liferay.imex.adt.exporter.configuration.ImExWCDDmExporterPropsKeys;
 import com.liferay.imex.adt.model.ImExAdt;
 import com.liferay.imex.core.api.exporter.Exporter;
+import com.liferay.imex.core.api.exporter.model.ExporterRawContent;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.core.util.statics.ImexNormalizer;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -73,7 +75,7 @@ public class AdtExporter implements Exporter {
 	protected ImexExecutionReportService reportService;
 
 	@Override
-	public void doExport(User user, Properties config, File adtDir, long companyId, Locale locale, boolean debug) {
+	public void doExport(User user, Properties config, File adtDir, long companyId, Locale locale, List<ExporterRawContent> rawContentToExport, boolean debug) {
 		
 		reportService.getStartMessage(_log, "ADT export process");
 		
@@ -100,7 +102,7 @@ public class AdtExporter implements Exporter {
 							boolean isSite = group.isSite() && !group.getFriendlyURL().equals("/control_panel");
 							if (isSite) {
 								
-								doExport(config, group, adtDir, locale, debug, classType);
+								doExport(config, group, adtDir, locale, debug, classType, rawContentToExport);
 								
 							}
 							
@@ -114,7 +116,7 @@ public class AdtExporter implements Exporter {
 					reportService.getStartMessage(_log, companyGroup, locale);
 
 					for (String classType : types) {			
-						doExport(config, companyGroup, adtDir, locale, debug, classType);	
+						doExport(config, companyGroup, adtDir, locale, debug, classType, rawContentToExport);	
 					}
 					
 					reportService.getEndMessage(_log, companyGroup, locale);
@@ -138,7 +140,7 @@ public class AdtExporter implements Exporter {
 		
 	}
 	
-	public void doExport(Properties config, Group group, File groupsDir, Locale locale, boolean debug, String classType) throws ImexException {
+	public void doExport(Properties config, Group group, File groupsDir, Locale locale, boolean debug, String classType, List<ExporterRawContent> rawContentToExport) throws ImexException {
 		
 		if (group != null) {
 			
@@ -166,7 +168,13 @@ public class AdtExporter implements Exporter {
 										
 										String groupName = GroupUtil.getGroupName(group, locale);
 										
-										processor.write(new ImExAdt(ddmTemplate, classType), adtDir, FileNames.getAdtFileName(ddmTemplate, group, locale, processor.getFileExtension()));
+										ImExAdt imexAdt = new ImExAdt(ddmTemplate, classType);
+										
+										processor.write(imexAdt, adtDir, FileNames.getAdtFileName(ddmTemplate, group, locale, processor.getFileExtension()));
+										
+										String rawFileName = FileNames.getAdtFileName(ddmTemplate, group, locale, StringPool.PERIOD + imexAdt.getLangType());
+										rawContentToExport.add(new ExporterRawContent(rawFileName, imexAdt.getData()));
+										
 										reportService.getOK(_log, groupName, "ADT : "  + ddmTemplate.getName(locale) + ", type : " + classType);
 										
 									} catch (Exception e) {

@@ -2,6 +2,8 @@ package com.liferay.imex.core.api.configuration;
 
 public interface ImExCorePropsKeys {
 	
+	public final static String RAW_CONTENT_EXPORTER_ENABLED = "imex.raw.content.exporter.enabled";
+	
 	public final static String DEFAULT_PROFILE_NAME = "imex.default.profile.name";
 	
 	public final static String MANAGES_PROFILES_LIST = "imex.managed.profiles.list";

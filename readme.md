@@ -4,12 +4,10 @@ A this moment IMEX is build using Liferay Workspace and gradle
 
 # IMEX commands
 imex:help : display all available commands
-imex:le : list all registred exporters
-imex:li : list all registered importers
 
 # How to create a new Exporter
 
-In order to create a new exporter in imex please follow tis steps
+In order to create a new exporter in imex please follow this steps
 
 ## Step 01 : Eclipse project setup
 

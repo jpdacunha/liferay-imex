@@ -1,5 +1,6 @@
 package com.liferay.imex.core.service.importer.impl;
 
+import com.liferay.imex.core.api.ImexCoreService;
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
@@ -34,6 +35,7 @@ import java.util.Properties;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -61,6 +63,9 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexExecutionReportService reportService;
 	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	private ImexCoreService imexCoreService;
+	
 	@Override
 	public String doImportAll() {
 		return doImport(StringPool.BLANK);
@@ -70,72 +75,95 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 	public String doImport(String... names) {		
 		return doImport(Arrays.asList(names));		
 	}
+	
+	@Activate
+	public void activate() {
+		imexCoreService.initializeLock();
+		_log.info("Lock succesfully initialized by IMEX core");
+	}
 
 	@Override
 	public String doImport(List<String> bundleNames, String profileId) { 
 		
-		//Generate an unique identifier for this import process
+		// Generate an unique identifier for this import process
 		ProcessIdentifierGenerator identifier = new ImporterProcessIdentifier();
 		String identifierStr = identifier.getOrGenerateUniqueIdentifier();
-		
 		LoggingContext.put(ImexExecutionReportService.IDENTIFIER_KEY, identifierStr);
-				
-		reportService.getSeparator(_log);
-		if (bundleNames != null && bundleNames.size() > 0) {			
-			reportService.getStartMessage(_log, "PARTIAL import process for [" + bundleNames.toString() + "]");
-		} else {
-			reportService.getStartMessage(_log, "ALL import process");
-		}
 		
 		try {
 			
-			Map<String, ServiceReference<Importer>> importers = trackerService.getFilteredImporters(bundleNames);
-			
-			if (importers == null || importers.size() == 0) {
+			if (imexCoreService.tryLock()) {
 				
-				reportService.getMessage(_log, "There is no importers to execute. Please check : ");
-				reportService.getMessage(_log, "- All importers are correctly registered in OSGI container");
-				if (bundleNames != null) {
-					reportService.getMessage(_log, "- A registered bundle exists for each typed name [" + bundleNames + "]");
+				reportService.getSeparator(_log);
+				if (bundleNames != null && bundleNames.size() > 0) {			
+					reportService.getStartMessage(_log, "PARTIAL import process for [" + bundleNames.toString() + "]");
+				} else {
+					reportService.getStartMessage(_log, "ALL import process");
 				}
-				reportService.printKeys(trackerService.getImporters(), _log);
 				
-			} else {
-				
-				//Archive actual files before importing
-				ImexProperties coreConfig = new ImexProperties();
-				configurationService.loadCoreConfiguration(coreConfig);
-				reportService.displayConfigurationLoadingInformation(coreConfig, _log);
-				imexArchiverService.archiveDataDirectory(coreConfig.getProperties(), identifier);
-				
-				File importDir = getImportDirectory();
-				reportService.getPropertyMessage(_log, "IMEX import path", importDir.toString());
-			
-				List<Company> companies = companyLocalService.getCompanies();
-				
-				for (Company company : companies) {
+				try {
 					
-					long companyId = company.getCompanyId();
-					String companyName = company.getName();
+					Map<String, ServiceReference<Importer>> importers = trackerService.getFilteredImporters(bundleNames);
 					
-					File companyDir = getCompanyImportDirectory(importDir, company);
+					if (importers == null || importers.size() == 0) {
+						
+						reportService.getMessage(_log, "There is no importers to execute. Please check : ");
+						reportService.getMessage(_log, "- All importers are correctly registered in OSGI container");
+						if (bundleNames != null) {
+							reportService.getMessage(_log, "- A registered bundle exists for each typed name [" + bundleNames + "]");
+						}
+						reportService.printKeys(trackerService.getImporters(), _log);
+						
+					} else {
+						
+						//Archive actual files before importing
+						ImexProperties coreConfig = new ImexProperties();
+						configurationService.loadCoreConfiguration(coreConfig);
+						reportService.displayConfigurationLoadingInformation(coreConfig, _log);
+						imexArchiverService.archiveDataDirectory(coreConfig.getProperties(), identifier);
+						
+						File importDir = getImportDirectory();
+						reportService.getPropertyMessage(_log, "IMEX import path", importDir.toString());
 					
-					if (companyDir != null) {
-						executeRegisteredImporters(importers, companyDir, companyId, companyName, profileId);
+						List<Company> companies = companyLocalService.getCompanies();
+						
+						for (Company company : companies) {
+							
+							long companyId = company.getCompanyId();
+							String companyName = company.getName();
+							
+							File companyDir = getCompanyImportDirectory(importDir, company);
+							
+							if (companyDir != null) {
+								executeRegisteredImporters(importers, companyDir, companyId, companyName, profileId);
+							}
+							
+						}
+						
 					}
 					
+				} catch (Exception e) {
+					reportService.getError(_log, "doImport", e);
 				}
 				
+				reportService.getEndMessage(_log, "import process");
+				
+				
+		
+			} else {
+				
+				reportService.getMessage(_log, "##");
+				reportService.getMessage(_log, "## " + ImexCoreService.LOCKED_MESSAGE);
+				reportService.getMessage(_log, "##");
+				
 			}
-			
-		} catch (Exception e) {
-			reportService.getError(_log, "doImport", e);
+				
+		} finally {
+			imexCoreService.releaseLock();
 		}
 		
-		reportService.getEndMessage(_log, "import process");
-		
 		return identifierStr;
-
+		
 	}
 	
 	@Override
@@ -293,6 +321,54 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 
 	protected void unsetImporterTracker(ImporterTracker trackerService) {
 		this.trackerService = null;
+	}
+
+	public ImporterTracker getTrackerService() {
+		return trackerService;
+	}
+
+	public void setTrackerService(ImporterTracker trackerService) {
+		this.trackerService = trackerService;
+	}
+
+	public CompanyLocalService getCompanyLocalService() {
+		return companyLocalService;
+	}
+
+	public void setCompanyLocalService(CompanyLocalService companyLocalService) {
+		this.companyLocalService = companyLocalService;
+	}
+
+	public ImexConfigurationService getConfigurationService() {
+		return configurationService;
+	}
+
+	public void setConfigurationService(ImexConfigurationService configurationService) {
+		this.configurationService = configurationService;
+	}
+
+	public ImexArchiverService getImexArchiverService() {
+		return imexArchiverService;
+	}
+
+	public void setImexArchiverService(ImexArchiverService imexArchiverService) {
+		this.imexArchiverService = imexArchiverService;
+	}
+
+	public ImexExecutionReportService getReportService() {
+		return reportService;
+	}
+
+	public void setReportService(ImexExecutionReportService reportService) {
+		this.reportService = reportService;
+	}
+
+	public ImexCoreService getImexCoreService() {
+		return imexCoreService;
+	}
+
+	public void setImexCoreService(ImexCoreService imexCoreService) {
+		this.imexCoreService = imexCoreService;
 	}
 
 

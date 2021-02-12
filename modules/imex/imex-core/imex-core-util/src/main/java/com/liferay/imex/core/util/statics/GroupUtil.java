@@ -11,8 +11,6 @@ public class GroupUtil {
 	
 	private static final Log _log = LogFactoryUtil.getLog(GroupUtil.class);
 	
-	public static final String GLOBAL = "GLOBAL";	
-	
 	/**
 	 * Return the group name
 	 * @param group
@@ -22,10 +20,6 @@ public class GroupUtil {
 	public static String getGroupName(Group group, Locale locale) {
 		
 		String name = group.getName(locale);
-		if (group.isCompany()) {
-			name = GLOBAL;
-		}
-		
 		if (Validator.isNull(name)) {
 			_log.debug("Undefined group name for locale:[" + locale + "], group:[" + group.getFriendlyURL() + "] : using friendly url as group name.");
 			return ImexNormalizer.getDirNameByFriendlyURL(group.getFriendlyURL());
@@ -41,13 +35,11 @@ public class GroupUtil {
 	 * @return
 	 */
 	public static String getGroupFriendlyUrlAsName(Group group) {
-		String name = group.getFriendlyURL();
-		if (group.isCompany()) {
-			name = GLOBAL;
-		}
 		
-		name = ImexNormalizer.getDirNameByFriendlyURL(name);
+		String friendlyURL = group.getFriendlyURL();
+		String name = ImexNormalizer.getDirNameByFriendlyURL(friendlyURL);
 		return name;
+		
 	}
 
 }

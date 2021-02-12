@@ -158,7 +158,6 @@ public class SiteCommonUtil {
 		List<Group> filteredResult = groups.stream().collect(Collectors.toList());
 		
 		for (String friendlyUrl : friendlyUrlsToExclude) {
-			
 			filteredResult.removeIf(e -> (e.getFriendlyURL().equals(friendlyUrl)));
 		}
 		

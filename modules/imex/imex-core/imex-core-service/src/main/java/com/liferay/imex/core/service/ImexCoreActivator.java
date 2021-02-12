@@ -14,7 +14,7 @@ import org.osgi.framework.Version;
 public class ImexCoreActivator implements BundleActivator {
 	
 	private static final Log _log = LogFactoryUtil.getLog(ImexCoreActivator.class);
-
+	
 	@Override
 	public void start(BundleContext bundleContext) throws Exception {
 		
@@ -27,7 +27,7 @@ public class ImexCoreActivator implements BundleActivator {
 		if (state == 2 || state == 8) {
 			
 			_log.info("##");
-			_log.info("## IMEX core : (IMport EXport) v" + version +  " for Liferay DXP (7.2 EE) successfully started.");
+			_log.info("## IMEX core : (IMport EXport) v" + version +  " for Liferay DXP (7.2 EE) is starting ...");
 			_log.info("## By Jean-Paul DA CUNHA");
 			_log.info("##"); 
 			

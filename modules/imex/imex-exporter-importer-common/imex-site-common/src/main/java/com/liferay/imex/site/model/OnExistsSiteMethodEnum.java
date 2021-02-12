@@ -7,6 +7,7 @@ public enum OnExistsSiteMethodEnum {
 	
 	SKIP ("SKIP"),
 	RECREATE ("RECREATE"),
+	DELETE ("DELETE"),
 	UPDATE ("UPDATE");
 	
 	private static Log _log = LogFactoryUtil.getLog(OnExistsSiteMethodEnum.class);

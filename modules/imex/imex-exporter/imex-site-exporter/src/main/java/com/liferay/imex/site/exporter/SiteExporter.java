@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
@@ -100,7 +101,7 @@ public class SiteExporter implements Exporter {
 					
 					for (Group group : groups) {
 											
-						boolean isSite = group.isSite() && !group.getFriendlyURL().equals("/control_panel");
+						boolean isSite = group.isSite() && !group.getFriendlyURL().equals(GroupConstants.CONTROL_PANEL_FRIENDLY_URL);
 						if (isSite) {
 							
 							reportService.getStartMessage(_log, group, locale);
@@ -257,7 +258,7 @@ public class SiteExporter implements Exporter {
 	 */
 	private File initializeSingleSiteExportDirectory(File sitesDir, Group group, Locale locale) throws ImexException {
 		
-		String name = GroupUtil.getGroupName(group, locale);
+		String name = GroupUtil.getGroupFriendlyUrlAsName(group);
 		File dir = new File(sitesDir, name);
 		dir.mkdirs();		
 		return dir;

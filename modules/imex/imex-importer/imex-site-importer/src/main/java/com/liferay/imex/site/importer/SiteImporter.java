@@ -20,7 +20,6 @@ import com.liferay.imex.site.model.OnExistsSiteMethodEnum;
 import com.liferay.imex.site.model.OnMissingSiteMethodEnum;
 import com.liferay.imex.site.service.SiteCommonService;
 import com.liferay.imex.site.util.SiteCommonUtil;
-import com.liferay.portal.kernel.exception.DuplicateGroupException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
@@ -189,8 +188,6 @@ public class SiteImporter implements Importer {
 				
 				ImexSite imexSite = (ImexSite)processor.read(ImexSite.class, groupDir, siteDescriptorFileName);
 				
-				Group group = null;
-				
 				UnicodeProperties typeSettingsProperties = imexSite.getUnicodeProperties();
 				ServiceContext serviceContext = new ServiceContext();
 				
@@ -212,26 +209,37 @@ public class SiteImporter implements Importer {
 				
 				String logPrefix = "SITE : "  + groupFriendlyUrl;
 				
-				try {
-					
+				Group group = groupLocalService.fetchFriendlyURLGroup(companyId, friendlyURL);
+				
+				if (group == null) {
+				
 					OnMissingSiteMethodEnum createMethod = behaviorManagerService.getOnMissingBehavior(config, groupFriendlyUrl);
 
 					if (createMethod.getValue().equals(OnMissingSiteMethodEnum.CREATE.getValue())) {
 						
-						group = groupLocalService.addGroup(userId, defaultParentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
-						doImportLars(groupDir, config, user, group, locale, debug);
-						groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
+						String stringList = GetterUtil.getString(config.get(ImExSiteImporterPropsKeys.IMPORT_SITE_LIFERAY_SYSTEM_GROUPS_FRIENDLYURL_LIST));
+						List<String> neverCreateFriendlyURLS = CollectionUtil.getList(stringList);
 						
+						if (neverCreateFriendlyURLS.contains(groupFriendlyUrl)){
+							
+							reportService.getError(_log, groupFriendlyUrl, "is evaluated as  [" + OnMissingSiteMethodEnum.CREATE.getValue() + "] but it appears to be a system group. Skipping creation");
+							getReportService().getSkipped(_log, groupFriendlyUrl);
+							
+						} else {
+							
+							group = groupLocalService.addGroup(userId, defaultParentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
+							doImportLars(groupDir, config, user, group, locale, debug);
+							groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());	
+							
+							reportService.getOK(_log, dirName, logPrefix, createMethod.getValue());
+							
+						}
+
 					} else {
 						_log.debug("Site creation were skipped.");
 					}
 					
-					reportService.getOK(_log, dirName, logPrefix, createMethod.getValue());
-					
-				} catch(DuplicateGroupException e) {
-					
-					//Loading Liferay site
-					group = groupLocalService.getFriendlyURLGroup(companyId, friendlyURL);
+				} else {
 					
 					OnExistsSiteMethodEnum duplicateMethod = behaviorManagerService.getOnExistsBehavior(config, group);
 					
@@ -254,6 +262,14 @@ public class SiteImporter implements Importer {
 												
 							//Creating site again
 							group = groupLocalService.addGroup(userId, defaultParentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
+							
+						} else if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.DELETE.getValue())) {
+							
+							//Reseting parent group
+							siteCommonService.eraseSiteHierarchy(group);
+							
+							//Deleting site
+							group = groupLocalService.deleteGroup(group);
 							
 						}
 						

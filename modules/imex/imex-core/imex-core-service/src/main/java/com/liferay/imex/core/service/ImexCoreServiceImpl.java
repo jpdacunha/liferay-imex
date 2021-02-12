@@ -1,6 +1,6 @@
 package com.liferay.imex.core.service;
 
-import com.liferay.imex.core.api.ImexService;
+import com.liferay.imex.core.api.ImexCoreService;
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
@@ -31,11 +33,13 @@ import org.pmw.tinylog.LoggingContext;
 
 @Component(
 		immediate = true,
-		service = ImexService.class
+		service = ImexCoreService.class
 	)
-public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService {
+public class ImexCoreServiceImpl implements ImexCoreService {
 	
-	private static final Log _log = LogFactoryUtil.getLog(ImexServiceImpl.class);
+	private static final Log _log = LogFactoryUtil.getLog(ImexCoreServiceImpl.class);
+	
+	private Lock imexCoreLock = null;
 
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexArchiverService imexArchiverService;
@@ -53,6 +57,33 @@ public class ImexServiceImpl extends ImexServiceBaseImpl implements ImexService 
 	@Override
 	public String generateOverrideFileSystemConfigurationFiles() {
 		return generateOverrideFileSystemConfigurationFiles(null, true);
+	}
+	
+	@Override
+	public void initializeLock() {
+		
+		synchronized(this) {
+			
+			if (this.imexCoreLock == null) {
+				this.imexCoreLock = new ReentrantLock();
+			} else if (tryLock()) {
+				_log.error("Unreleased lock detected. Imex Lock appear to be already locked. Trying to force loack to be released ...");
+				releaseLock();
+				_log.info("Lock successfully released");
+			}
+			
+		}
+	
+	}
+	
+	@Override
+	public void releaseLock() {
+		this.imexCoreLock.unlock();
+	}
+	
+	@Override
+	public boolean tryLock() {
+		return this.imexCoreLock.tryLock();
 	}
 	
 	@Override

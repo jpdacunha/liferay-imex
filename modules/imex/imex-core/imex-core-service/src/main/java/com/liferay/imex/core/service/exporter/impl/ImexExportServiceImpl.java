@@ -1,5 +1,6 @@
 package com.liferay.imex.core.service.exporter.impl;
 
+import com.liferay.imex.core.api.ImexCoreService;
 import com.liferay.imex.core.api.archiver.ImexArchiverService;
 import com.liferay.imex.core.api.configuration.ImExCorePropsKeys;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
@@ -67,6 +68,9 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexExecutionReportService reportService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	private ImexCoreService imexCoreService;
 
 	@Override
 	public String doExportAll() {
@@ -84,73 +88,90 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 		//Generate an unique identifier for this export process
 		ProcessIdentifierGenerator identifier = new ExporterProcessIdentifierGenerator();
 		String identifierStr = identifier.getOrGenerateUniqueIdentifier();
-		
-		//TODO : JDA manage debug mode
-		boolean debug = true;
-		
 		LoggingContext.put(ImexExecutionReportService.IDENTIFIER_KEY, identifierStr);
-		
-		reportService.getSeparator(_log);
-		if (bundleNames != null && bundleNames.size() > 0) {
-			reportService.getStartMessage(_log, "PARTIAL export process for [" + bundleNames.toString() + "]");
-		} else {
-			reportService.getStartMessage(_log, "ALL export process");
-		}
 		
 		try {
 			
-			Map<String, ServiceReference<Exporter>> exporters = trackerService.getFilteredExporters(bundleNames);
+			if (imexCoreService.tryLock()) {
 			
-			if (exporters == null || exporters.size() == 0) {
-				
-				reportService.getMessage(_log, "There is no exporters to execute. Please check : ");
-				reportService.getMessage(_log, "- All importers are correctly registered in OSGI container");
-				if (bundleNames != null) {
-					reportService.getMessage(_log, "- A registered bundle exists for each typed name [" + bundleNames + "]");
-				}
-				reportService.printKeys(trackerService.getExporters(), _log);
-				
-			} else {
-				
-				//Reading configuration
-				ImexProperties coreConfig = new ImexProperties();
-				configurationService.loadCoreConfiguration(coreConfig);
-				reportService.displayConfigurationLoadingInformation(coreConfig, _log);
-				
-				//Archive actual files before importing
-				imexArchiverService.archiveDataDirectory(coreConfig.getProperties(), identifier);
-				
-				File exportDir = initializeExportDirectory();
-				
-				reportService.getPropertyMessage(_log, "IMEX export path", exportDir.toString());
-							
-				List<Company> companies = companyLocalService.getCompanies();
-				
-				for (Company company : companies) {
-					
-					reportService.getStartMessage(_log, company);
-					
-					long companyId = company.getCompanyId();
-					String companyName = company.getName();
-					
-					File companyDir = initializeCompanyExportDirectory(exportDir, company);
-					
-					executeRegisteredExporters(exporters, companyDir, companyId, companyName, profileId, debug);
-					
-				}
+				//TODO : JDA manage debug mode
+				boolean debug = true;
 				
 				reportService.getSeparator(_log);
+				if (bundleNames != null && bundleNames.size() > 0) {
+					reportService.getStartMessage(_log, "PARTIAL export process for [" + bundleNames.toString() + "]");
+				} else {
+					reportService.getStartMessage(_log, "ALL export process");
+				}
 				
-				//Executing raw export
-				executeRawExport((ExporterProcessIdentifierGenerator)identifier, debug);
+				try {
+					
+					Map<String, ServiceReference<Exporter>> exporters = trackerService.getFilteredExporters(bundleNames);
+					
+					if (exporters == null || exporters.size() == 0) {
+						
+						reportService.getMessage(_log, "There is no exporters to execute. Please check : ");
+						reportService.getMessage(_log, "- All importers are correctly registered in OSGI container");
+						if (bundleNames != null) {
+							reportService.getMessage(_log, "- A registered bundle exists for each typed name [" + bundleNames + "]");
+						}
+						reportService.printKeys(trackerService.getExporters(), _log);
+						
+					} else {
+						
+						//Reading configuration
+						ImexProperties coreConfig = new ImexProperties();
+						configurationService.loadCoreConfiguration(coreConfig);
+						reportService.displayConfigurationLoadingInformation(coreConfig, _log);
+						
+						//Archive actual files before importing
+						imexArchiverService.archiveDataDirectory(coreConfig.getProperties(), identifier);
+						
+						File exportDir = initializeExportDirectory();
+						
+						reportService.getPropertyMessage(_log, "IMEX export path", exportDir.toString());
+									
+						List<Company> companies = companyLocalService.getCompanies();
+						
+						for (Company company : companies) {
+							
+							reportService.getStartMessage(_log, company);
+							
+							long companyId = company.getCompanyId();
+							String companyName = company.getName();
+							
+							File companyDir = initializeCompanyExportDirectory(exportDir, company);
+							
+							executeRegisteredExporters(exporters, companyDir, companyId, companyName, profileId, debug);
+							
+						}
+						
+						reportService.getSeparator(_log);
+						
+						//Executing raw export
+						executeRawExport((ExporterProcessIdentifierGenerator)identifier, debug);
+						
+					}
+					
+				} catch (Exception e) {
+					reportService.getError(_log, "doExport", e);
+				}
+				
+				reportService.getEndMessage(_log, "export process");
+				
+				
+			
+			} else {
+				
+				reportService.getMessage(_log, "##");
+				reportService.getMessage(_log, "## " + ImexCoreService.LOCKED_MESSAGE);
+				reportService.getMessage(_log, "##");
 				
 			}
-			
-		} catch (Exception e) {
-			reportService.getError(_log, "doExport", e);
+				
+		} finally {
+			imexCoreService.releaseLock();
 		}
-		
-		reportService.getEndMessage(_log, "export process");
 		
 		return identifierStr;
 		
@@ -372,6 +393,62 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 
 	protected void unsetExporterTracker(ExporterTracker trackerService) {
 		this.trackerService = null;
+	}
+
+	public List<ExporterRawContent> getRawExportContentList() {
+		return rawExportContentList;
+	}
+
+	public void setRawExportContentList(List<ExporterRawContent> rawExportContentList) {
+		this.rawExportContentList = rawExportContentList;
+	}
+
+	public ExporterTracker getTrackerService() {
+		return trackerService;
+	}
+
+	public void setTrackerService(ExporterTracker trackerService) {
+		this.trackerService = trackerService;
+	}
+
+	public CompanyLocalService getCompanyLocalService() {
+		return companyLocalService;
+	}
+
+	public void setCompanyLocalService(CompanyLocalService companyLocalService) {
+		this.companyLocalService = companyLocalService;
+	}
+
+	public ImexConfigurationService getConfigurationService() {
+		return configurationService;
+	}
+
+	public void setConfigurationService(ImexConfigurationService configurationService) {
+		this.configurationService = configurationService;
+	}
+
+	public ImexArchiverService getImexArchiverService() {
+		return imexArchiverService;
+	}
+
+	public void setImexArchiverService(ImexArchiverService imexArchiverService) {
+		this.imexArchiverService = imexArchiverService;
+	}
+
+	public ImexExecutionReportService getReportService() {
+		return reportService;
+	}
+
+	public void setReportService(ImexExecutionReportService reportService) {
+		this.reportService = reportService;
+	}
+
+	public ImexCoreService getImexCoreService() {
+		return imexCoreService;
+	}
+
+	public void setImexCoreService(ImexCoreService imexCoreService) {
+		this.imexCoreService = imexCoreService;
 	}
 
 }

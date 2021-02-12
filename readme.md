@@ -91,3 +91,10 @@ Example : imex-site-exporter => imex.site.exporter
 
 # How to create a new Importer
 In order to create a new importer in imex please follow this steps
+
+
+# Release notes
+## Version 1.3.0
+ - Raw ewport process feature added : export datas in a human readable format
+ - Support for profiles importers or Exporters 
+ - Lock management to manage concurrent execution

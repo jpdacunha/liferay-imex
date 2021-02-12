@@ -11,4 +11,7 @@ public interface ImexImportService {
 	public String doImport(String... bundleNames);
 
 	public String doImport(List<String> bundleNames, String profileId);
+	
+	public String doImport(List<String> bundleNames, String profileId, boolean isDebug);
+	
 }

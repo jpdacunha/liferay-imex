@@ -1,5 +1,6 @@
 package com.liferay.imex.core.service.configuration.impl;
 
+import com.liferay.imex.core.api.configuration.ImExCorePropsKeys;
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.exporter.Exporter;
@@ -44,7 +45,7 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 
 	public final static String EXPORTER = "exporter";
 	public final static String IMPORTER = "importer";
-	public final static String IMEX = "imex";
+	public final static String IMEX = ImExCorePropsKeys.IMEX_PREFIX;
 	
 	private static final String DEFAULT_FILENAME_PREFIX = "default";
 	

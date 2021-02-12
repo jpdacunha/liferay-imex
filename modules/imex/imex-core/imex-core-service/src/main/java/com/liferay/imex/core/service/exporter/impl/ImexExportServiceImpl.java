@@ -84,6 +84,11 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 	
 	@Override
 	public String doExport(List<String> bundleNames, String profileId) {
+		return doExport(bundleNames, profileId, false);
+	}
+	
+	@Override
+	public String doExport(List<String> bundleNames, String profileId, boolean debug) {
 		
 		//Generate an unique identifier for this export process
 		ProcessIdentifierGenerator identifier = new ExporterProcessIdentifierGenerator();
@@ -94,9 +99,6 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			
 			if (imexCoreService.tryLock()) {
 			
-				//TODO : JDA manage debug mode
-				boolean debug = true;
-				
 				reportService.getSeparator(_log);
 				if (bundleNames != null && bundleNames.size() > 0) {
 					reportService.getStartMessage(_log, "PARTIAL export process for [" + bundleNames.toString() + "]");
@@ -105,6 +107,10 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 				}
 				
 				try {
+					
+					if (debug) {
+						reportService.getMessage(_log, "Running DEBUG mode ...");
+					}
 					
 					Map<String, ServiceReference<Exporter>> exporters = trackerService.getFilteredExporters(bundleNames);
 					
@@ -133,6 +139,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 									
 						List<Company> companies = companyLocalService.getCompanies();
 						
+						//For each Liferay company
 						for (Company company : companies) {
 							
 							reportService.getStartMessage(_log, company);

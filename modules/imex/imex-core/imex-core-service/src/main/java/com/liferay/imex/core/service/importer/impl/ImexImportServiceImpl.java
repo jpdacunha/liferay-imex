@@ -81,9 +81,14 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 		imexCoreService.initializeLock();
 		_log.info("Lock succesfully initialized by IMEX core");
 	}
+	
+	@Override
+	public String doImport(List<String> bundleNames, String profileId) {
+		return doImport(bundleNames, profileId, false);
+	}
 
 	@Override
-	public String doImport(List<String> bundleNames, String profileId) { 
+	public String doImport(List<String> bundleNames, String profileId, boolean debug) { 
 		
 		// Generate an unique identifier for this import process
 		ProcessIdentifierGenerator identifier = new ImporterProcessIdentifier();
@@ -102,6 +107,10 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 				}
 				
 				try {
+					
+					if (debug) {
+						reportService.getMessage(_log, "Running DEBUG mode ...");
+					}
 					
 					Map<String, ServiceReference<Importer>> importers = trackerService.getFilteredImporters(bundleNames);
 					
@@ -127,6 +136,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 					
 						List<Company> companies = companyLocalService.getCompanies();
 						
+						//For each Liferay company
 						for (Company company : companies) {
 							
 							long companyId = company.getCompanyId();
@@ -135,7 +145,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 							File companyDir = getCompanyImportDirectory(importDir, company);
 							
 							if (companyDir != null) {
-								executeRegisteredImporters(importers, companyDir, companyId, companyName, profileId);
+								executeRegisteredImporters(importers, companyDir, companyId, companyName, profileId, debug);
 							}
 							
 						}
@@ -198,7 +208,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 		
 	}
 	
-	private void executeRegisteredImporters(Map<String, ServiceReference<Importer>> importers, File companyDir, long companyId, String companyName, String profileId) throws ImexException {
+	private void executeRegisteredImporters(Map<String, ServiceReference<Importer>> importers, File companyDir, long companyId, String companyName, String profileId, boolean debug) throws ImexException {
 				
 		User user = UserUtil.getDefaultAdmin(companyId);
 		
@@ -271,7 +281,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 						reportService.getMessage(_log, "Using [" + locale + "] as default locale");
 					}
 					
-					importer.doImport(bundle, serviceContext, user, configAsProperties, destDir, companyId, locale, true);
+					importer.doImport(bundle, serviceContext, user, configAsProperties, destDir, companyId, locale, debug);
 					
 				} else {
 					reportService.getSkipped(_log, "[" + bundle.getSymbolicName() + "]");

@@ -11,5 +11,7 @@ public interface ImexExportService {
 	public String doExport(String... bundleNames);
 
 	public String doExport(List<String> bundleNames, String profileId);
+	
+	public String doExport(List<String> bundleNames, String profileId, boolean isDebug);
 
 }

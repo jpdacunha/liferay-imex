@@ -96,18 +96,26 @@ public class VirtualhostImporter implements ProfiledImporter {
 		
 			try {
 				
-				List<ExtendedImexVirtualhost> virtualHosts = deserialiseFiles(srcDir);
-				
-				if (virtualHosts.size() > 0) {
-										
-					Map<Long, TreeMap<String, String>> layoutSetHostnames = converToUpdatableMap(companyId, virtualHosts);
+				if (srcDir == null || !srcDir.exists()){
 					
-					updateVirtualHosts(companyId, locale, layoutSetHostnames);
+					reportService.getDNE(_log, srcDir);
 					
 				} else {
-					reportService.getEmpty(_log, "virtualhost list");
+					
+					List<ExtendedImexVirtualhost> virtualHosts = deserialiseFiles(srcDir);
+					
+					if (virtualHosts.size() > 0) {
+											
+						Map<Long, TreeMap<String, String>> layoutSetHostnames = converToUpdatableMap(companyId, virtualHosts);
+						
+						updateVirtualHosts(companyId, locale, layoutSetHostnames);
+						
+					} else {
+						reportService.getEmpty(_log, "virtualhost list");
+					}	
+					
 				}
-								
+							
 			} catch (Exception e) {
 				_log.error(e,e);
 				reportService.getError(_log, e); 

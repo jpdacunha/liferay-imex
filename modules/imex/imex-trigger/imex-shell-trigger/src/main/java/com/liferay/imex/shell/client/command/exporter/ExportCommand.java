@@ -1,10 +1,9 @@
 package com.liferay.imex.shell.client.command.exporter;
 
 import com.liferay.imex.core.api.exporter.ImexExportService;
+import com.liferay.imex.shell.client.command.model.ImexParams;
+import com.liferay.imex.shell.client.command.model.exception.UnknownParameterException;
 import com.liferay.imex.shell.trigger.ImexCommand;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -26,24 +25,18 @@ public class ExportCommand implements ImexCommand {
 	
 	public void ex(String ... parameters) {
 		
-		String profileId = null;
-		List<String> bundleNames = new ArrayList<String>();
-		
-		for (String parameter : parameters) {
+		ImexParams params = new ImexParams();
+		try {
 			
-			parameter = parameter.trim();
+			params.parse(parameters);
 			
-			if (parameter.startsWith(PROFILE_ARG)) {
-				profileId = parameter.replaceFirst(PROFILE_ARG, "");
-			} else {
-				bundleNames.add(parameter);
-			}
+			String id = imexExportService.doExport(params.getBundleNames(), params.getProfile(), params.isDebug());
+			System.out.println("[" + id + "] Done.");
 			
+		} catch (UnknownParameterException e) {
+			System.out.println(e.getMessage());
 		}
-		
-		String id = imexExportService.doExport(bundleNames, profileId);
-		System.out.println("[" + id + "] Done.");
-	
+
 	}
 
 }

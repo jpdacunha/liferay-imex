@@ -96,5 +96,6 @@ In order to create a new importer in imex please follow this steps
 # Release notes
 ## Version 1.3.0
  - Raw ewport process feature added : export datas in a human readable format
- - Support for profiles importers or Exporters 
+ - Support for profiles : this features is available for Importers and Exporters 
  - Lock management to manage concurrent execution
+ - Fully support for debug parameter in shell trigger

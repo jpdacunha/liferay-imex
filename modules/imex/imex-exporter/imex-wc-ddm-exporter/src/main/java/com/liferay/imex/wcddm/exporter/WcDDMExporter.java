@@ -245,9 +245,17 @@ public class WcDDMExporter implements Exporter {
 		
 		String name = ImexNormalizer.convertToKey(structure.getStructureKey());
 		File dir = new File(groupDir, name);
+		
+		if (dir.exists() && dirFiles(dir).length > 0) {
+			reportService.getError(_log, "Ambiguous structure directory", "maybe two different structures are currently using the same directory.");
+		}
 		dir.mkdirs();		
 		return dir;
 		
+	}
+
+	private File[] dirFiles(File dir) {
+		return dir.listFiles();
 	}
 
 	/**

@@ -8,7 +8,7 @@ import java.text.Normalizer.Form;
 public class ImexNormalizer {
 	
 	/**
-	 * Replace alla spécia chars by a minus
+	 * Replace all spécial chars by a minus
 	 * @param s
 	 * @return
 	 */
@@ -16,8 +16,9 @@ public class ImexNormalizer {
 		
 		if (s != null) {
 			s = s.toLowerCase();
+			//Remove special chars
 			s = Normalizer.normalize(s, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-			s = s.replaceAll("[^a-zA-Z0-9]+", StringPool.MINUS);
+			s = s.replaceAll("[^a-zA-Z0-9_]+", StringPool.MINUS);
 		}
 		return s;
 	}
@@ -51,6 +52,5 @@ public class ImexNormalizer {
 		return s;
 		
 	}
-	
 
 }

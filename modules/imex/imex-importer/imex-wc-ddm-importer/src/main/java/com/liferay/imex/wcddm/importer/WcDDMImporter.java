@@ -207,7 +207,7 @@ public class WcDDMImporter implements Importer {
 					long classNameId = classNameLocalService.getClassNameId(JournalArticle.class);
 
 					long parentStructureId = DDMStructureConstants.DEFAULT_PARENT_STRUCTURE_ID;
-					String structureKey = "imex-" + imexStructure.getKey() + "-" + counterLocalService.increment();
+					String structureKey = imexStructure.getKey();
 					String storageType = imexStructure.getStorageType();
 					int type = imexStructure.getStructureType();
 					//uuid is set only for creation
@@ -300,7 +300,7 @@ public class WcDDMImporter implements Importer {
 						long classNameId = classNameLocalService.getClassNameId(DDMStructure.class);
 						long resourceClassNameId = classNameLocalService.getClassNameId(JournalArticle.class);
 						long groupId = group.getGroupId();
-						String templateKey = "imex-" + imexTemplate.getKey() + "-" + counterLocalService.increment();
+						String templateKey = imexTemplate.getKey();
 						
 						boolean smallImage = false;
 						String smallImageURL = null;

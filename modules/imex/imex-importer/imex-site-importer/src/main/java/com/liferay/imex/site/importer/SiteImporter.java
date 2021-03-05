@@ -20,6 +20,7 @@ import com.liferay.imex.site.model.OnExistsSiteMethodEnum;
 import com.liferay.imex.site.model.OnMissingSiteMethodEnum;
 import com.liferay.imex.site.service.SiteCommonService;
 import com.liferay.imex.site.util.SiteCommonUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
@@ -64,7 +65,6 @@ public class SiteImporter implements Importer {
 
 	private static final Log _log = LogFactoryUtil.getLog(SiteImporter.class);
 
-	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexProcessor processor;
 	
@@ -145,7 +145,7 @@ public class SiteImporter implements Importer {
 		reportService.getStartMessage(_log, "Managing sites hierarchy");
 		
 		if (toUpdateParentGroups.size() == 0) {
-			reportService.getEmpty(_log, "no hierarchy to manage");
+			reportService.getMessage(_log, "no hierarchy to manage");
 		} else {
 			
 			for (Entry<String, String> entry : toUpdateParentGroups.entrySet()) {
@@ -228,15 +228,18 @@ public class SiteImporter implements Importer {
 						} else {
 							
 							group = groupLocalService.addGroup(userId, defaultParentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
-							doImportLars(groupDir, config, user, group, locale, debug);
 							groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());	
+							doImportLars(groupDir, config, user, group, locale, debug);
 							
 							reportService.getOK(_log, dirName, logPrefix, createMethod.getValue());
 							
 						}
 
 					} else {
+						
 						_log.debug("Site creation were skipped.");
+						getReportService().getSkipped(_log, groupFriendlyUrl);
+						
 					}
 					
 				} else {
@@ -244,43 +247,49 @@ public class SiteImporter implements Importer {
 					OnExistsSiteMethodEnum duplicateMethod = behaviorManagerService.getOnExistsBehavior(config, group);
 					
 					if (!duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.SKIP.getValue())) {
+						
+						if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.UPDATE_GROUP_ONLY.getValue())) {
+							
+							updateLiferayGroup(typeSettingsProperties, serviceContext, nameMap, descriptionMap, type, friendlyURL, active, membershipRestriction, manualMembership, inheritContent, defaultParentGroupId, group);
+							
+						} else {
 
-						long groupId = group.getGroupId();
+							//Si le group existe
+							if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.UPDATE.getValue())) {
+								
+								updateLiferayGroup(typeSettingsProperties, serviceContext, nameMap, descriptionMap, type, friendlyURL, active, membershipRestriction, manualMembership, inheritContent, defaultParentGroupId, group);
+								
+							} else if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.RECREATE.getValue())) {
+								
+								//Reseting parent group
+								siteCommonService.eraseSiteHierarchy(group);
+								
+								//Deleting site
+								group = groupLocalService.deleteGroup(group);
+													
+								//Creating site again
+								group = groupLocalService.addGroup(userId, defaultParentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
+								
+							} else if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.DELETE.getValue())) {
+								
+								//Reseting parent group
+								siteCommonService.eraseSiteHierarchy(group);
+								
+								//Deleting site
+								group = groupLocalService.deleteGroup(group);
+								
+							}
+							
+							//Importing LARS
+							doImportLars(groupDir, config, user, group, locale, debug);
+							groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
+							
+						} 
 						
-						//Si le group existe
-						if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.UPDATE.getValue())) {
-							
-							groupLocalService.updateGroup(groupId, defaultParentGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, inheritContent, active, serviceContext);
-							
-						} else if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.RECREATE.getValue())) {
-							
-							//Reseting parent group
-							siteCommonService.eraseSiteHierarchy(group);
-							
-							//Deleting site
-							group = groupLocalService.deleteGroup(group);
-												
-							//Creating site again
-							group = groupLocalService.addGroup(userId, defaultParentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
-							
-						} else if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.DELETE.getValue())) {
-							
-							//Reseting parent group
-							siteCommonService.eraseSiteHierarchy(group);
-							
-							//Deleting site
-							group = groupLocalService.deleteGroup(group);
-							
-						}
-						
-						//Importing LARS
-						doImportLars(groupDir, config, user, group, locale, debug);
-						groupLocalService.updateGroup(group.getGroupId(), typeSettingsProperties.toString());
-					
 						reportService.getOK(_log, dirName, logPrefix, duplicateMethod.getValue());
 						
 					} else {
-						reportService.getOK(_log, dirName, logPrefix, duplicateMethod.getValue());
+						getReportService().getSkipped(_log, groupFriendlyUrl);
 					}
 					
 				}
@@ -291,10 +300,10 @@ public class SiteImporter implements Importer {
 				if (group != null && Validator.isNotNull(parentGroupIdFriendlyUrl)) {
 					toUpdateParentGroups.put(groupFriendlyUrl, parentGroupIdFriendlyUrl);
 				} else {
-					_log.debug("Ste identified by [" + groupFriendlyUrl + "] has no parent group");
+					_log.debug("Site identified by [" + groupFriendlyUrl + "] has no parent group");
 				}
 				
-				reportService.getEndMessage(_log, groupFriendlyUrl);
+				reportService.getEndMessage(_log, groupFriendlyUrl); 
 				
 			} else {
 				reportService.getDNE(_log, groupDir.getAbsolutePath());
@@ -304,6 +313,19 @@ public class SiteImporter implements Importer {
 		} else {
 			_log.error("Skipping null dir ...");
 		}
+	}
+
+	private Group updateLiferayGroup(UnicodeProperties typeSettingsProperties, ServiceContext serviceContext,
+			Map<Locale, String> nameMap, Map<Locale, String> descriptionMap, int type, String friendlyURL,
+			boolean active, int membershipRestriction, boolean manualMembership, boolean inheritContent,
+			long defaultParentGroupId, Group group) throws PortalException {
+		
+		long groupId = group.getGroupId();
+		Group updatedGroup = groupLocalService.updateGroup(groupId, defaultParentGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, inheritContent, active, serviceContext);
+		updatedGroup = groupLocalService.updateGroup(groupId, typeSettingsProperties.toString());
+		
+		return updatedGroup;
+		
 	}
 	
 	private void doImportLars(File groupDir, Properties config, User user, Group group, Locale locale, boolean debug) throws Exception {

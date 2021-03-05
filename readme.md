@@ -94,8 +94,11 @@ In order to create a new importer in imex please follow this steps
 
 
 # Release notes
-## Version 1.3.0
+## 1.3.0 Version
  - Raw ewport process feature added : export datas in a human readable format
  - Support for profiles : this features is available for Importers and Exporters 
  - Lock management to manage concurrent execution
  - Fully support for debug parameter in shell trigger
+ 
+## 1.4.0 Version
+ - Site importer : including support for UPGRADE_GROUP_ONLY import method. This method update the group object and it's dependencies without importing any LAR.

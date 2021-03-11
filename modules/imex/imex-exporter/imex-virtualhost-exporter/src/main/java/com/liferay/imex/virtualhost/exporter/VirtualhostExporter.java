@@ -89,6 +89,7 @@ public class VirtualhostExporter implements ProfiledExporter {
 					
 					try {
 						
+						LayoutSet layoutSet = null;
 						Group group = null;
 						boolean publicVirtualHost = true;
 						long layoutSetId = virtualHost.getLayoutSetId();
@@ -99,7 +100,7 @@ public class VirtualhostExporter implements ProfiledExporter {
 						
 						if (!isCompanyLayoutSet) {
 							
-							LayoutSet layoutSet = layoutSetLocalService.getLayoutSet(layoutSetId);
+							layoutSet = layoutSetLocalService.getLayoutSet(layoutSetId);
 							publicVirtualHost =  !layoutSet.isPrivateLayout();
 							group = groupLocalService.getGroup(layoutSet.getGroupId());
 							groupFriendlyURL = group.getFriendlyURL();
@@ -118,7 +119,7 @@ public class VirtualhostExporter implements ProfiledExporter {
 								defaultVirtualHost,
 								languageId);
 						
-						processor.write(imexVirtualhost, virtualhostDir, FileNames.getVirtualhostFileName(virtualHost, company, group, processor.getFileExtension()));
+						processor.write(imexVirtualhost, virtualhostDir, FileNames.getVirtualhostFileName(virtualHost, company, group, layoutSet, processor.getFileExtension()));
 						reportService.getOK(_log, "Virtualhost : "  + hostname + " for group : " + groupFriendlyURL);
 						
 					} catch (Exception e) {

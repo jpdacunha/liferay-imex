@@ -2,10 +2,10 @@ package com.liferay.imex.core.api.report.model;
 
 public enum ImexOperationEnum {
 	
-	   CREATE ("CREATE"),
-	   UPDATE   ("UPDATE"),
-	   DELETE   ("DELETE"),
-	   SKIPPED   ("SKIPPED");
+	   CREATE("CREATE"),
+	   UPDATE("UPDATE"),
+	   DELETE("DELETE"),
+	   SKIPPED("SKIPPED");
 	
 
     private final String value;

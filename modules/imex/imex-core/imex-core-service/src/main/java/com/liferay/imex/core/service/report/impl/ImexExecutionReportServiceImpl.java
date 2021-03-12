@@ -208,7 +208,7 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 			message += "[" + operation.getValue() + "] ";
 		}
 		
-		message = "[" + key + "]=>[" + name + "] [   OK  ]";	
+		message += "[" + key + "]=>[" + name + "] [   OK  ]";	
 		
 		if (file != null) {
 			message += " - (" + file.getAbsolutePath() + ")";

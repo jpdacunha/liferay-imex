@@ -42,5 +42,11 @@ public interface ImexConfigurationService {
 	public void loadImporterAndCoreConfiguration(Bundle bundle, ImexProperties props);
 
 	public Map<String, Properties> loadAllConfigurationMap(List<String> bundleNames, Map<String, ServiceReference<Importer>> importers, Map<String, ServiceReference<Exporter>> exporters);
+
+	public String loadDefaultConfigurationAsString(Bundle bundle);
+
+	public String getImexTempPath();
+
+	public void loadDefaultConfigurationInFile(Bundle bundle, File file);
 	
 }

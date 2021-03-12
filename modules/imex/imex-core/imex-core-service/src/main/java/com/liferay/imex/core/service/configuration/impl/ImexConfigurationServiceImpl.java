@@ -6,6 +6,7 @@ import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.util.configuration.ImExPropsValues;
+import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -15,12 +16,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -29,19 +33,23 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true, service = ImexConfigurationService.class)
 public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	
+	private static final String PROPERTIES_EXTENSION = FileUtil.PROPERTIES_EXTENSION;
+
 	private static final Log _log = LogFactoryUtil.getLog(ImexConfigurationServiceImpl.class);
 	
-	private static final String CONFIGURATION = "/configuration";
+	private static final String CONFIGURATION_PATH = "/configuration";
 
-	private static final String ARCHIVE = "/archive";
+	private static final String ARCHIVE_PATH = "/archive";
 
-	private static final String LOGS = "/logs";
+	private static final String LOGS_PATH = "/logs";
 
-	private static final String DATA = "/data";
+	private static final String DATA_PATH = "/data";
 	
-	private static final String RAW_DATA = "/data-raw";
+	private static final String RAW_DATA_PATH = "/data-raw";
 
-	private static final String IMEX2 = "/imex";
+	private static final String IMEX_PATH = "/imex";
+	
+	private static final String IMEX_TEMP_PATH = "/imex";
 
 	public final static String EXPORTER = "exporter";
 	public final static String IMPORTER = "importer";
@@ -113,7 +121,7 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	public File getConfigurationOverrideFileName(Bundle bundle) {
 		
 		if (bundle != null) {
-			String fileName = bundle.getSymbolicName() + ".properties";
+			String fileName = bundle.getSymbolicName() + PROPERTIES_EXTENSION;
 			
 			return new File(this.getImexCfgOverridePath() + StringPool.SLASH + fileName);
 		} else {
@@ -128,7 +136,7 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	public File getConfigurationOverrideFileName(Entry<String, Properties> entry) {
 		
 		if (entry != null) {
-			String fileName = entry.getKey() + ".properties";
+			String fileName = entry.getKey() + PROPERTIES_EXTENSION;
 			
 			return new File(this.getImexCfgOverridePath() + StringPool.SLASH + fileName);
 		} else {
@@ -136,6 +144,96 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 		}
 	
 		return null;
+		
+	}
+	
+	@Override
+	public String loadDefaultConfigurationAsString(Bundle bundle) {
+		
+		String content = "";
+		String fileName = DEFAULT_FILENAME_PREFIX + PROPERTIES_EXTENSION;
+		
+		URL fileURL = bundle.getResource(fileName);
+		
+		try {
+			
+			if (fileURL != null) {
+				
+				InputStream in = null;
+				try {
+					
+					in = fileURL.openStream();
+					content = IOUtils.toString(in, StandardCharsets.UTF_8.name());
+					
+				} finally {
+					if (in != null) {
+						in.close();
+					}
+				}
+				
+		    } else {
+		    	_log.debug("Resource [" + fileName + "] is null.");
+		    }
+
+			
+		} catch (IOException e) {
+			_log.error(e,e);
+	    } 
+		
+		return content;
+	}
+	
+	@Override
+	public void loadDefaultConfigurationInFile(Bundle bundle, File file) {
+
+		if (file != null) {
+			
+			try {
+				String content = loadDefaultConfigurationAsString(bundle);
+				FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8.name());
+			} catch (IOException e) {
+				_log.error(e,e);
+		    }
+			
+		} else {
+			_log.error("Invalid required parameter file : nul or does not exists");
+		}
+	
+	}
+	
+	private ImexProperties loadDefaultConfiguration(Bundle bundle, ImexProperties props) {
+		
+		String fileName = DEFAULT_FILENAME_PREFIX + PROPERTIES_EXTENSION;
+			
+		URL fileURL = bundle.getResource(fileName);
+		
+		try {
+			
+			if (fileURL != null) {
+				
+				InputStream in = null;
+				try {
+					
+					in = fileURL.openStream();
+					props.getProperties().load(in);
+					props.addPath("classpath:" + fileName);
+					
+				} finally {
+					if (in != null) {
+						in.close();
+					}
+				}
+				
+		    } else {
+		    	_log.debug("Resource [" + fileName + "] is null.");
+		    }
+
+			
+		} catch (IOException e) {
+			_log.error(e,e);
+	    } 
+		
+		return props;
 		
 	}
 	
@@ -225,71 +323,40 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 		return props;
 		
 	}
-	
-	private ImexProperties loadDefaultConfiguration(Bundle bundle, ImexProperties props) {
-		
-		String fileName = DEFAULT_FILENAME_PREFIX + ".properties";
-			
-		URL fileURL = bundle.getResource(fileName);
-		
-		try {
-			
-			if (fileURL != null) {
-				
-				InputStream in = null;
-				try {
-					
-					in = fileURL.openStream();
-					props.getProperties().load(in);
-					props.addPath("classpath:" + fileName);
-					
-				} finally {
-					if (in != null) {
-						in.close();
-					}
-				}
-				
-		    } else {
-		    	_log.debug("Resource [" + fileName + "] is null.");
-		    }
-
-			
-		} catch (IOException e) {
-			_log.error(e,e);
-	    } 
-		
-		return props;
-		
-	}
 
 	@Override
 	public String getImexPath() {
-		return ImExPropsValues.DEPLOY_DIR + IMEX2;
+		return ImExPropsValues.DEPLOY_DIR + IMEX_PATH;
+	}
+	
+	@Override
+	public String getImexTempPath() {
+		return System.getProperty("java.io.tmpdir") + IMEX_TEMP_PATH;
 	}
 	
 	@Override
 	public String getImexDataPath() {
-		return getImexPath() + DATA;
+		return getImexPath() + DATA_PATH;
 	}
 	
 	@Override
 	public String getImexRawDataPath() {
-		return getImexPath() + RAW_DATA;
+		return getImexPath() + RAW_DATA_PATH;
 	}
 	
 	@Override
 	public String getImexLogsPath() {
-		return getImexPath() + LOGS;
+		return getImexPath() + LOGS_PATH;
 	}
 
 	@Override
 	public String getImexArchivePath() {
-		return getImexPath() + ARCHIVE;
+		return getImexPath() + ARCHIVE_PATH;
 	}
 	
 	@Override
 	public String getImexCfgOverridePath() {
-		return getImexPath() + CONFIGURATION;
+		return getImexPath() + CONFIGURATION_PATH;
 	}
 
 }

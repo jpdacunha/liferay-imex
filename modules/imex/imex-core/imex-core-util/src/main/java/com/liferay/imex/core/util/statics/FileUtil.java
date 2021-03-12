@@ -6,11 +6,14 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -20,8 +23,29 @@ public class FileUtil {
 	public final static String XML_EXTENSION = ".xml";
 	public final static String ZIP_EXTENSION = ".zip";
 	public final static String JSON_EXTENSION = ".json";
+	public final static String PROPERTIES_EXTENSION = ".properties";
 	
 	private static final Log _log = LogFactoryUtil.getLog(FileUtil.class);
+	
+	public static void loadPropertiesInFile(File file, Properties props) {
+		
+		if (file != null) {
+			
+			try (FileOutputStream out = new FileOutputStream(file)) {
+			
+				props.store(out, null);
+				
+			} catch (FileNotFoundException e) {
+				_log.error(e,e);
+			} catch (IOException e) {
+				_log.error(e,e);
+			}
+			
+		} else {
+			_log.error("Unable to load properties because file is null");
+		}
+		
+	}
 	
 	public static File[] listFilesByExtension(File directory, String extension) {
 		

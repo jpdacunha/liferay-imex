@@ -30,6 +30,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -125,6 +126,12 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 				
 			}
 			
+			//Merging core bundle : TODO : JDA test this first
+			Bundle coreBundle = FrameworkUtil.getBundle(this.getClass());
+			String coreBundleName = coreBundle.getSymbolicName();
+			mergeConfiguration(props, coreBundleName, coreBundle);
+			
+			//Merging importers
 			for (Map.Entry<String ,ServiceReference<Importer>> entry  : importers.entrySet()) {
 				
 				ServiceReference<Importer> reference = entry.getValue();
@@ -137,6 +144,7 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 				
 			}
 			
+			//Merging exporters
 			for (Map.Entry<String ,ServiceReference<Exporter>> entry  : exporters.entrySet()) {
 				
 				ServiceReference<Exporter> reference = entry.getValue();

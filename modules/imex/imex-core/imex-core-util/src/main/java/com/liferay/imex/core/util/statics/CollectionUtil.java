@@ -8,9 +8,30 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CollectionUtil {
 	
+	/**
+	 * Replabe nulls in map
+	 * @param <T>
+	 * @param <K>
+	 * @param map
+	 * @param defaultValue
+	 * @return
+	 */
+	public static <T, K> Map<K, T> replaceNullValues(Map<K, T> map, T defaultValue) {
+
+		// Replace the null value
+		map = map.entrySet().stream().map(entry -> {
+			if (entry.getValue() == null)
+				entry.setValue(defaultValue);
+			return entry;
+		}).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+		return map;
+	}
+
 	/**
 	 * Filter a collection by keys. If a key is not found in the map an exception is throws.
 	 * @param keys

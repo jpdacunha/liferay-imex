@@ -5,6 +5,7 @@ import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ProfiledImporter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
+import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.virtualhost.FileNames;
@@ -57,6 +58,8 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 	)
 public class VirtualhostImporter implements ProfiledImporter {
 	
+	private static final String DEFAULT_LANGUAGE_MESSAGE = "DEFAULT-LANGUAGE";
+
 	private static final String DESCRIPTION = "VIRTUALHOST import";
 	
 	private static final Log _log = LogFactoryUtil.getLog(VirtualhostImporter.class);
@@ -149,7 +152,12 @@ public class VirtualhostImporter implements ProfiledImporter {
 				name = "Site : " + GroupUtil.getGroupName(group, locale);
 			}
 			
-			reportService.getOK(_log, name, "Virtual Hosts : "  + currentLayoutSetHostnames);
+			//To avoid diplaying null in logs
+			Map<String,String> toDisplay = new HashMap<String,String>();
+			toDisplay.putAll(currentLayoutSetHostnames);	
+			toDisplay = CollectionUtil.replaceNullValues(toDisplay, DEFAULT_LANGUAGE_MESSAGE);
+			
+			reportService.getOK(_log, name, "Virtual Hosts : "  + toDisplay);
 			
 		}
 		

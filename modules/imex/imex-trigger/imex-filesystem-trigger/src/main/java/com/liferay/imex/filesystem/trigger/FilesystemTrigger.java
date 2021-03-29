@@ -1,4 +1,4 @@
-package com.liferay.imex.shell.trigger;
+package com.liferay.imex.filesystem.trigger;
 
 import com.liferay.imex.core.api.trigger.Trigger;
 
@@ -11,19 +11,16 @@ import org.osgi.service.component.annotations.Component;
 		},
 		service = Trigger.class
 )
-public class GogoShellTrigger implements Trigger {
+public class FilesystemTrigger implements Trigger {
 
 	@Override
 	public String getTriggerName() {
-		return "Gogo shell trigger";
+		return "File system trigger";
 	}
 
 	@Override
 	public String getTriggerDescription() {
-		return "Allow triggering IMEX using Gogo shell custom commands";
+		return "Allow triggering IMEX using an action performed on filesystem";
 	}
 	
-	
-	
-
 }

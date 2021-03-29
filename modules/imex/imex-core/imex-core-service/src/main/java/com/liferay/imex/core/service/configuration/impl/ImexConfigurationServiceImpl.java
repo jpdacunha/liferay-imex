@@ -5,6 +5,7 @@ import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.importer.Importer;
+import com.liferay.imex.core.api.trigger.Trigger;
 import com.liferay.imex.core.util.configuration.ImExPropsValues;
 import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.petra.string.StringPool;
@@ -74,6 +75,12 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	}
 	
 	@Override
+	public void loadExporterAndCoreConfiguration(Class<?> clazz, ImexProperties props) {
+		Bundle bundle = FrameworkUtil.getBundle(clazz);
+		loadExporterAndCoreConfiguration(bundle, props);
+	}
+	
+	@Override
 	public void loadImporterAndCoreConfiguration(Bundle bundle, ImexProperties props) {
 		
 		loadBundleConfiguration(bundle, props);
@@ -83,7 +90,28 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	}
 	
 	@Override
-	public Map<String,Properties> loadAllConfigurationMap(List<String> bundleNames, Map<String, ServiceReference<Importer>> importers, Map<String, ServiceReference<Exporter>> exporters) {
+	public void loadImporterAndCoreConfiguration(Class<?> clazz, ImexProperties props) {
+		Bundle bundle = FrameworkUtil.getBundle(clazz);
+		loadImporterAndCoreConfiguration(bundle, props);
+	}
+	
+	@Override
+	public void loadTriggerAndCoreConfiguration(Bundle bundle, ImexProperties props) {
+		
+		loadBundleConfiguration(bundle, props);
+	
+		loadCoreConfiguration(props);
+		
+	}
+	
+	@Override
+	public void loadTriggerAndCoreConfiguration(Class<?> clazz, ImexProperties props) {
+		Bundle bundle = FrameworkUtil.getBundle(clazz);
+		loadTriggerAndCoreConfiguration(bundle, props);
+	}
+	
+	@Override
+	public Map<String,Properties> loadAllConfigurationMap(List<String> bundleNames, Map<String, ServiceReference<Importer>> importers, Map<String, ServiceReference<Exporter>> exporters, Map<String, ServiceReference<Trigger>> triggers) {
 		
 		Map<String,Properties> conf = new HashMap<>();
 		
@@ -96,6 +124,9 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 		
 		Map<String,Properties> exporterConfig = loadExportersConfigurationMap(bundleNames, exporters);
 		conf.putAll(exporterConfig);
+		
+		Map<String,Properties> triggerConfig = loadTriggersConfigurationMap(bundleNames, triggers);
+		conf.putAll(triggerConfig);
 		
 		return conf;
 	
@@ -243,15 +274,19 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	
 	private Map<String,Properties> loadImportersConfigurationMap(List<String> bundleNames, Map<String, ServiceReference<Importer>> importers) {
 		
-		//Map<String, ServiceReference<Importer>> importers = importerTrackerService.getFilteredImporters(bundleNames);
 		return loadConfigurationMap(bundleNames, importers);
 		
 	}
 	
 	private Map<String,Properties> loadExportersConfigurationMap(List<String> bundleNames, Map<String, ServiceReference<Exporter>> exporters) {
 		
-		//Map<String, ServiceReference<Exporter>> exporters = exporterTrackerService.getFilteredExporters(bundleNames);
 		return loadConfigurationMap(bundleNames, exporters);
+		
+	}
+	
+	private Map<String,Properties> loadTriggersConfigurationMap(List<String> bundleNames, Map<String, ServiceReference<Trigger>> triggers) {
+		
+		return loadConfigurationMap(bundleNames, triggers);
 		
 	}
 	

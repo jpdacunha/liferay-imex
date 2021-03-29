@@ -15,6 +15,8 @@ import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ImporterTracker;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.api.report.model.ImexOperationEnum;
+import com.liferay.imex.core.api.trigger.Trigger;
+import com.liferay.imex.core.api.trigger.TriggerTracker;
 import com.liferay.imex.core.service.configuration.model.ConfigurationOverrideProcessIdentifier;
 import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.petra.string.StringPool;
@@ -67,6 +69,8 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 	
 	private ExporterTracker exporterTrackerService;
 	
+	private TriggerTracker triggerTrackerService;
+	
 	@Override
 	public String generateOverrideFileSystemConfigurationFiles() {
 		return generateOverrideFileSystemConfigurationFiles(null, true);
@@ -103,8 +107,10 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 	public String generateOverrideFileSystemConfigurationFiles(List<String> bundleNames, boolean archive) {
 		
 		Map<String, ServiceReference<Importer>> importers = importerTrackerService.getFilteredImporters(bundleNames);
-		Map<String, ServiceReference<Exporter>> exporters = exporterTrackerService.getFilteredExporters(bundleNames);		
-		Map<String,Properties> props = configurationService.loadAllConfigurationMap(bundleNames, importers, exporters);
+		Map<String, ServiceReference<Exporter>> exporters = exporterTrackerService.getFilteredExporters(bundleNames);
+		Map<String, ServiceReference<Trigger>>  triggers = triggerTrackerService.getTriggers();
+		
+		Map<String,Properties> props = configurationService.loadAllConfigurationMap(bundleNames, importers, exporters, triggers);
 		
 		ProcessIdentifierGenerator processIdentifier = new ConfigurationOverrideProcessIdentifier();
 		
@@ -148,6 +154,19 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 			for (Map.Entry<String ,ServiceReference<Exporter>> entry  : exporters.entrySet()) {
 				
 				ServiceReference<Exporter> reference = entry.getValue();
+				
+				Bundle bundle = reference.getBundle();
+				
+				String key = entry.getKey();
+				
+				mergeConfiguration(props, key, bundle);
+				
+			}
+			
+			//Merging triggers
+			for (Map.Entry<String ,ServiceReference<Trigger>> entry  : triggers.entrySet()) {
+				
+				ServiceReference<Trigger> reference = entry.getValue();
 				
 				Bundle bundle = reference.getBundle();
 				
@@ -291,6 +310,15 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 
 	protected void unsetExporterTracker(ExporterTracker trackerService) {
 		this.exporterTrackerService = null;
+	}
+	
+	@Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
+	protected void setTriggerTracker(TriggerTracker trackerService) {
+		this.triggerTrackerService = trackerService;
+	}
+
+	protected void unsetTriggerTracker(TriggerTracker trackerService) {
+		this.triggerTrackerService = null;
 	}
 
 }

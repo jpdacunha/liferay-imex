@@ -2,4 +2,6 @@ dependencies {
 	compileOnly group: "org.osgi", name: "org.osgi.core"
 	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel"
+	compileOnly project(":modules:imex:imex-core:imex-core-api")
+	compileOnly project(":modules:imex:imex-core:imex-core-util")
 }

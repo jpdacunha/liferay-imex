@@ -3,7 +3,7 @@ package com.liferay.imex.core.service.exporter.tracker;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
-import com.liferay.imex.core.service.model.ImexServiceReferenceMap;
+import com.liferay.imex.core.service.model.PriorizedImexServiceReferenceMap;
 import com.liferay.imex.core.util.exception.MissingKeyException;
 import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.osgi.util.ServiceTrackerFactory;
@@ -34,7 +34,7 @@ public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter
 	
 	private ServiceTracker<Exporter, com.liferay.imex.core.api.exporter.Exporter> _serviceTracker;
 	
-	private ImexServiceReferenceMap<Exporter> _serviceReferences = new ImexServiceReferenceMap<Exporter>();
+	private PriorizedImexServiceReferenceMap<Exporter> _serviceReferences = new PriorizedImexServiceReferenceMap<Exporter>();
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexExecutionReportService reportService;

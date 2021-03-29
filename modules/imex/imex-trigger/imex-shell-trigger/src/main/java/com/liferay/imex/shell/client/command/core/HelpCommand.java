@@ -27,6 +27,7 @@ public class HelpCommand implements ImexCommand {
 		System.out.println("    Available options :");
 		System.out.println("       > [Exporter_Name_list] : Specify a list of exporter names. If missing a full export will be executed");
 		System.out.println("       > -P[Profile_ID] : Execute export process for specified id. example : imex:ex -Pdev");
+		System.out.println("       > -Debug : execute in debug mode");
 		System.out.println(" ");
 		
 		System.out.println("Import commands :");
@@ -35,9 +36,12 @@ public class HelpCommand implements ImexCommand {
 		System.out.println("    Available options :");
 		System.out.println("       > [Importer_Name_list] : Specify a list of importer names. If missing a full import will be executed");
 		System.out.println("       > -P[Profile_ID] : Execute import process for specified id. example : imex:im -Pdev");
+		System.out.println("       > -Debug : execute in debug mode");
 		System.out.println(" ");
+		
+		System.out.println("Trigger commands :");
+		System.out.println("  imex:lt : List available triggers");
 		System.out.println(" ");
-		System.out.println("If you want to use a profile ");
 		
 	}
 

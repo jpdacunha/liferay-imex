@@ -15,10 +15,6 @@ import org.osgi.framework.ServiceReference;
 
 public interface ImexConfigurationService {
 	
-	public void loadExporterConfiguration(Bundle bundle, ImexProperties props);
-	
-	public void loadImporterConfiguration(Bundle bundle, ImexProperties props);
-	
 	public void loadCoreConfiguration(ImexProperties props);
 	
 	public String getImexPath();

@@ -103,3 +103,7 @@ In order to create a new importer in imex please follow this steps
 ## 1.4.0 Version
  - Site importer : including support for UPGRADE_GROUP_ONLY import method. This method update the group object and it's dependencies without importing any LAR.
  - Merge feature for configuration files. This feature allow the user to update it's own configuration file without having to merge it by hand.
+ 
+## 1.4.1 Version
+ - Support for merging configuration files and comments preservation.
+ - Adding Service Tracker for triggers. FilesSystme Service Tracker implémentation

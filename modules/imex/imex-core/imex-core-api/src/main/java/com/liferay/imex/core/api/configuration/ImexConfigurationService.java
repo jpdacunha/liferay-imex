@@ -55,5 +55,9 @@ public interface ImexConfigurationService {
 	public void loadTriggerAndCoreConfiguration(Bundle bundle, ImexProperties props);
 
 	public void loadTriggerAndCoreConfiguration(Class<?> clazz, ImexProperties props);
+
+	public String getImexWorkPath();
+	
+	public File getImexWorkFile();
 	
 }

@@ -1,4 +1,4 @@
-package com.liferay.imex.filesystem.trigger.conffiguration;
+package com.liferay.imex.filesystem.trigger.configuration;
 
 public interface ImExFileSystemTriggerPropsKeys {
 	

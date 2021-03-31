@@ -2,7 +2,7 @@ package com.liferay.imex.filesystem.trigger.listener;
 
 import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
-import com.liferay.imex.filesystem.trigger.conffiguration.ImExFileSystemTriggerPropsKeys;
+import com.liferay.imex.filesystem.trigger.configuration.ImExFileSystemTriggerPropsKeys;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.messaging.BaseMessageListener;

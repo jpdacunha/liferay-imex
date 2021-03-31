@@ -52,6 +52,8 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 	private Lock imexCoreLock = null;
 	
 	private File imexTempDir;
+	
+	private File imexWorkDir;
 
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexArchiverService imexArchiverService;
@@ -254,9 +256,22 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 		} catch (IOException e) {
 			 _log.error(e,e);
 		}
+	}	
+	
+	public File getImexTempDir() {
+		return imexTempDir;
+	}
+	
+	public File getImexWorkDir() {
+		return imexWorkDir;
 	}
 	
 	@Activate
+	private void initialize() {
+		initializeTempDirectory();
+		initializeWorkDirectory();
+	}
+	
 	private void initializeTempDirectory() {
 		
 		//Initialize configuration directory
@@ -275,8 +290,22 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 		
 	}
 	
-	public File getImexTempDir() {
-		return imexTempDir;
+	private void initializeWorkDirectory() {
+		
+		//Initialize configuration directory
+		String filePath = configurationService.getImexWorkPath();
+		
+		File file = new File(filePath);
+		
+		file.mkdirs();
+		if (!file.exists()) {
+			_log.error("Failed to create directory " + file);
+		} else {
+			this.imexTempDir = file;
+		}
+		
+		_log.info("Work directory is available at [" + getImexWorkDir().getAbsolutePath() + "].");
+		
 	}
 
 	private void initializeConfigurationtDirectories() {

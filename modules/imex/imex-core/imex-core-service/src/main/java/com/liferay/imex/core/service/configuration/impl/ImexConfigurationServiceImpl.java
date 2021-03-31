@@ -55,6 +55,8 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	public final static String IMEX = ImExCorePropsKeys.IMEX_PREFIX;
 	
 	private static final String DEFAULT_FILENAME_PREFIX = "default";
+
+	private static final String WORK_PATH = "/work";
 	
 	@Override
 	public void loadCoreConfiguration(ImexProperties props) {
@@ -216,6 +218,12 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	
 	}
 	
+
+	@Override
+	public File getImexWorkFile() {
+		return new File(getImexWorkPath());
+	}
+	
 	private ImexProperties loadDefaultConfiguration(Bundle bundle, ImexProperties props) {
 		
 		String fileName = DEFAULT_FILENAME_PREFIX + PROPERTIES_EXTENSION;
@@ -351,6 +359,11 @@ public class ImexConfigurationServiceImpl implements ImexConfigurationService {
 	@Override
 	public String getImexTempPath() {
 		return System.getProperty("java.io.tmpdir") + IMEX_TEMP_PATH;
+	}
+	
+	@Override
+	public String getImexWorkPath() {
+		return getImexPath() + WORK_PATH;
 	}
 	
 	@Override

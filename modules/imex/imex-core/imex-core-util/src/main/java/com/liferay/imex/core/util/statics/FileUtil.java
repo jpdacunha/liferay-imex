@@ -10,12 +10,18 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.apache.commons.io.IOUtils;
+import org.osgi.framework.Bundle;
 
 public class FileUtil {
 	
@@ -24,8 +30,57 @@ public class FileUtil {
 	public final static String ZIP_EXTENSION = ".zip";
 	public final static String JSON_EXTENSION = ".json";
 	public final static String PROPERTIES_EXTENSION = ".properties";
+	public final static String DEFAULT_FILE_PATTERN = "*";
 	
 	private static final Log _log = LogFactoryUtil.getLog(FileUtil.class);
+	
+	public static List<URL> findBundleResources(Bundle bundle, String toCopyBundleDirectoryName, String filePatternToCopy) {
+		
+		if (bundle != null) {
+
+			if (Validator.isNotNull(toCopyBundleDirectoryName)) {
+
+				if (Validator.isNull(filePatternToCopy)) {
+					filePatternToCopy = DEFAULT_FILE_PATTERN;
+				}
+
+				return Collections.list(bundle.findEntries(toCopyBundleDirectoryName, filePatternToCopy, true));
+
+			} else {
+				_log.error("Missing required parameter bundleDirectoryName");
+			}
+
+		} else {
+			_log.error("Missing required parameter bundle");
+		}
+		return null;
+		
+	}
+
+	public static void copyUrlsAsFiles(File destinationDir, List<URL> enumeration) {
+		
+		if (enumeration != null) {
+			
+			for (URL resourceURL : enumeration) {
+			
+				try (InputStream in = resourceURL.openStream()) {
+
+					File file = new File(destinationDir, resourceURL.getFile());
+					try (FileOutputStream out = new FileOutputStream(file)) {
+						IOUtils.copy(in, out);
+					}
+					
+				} catch (IOException e) {
+					_log.error(e,e);
+				}
+
+			}
+			
+		} else {
+			_log.debug("Nothing to copy");
+		}
+		
+	}
 	
 	public static void loadPropertiesInFile(File file, Properties props) {
 		

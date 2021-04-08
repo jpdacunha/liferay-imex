@@ -22,9 +22,11 @@ import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -44,7 +46,7 @@ import org.pmw.tinylog.LoggingContext;
 @Component(
 		immediate = true,
 		service = ImexCoreService.class
-	)
+)
 public class ImexCoreServiceImpl implements ImexCoreService {
 	
 	private static final Log _log = LogFactoryUtil.getLog(ImexCoreServiceImpl.class);
@@ -72,6 +74,33 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 	private ExporterTracker exporterTrackerService;
 	
 	private TriggerTracker triggerTrackerService;
+	
+	public void deployFiles(Bundle bundle) {
+			
+//		if (bundle != null) {
+//			
+//			String toCopyBundleDirectoryName = configurationService.getImexScriptsFolderName();
+//			
+//			if (Validator.isNotNull(toCopyBundleDirectoryName)) {
+//				
+//				List<URL> enumeration = FileUtil.findBundleResources(bundle, toCopyBundleDirectoryName, "*");
+//				
+//				if (enumeration != null && enumeration.size() > 0) {
+//					
+//					initializeScriptstDirectory();
+//					FileUtil.copyUrlsAsFiles(imexScriptDir, enumeration);
+//					
+//				}
+//			
+//			} else {
+//				_log.error("Missing required parameter bundleDirectoryName");
+//			}
+//			
+//		} else {
+//			_log.error("Missing required parameter bundle");
+//		}
+		
+	}
 	
 	@Override
 	public String generateOverrideFileSystemConfigurationFiles() {
@@ -134,7 +163,6 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 				
 			}
 			
-			//Merging core bundle : TODO : JDA test this first
 			Bundle coreBundle = FrameworkUtil.getBundle(this.getClass());
 			String coreBundleName = coreBundle.getSymbolicName();
 			mergeConfiguration(props, coreBundleName, coreBundle);
@@ -268,8 +296,10 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 	
 	@Activate
 	private void initialize() {
+		_log.info("Starting imex core initialization ...");
 		initializeTempDirectory();
 		initializeWorkDirectory();
+		_log.info("Initialization done.");
 	}
 	
 	private void initializeTempDirectory() {
@@ -301,13 +331,13 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 		if (!file.exists()) {
 			_log.error("Failed to create directory " + file);
 		} else {
-			this.imexTempDir = file;
+			this.imexWorkDir = file;
 		}
 		
 		_log.info("Work directory is available at [" + getImexWorkDir().getAbsolutePath() + "].");
 		
 	}
-
+	
 	private void initializeConfigurationtDirectories() {
 		
 		String cfgFilePath = configurationService.getImexCfgOverridePath();
@@ -318,9 +348,7 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 		if (!cfgFile.exists()) {
 			_log.error("Failed to create directory " + cfgFile);
 		}
-		
 
-			
 	}
 	
 	@Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)

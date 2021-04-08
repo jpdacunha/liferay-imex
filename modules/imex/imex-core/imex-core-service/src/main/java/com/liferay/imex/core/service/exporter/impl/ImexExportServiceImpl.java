@@ -16,7 +16,6 @@ import com.liferay.imex.core.service.exporter.model.ExporterProcessIdentifierGen
 import com.liferay.imex.core.service.exporter.model.RawExporterProcessIdentifierGeneratorWrapper;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.UserUtil;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -74,7 +73,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 
 	@Override
 	public String doExportAll() {
-		return doExport(StringPool.BLANK);
+		return doExport(new ArrayList<>());
 	}
 	
 	@Override

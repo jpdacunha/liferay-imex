@@ -59,5 +59,5 @@ public interface ImexConfigurationService {
 	public String getImexWorkPath();
 	
 	public File getImexWorkFile();
-	
+
 }

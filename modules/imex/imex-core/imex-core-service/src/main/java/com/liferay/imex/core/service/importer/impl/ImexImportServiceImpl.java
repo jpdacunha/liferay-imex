@@ -13,7 +13,6 @@ import com.liferay.imex.core.service.ImexServiceBaseImpl;
 import com.liferay.imex.core.service.importer.model.ImporterProcessIdentifier;
 import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.imex.core.util.statics.UserUtil;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -27,6 +26,7 @@ import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -68,7 +68,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 	
 	@Override
 	public String doImportAll() {
-		return doImport(StringPool.BLANK);
+		return doImport(new ArrayList<>());
 	}
 	
 	@Override

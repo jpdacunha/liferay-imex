@@ -218,6 +218,16 @@ public class WcDDMExporter implements Exporter {
 		return DESCRIPTION;
 	}
 	
+	@Override
+	public void deploy() {
+		
+	}
+
+	@Override
+	public void undeploy() {
+		
+	}
+	
 	/**
 	 * Create directory for single role (/role-name)
 	 * @param roleDir

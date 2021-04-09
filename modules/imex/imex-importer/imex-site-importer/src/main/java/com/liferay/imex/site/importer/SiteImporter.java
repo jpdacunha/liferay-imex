@@ -417,7 +417,16 @@ public class SiteImporter implements Importer {
 	public String getProcessDescription() {
 		return DESCRIPTION;
 	}
+	
+	@Override
+	public void deploy() {
+		
+	}
 
+	@Override
+	public void undeploy() {
+		
+	}
 
 	public ImexProcessor getProcessor() {
 		return processor;

@@ -150,14 +150,22 @@ public class VirtualhostExporter implements ProfiledExporter {
 	 */
 	@Override
 	public String getRootDirectoryName() {
-		
 		return FileNames.DIR_VIRTUALHOST;
-
 	}
 
 	@Override
 	public String getProcessDescription() {
 		return DESCRIPTION;
+	}
+	
+	@Override
+	public void deploy() {
+		
+	}
+
+	@Override
+	public void undeploy() {
+		
 	}
 
 	public ImexProcessor getProcessor() {

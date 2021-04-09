@@ -286,6 +286,16 @@ public class VirtualhostImporter implements ProfiledImporter {
 	public String getRootDirectoryName() {
 		return FileNames.DIR_VIRTUALHOST;
 	}
+	
+	@Override
+	public void deploy() {
+		
+	}
+
+	@Override
+	public void undeploy() {
+		
+	}
 
 	public ImexProcessor getProcessor() {
 		return processor;

@@ -363,6 +363,16 @@ public class WcDDMImporter implements Importer {
 		return DESCRIPTION;
 	}
 	
+	@Override
+	public void deploy() {
+		
+	}
+
+	@Override
+	public void undeploy() {
+		
+	}
+	
 	@Reference(unbind = "-")
 	protected void setDDM(DDM ddm) {
 		_ddm = ddm;

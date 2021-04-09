@@ -144,6 +144,16 @@ public class RoleImporter implements Importer {
 
 	}
 	
+	@Override
+	public void deploy() {
+		
+	}
+
+	@Override
+	public void undeploy() {
+		
+	}
+	
 	/**
 	 * Return root directory name
 	 *

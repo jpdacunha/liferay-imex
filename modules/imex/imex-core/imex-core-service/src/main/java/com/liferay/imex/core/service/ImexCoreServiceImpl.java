@@ -22,11 +22,9 @@ import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -74,33 +72,6 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 	private ExporterTracker exporterTrackerService;
 	
 	private TriggerTracker triggerTrackerService;
-	
-	public void deployFiles(Bundle bundle) {
-			
-//		if (bundle != null) {
-//			
-//			String toCopyBundleDirectoryName = configurationService.getImexScriptsFolderName();
-//			
-//			if (Validator.isNotNull(toCopyBundleDirectoryName)) {
-//				
-//				List<URL> enumeration = FileUtil.findBundleResources(bundle, toCopyBundleDirectoryName, "*");
-//				
-//				if (enumeration != null && enumeration.size() > 0) {
-//					
-//					initializeScriptstDirectory();
-//					FileUtil.copyUrlsAsFiles(imexScriptDir, enumeration);
-//					
-//				}
-//			
-//			} else {
-//				_log.error("Missing required parameter bundleDirectoryName");
-//			}
-//			
-//		} else {
-//			_log.error("Missing required parameter bundle");
-//		}
-		
-	}
 	
 	@Override
 	public String generateOverrideFileSystemConfigurationFiles() {

@@ -43,6 +43,9 @@ public class TriggerTrackerService implements ServiceTrackerCustomizer<Trigger, 
 		
 		Trigger trigger = _bundleContext.getService(serviceReference);
 		
+		//Calling deploy method on custom service
+		trigger.deploy();
+		
 		return trigger;
 	}
 
@@ -56,7 +59,12 @@ public class TriggerTrackerService implements ServiceTrackerCustomizer<Trigger, 
 
 	@Override
 	public void removedService(ServiceReference<Trigger> serviceReference, Trigger service) {
+		
 		_serviceReferences.removeService(serviceReference);
+		
+		//Calling undeploy custom method on service
+		service.undeploy();
+		
 	}
 	
 	@Activate

@@ -197,6 +197,16 @@ public class AdtExporter implements Exporter {
 	}
 	
 	@Override
+	public void deploy() {
+		
+	}
+
+	@Override
+	public void undeploy() {
+		
+	}
+	
+	@Override
 	public String getProcessDescription() {
 		return DESCRIPTION;
 	}

@@ -46,6 +46,9 @@ public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter
 		
 		Exporter exporter = _bundleContext.getService(serviceReference);
 		
+		//Calling deploy method on custom service
+		exporter.deploy();
+		
 		return exporter;
 	}
 
@@ -59,7 +62,12 @@ public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter
 
 	@Override
 	public void removedService(ServiceReference<Exporter> serviceReference, Exporter service) {
+		
 		_serviceReferences.removeService(serviceReference);
+		
+		//Calling undeploy custom method on service
+		service.undeploy();
+		
 	}
 	
 	@Activate

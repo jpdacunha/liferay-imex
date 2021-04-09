@@ -22,8 +22,15 @@ public class GogoShellTrigger implements Trigger {
 	public String getTriggerDescription() {
 		return "Allow triggering IMEX using Gogo shell custom commands";
 	}
-	
-	
-	
+
+	@Override
+	public void deploy() {
+		
+	}
+
+	@Override
+	public void undeploy() {
+		
+	}
 
 }

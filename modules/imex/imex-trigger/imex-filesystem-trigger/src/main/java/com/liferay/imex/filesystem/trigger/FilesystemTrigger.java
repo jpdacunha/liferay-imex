@@ -40,5 +40,16 @@ public class FilesystemTrigger implements Trigger {
 		filesystemTriggerService.createMissingFiles();
 		_log.info("Done");
 	}
+
+	@Override
+	public void deploy() {
+		_log.info("In deploy");
+		
+	}
+
+	@Override
+	public void undeploy() {
+		_log.info("In undeploy");
+	}
 	
 }

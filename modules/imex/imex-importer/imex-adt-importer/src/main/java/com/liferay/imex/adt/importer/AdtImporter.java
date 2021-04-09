@@ -254,6 +254,16 @@ public class AdtImporter implements Importer {
 		return template;
 		
 	}
+	
+	@Override
+	public void deploy() {
+		
+	}
+
+	@Override
+	public void undeploy() {
+		
+	}
 
 	/**
 	 * Return root directory name

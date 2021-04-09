@@ -66,6 +66,16 @@ public class ExpandoExporter implements Exporter{
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public void deploy() {
+		
+	}
+
+	@Override
+	public void undeploy() {
+		
+	}
 
 	@Override
 	public String getProcessDescription() {

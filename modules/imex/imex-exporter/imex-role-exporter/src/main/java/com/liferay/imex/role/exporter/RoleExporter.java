@@ -165,6 +165,16 @@ public class RoleExporter implements Exporter {
 		return roleDir;
 		
 	}
+	
+	@Override
+	public void deploy() {
+		
+	}
+
+	@Override
+	public void undeploy() {
+		
+	}
 
 	/**
 	 * Return root directory name

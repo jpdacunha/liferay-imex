@@ -238,6 +238,16 @@ public class SiteExporter implements Exporter {
 			
 	}
 	
+	@Override
+	public void deploy() {
+		
+	}
+
+	@Override
+	public void undeploy() {
+		
+	}
+	
 	/**
 	 * Return root directory name
 	 *

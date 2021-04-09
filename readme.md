@@ -107,3 +107,4 @@ In order to create a new importer in imex please follow this steps
 ## 1.4.1 Version
  - Support for merging configuration files and comments preservation.
  - Adding Service Tracker for triggers. FilesSystme Service Tracker implémentation
+ - Supports deploy (called by ST after registering the service) and undeploy <called by ST after uneregestring service) methods for importer, Exporters, Triggers. 

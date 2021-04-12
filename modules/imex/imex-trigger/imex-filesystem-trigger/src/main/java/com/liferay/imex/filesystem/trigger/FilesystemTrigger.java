@@ -1,10 +1,14 @@
 package com.liferay.imex.filesystem.trigger;
 
+import com.liferay.imex.core.api.ImexCoreService;
+import com.liferay.imex.core.api.deploy.DeployDirEnum;
 import com.liferay.imex.core.api.trigger.Trigger;
 import com.liferay.imex.filesystem.trigger.service.FilesystemTriggerService;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -23,6 +27,9 @@ public class FilesystemTrigger implements Trigger {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected FilesystemTriggerService filesystemTriggerService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	protected ImexCoreService coreService;
 
 	@Override
 	public String getTriggerName() {
@@ -43,13 +50,27 @@ public class FilesystemTrigger implements Trigger {
 
 	@Override
 	public void deploy() {
-		_log.info("In deploy");
+		
+		_log.info("Deploying scripts ...");
+		Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+		coreService.deployBundleFiles(DeployDirEnum.SCRIPTS, "/scripts", bundle);
+		_log.info("Scripts succesfully deployed");
 		
 	}
 
 	@Override
 	public void undeploy() {
-		_log.info("In undeploy");
+		
+		Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+		
+		_log.info("Undeploying [" + bundle.getSymbolicName() + "] ...");
+		
+		coreService.cleanBundleFiles(DeployDirEnum.SCRIPTS, "/scripts", bundle);
+		
+		filesystemTriggerService.cleanFiles();
+		
+		_log.info("[" + bundle.getSymbolicName() + "] succesfully undeployed");
+		
 	}
 	
 }

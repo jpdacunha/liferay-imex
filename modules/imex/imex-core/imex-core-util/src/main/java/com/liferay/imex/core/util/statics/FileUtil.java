@@ -1,5 +1,6 @@
 package com.liferay.imex.core.util.statics;
 
+import com.liferay.imex.core.util.exception.ImexException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -12,15 +13,24 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.osgi.framework.Bundle;
 
 public class FileUtil {
@@ -33,6 +43,91 @@ public class FileUtil {
 	public final static String DEFAULT_FILE_PATTERN = "*";
 	
 	private static final Log _log = LogFactoryUtil.getLog(FileUtil.class);
+	
+	public static String getExtension(File file) throws ImexException {
+		
+		if (file != null) {
+			return FilenameUtils.getExtension(file.getName());
+		} else {
+			throw new ImexException("[null] is not a valid file"); 
+		}
+		
+	}
+	
+	public static void setFilePermissions(File file, boolean isWritable, boolean isReadable, boolean isExecutable) {
+		
+		if (file != null) {
+			
+			if (file.exists()) {
+				
+				file.setExecutable(isExecutable);
+				file.setReadable(isReadable);
+				file.setWritable(isWritable);
+				
+			}  else {
+				_log.error("File [" + file.getAbsolutePath() + "] does not exists");
+			}
+			
+		} else {
+			_log.error("File is null : unable to perform any action");
+		}
+		
+	}
+	
+	public static boolean isEmptyDirectory(File directory) throws IOException, ImexException {
+		
+		if (directory != null) {
+			
+			Path path = directory.toPath();
+		
+		    if (Files.isDirectory(path)) {
+		        try (Stream<Path> entries = Files.list(path)) {
+		            return !entries.findFirst().isPresent();
+		        }
+		    } else {
+		    	throw new ImexException("[" + directory.getAbsolutePath() + "] is not a directory"); 
+		    }
+	    
+		} else {
+	    	throw new ImexException("[null] is not a directory"); 
+	    }
+	    
+	}
+	
+	public static void deleteDirectory(File directory) {
+		
+		try {
+			FileUtils.deleteDirectory(directory);
+		} catch (IOException e) {
+			_log.error(e,e);
+		}
+		
+	}
+	
+	public static File initializeDirectory(String filePath) throws ImexException {
+		
+		File file = new File(filePath);
+		
+		file.mkdirs();
+		if (!file.exists()) {
+			throw new ImexException("Unable to create directory [" + filePath + "]");
+		} 
+		
+		return file;
+		
+	}
+	
+	public static List<File> findFiles(File directory, String... patterns) {
+		
+		Collection<File> collection = FileUtils.listFiles(directory, new WildcardFileFilter(patterns), null);
+		
+		if (collection != null) {
+			return new ArrayList<>(collection);
+		}
+		
+		return null;
+		
+	}
 	
 	public static List<URL> findBundleResources(Bundle bundle, String toCopyBundleDirectoryName, String filePatternToCopy) {
 		
@@ -57,17 +152,23 @@ public class FileUtil {
 		
 	}
 
-	public static void copyUrlsAsFiles(File destinationDir, List<URL> enumeration) {
+	public static void copyUrlsAsFiles(File destinationDir, List<URL> list) {
 		
-		if (enumeration != null) {
+		if (list != null) {
 			
-			for (URL resourceURL : enumeration) {
+			for (URL resourceURL : list) {
 			
 				try (InputStream in = resourceURL.openStream()) {
-
-					File file = new File(destinationDir, resourceURL.getFile());
+					
+					//Retrieve only fileName from the originalPath
+					Path originalfilePath = Paths.get(resourceURL.getFile());
+					String fileName = originalfilePath.getFileName().toString();
+					
+					File file = new File(destinationDir, fileName);
 					try (FileOutputStream out = new FileOutputStream(file)) {
+						
 						IOUtils.copy(in, out);
+						
 					}
 					
 				} catch (IOException e) {

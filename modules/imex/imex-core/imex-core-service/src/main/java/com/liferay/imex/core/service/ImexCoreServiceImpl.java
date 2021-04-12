@@ -8,6 +8,7 @@ import com.liferay.imex.core.api.configuration.PropertyMergerService;
 import com.liferay.imex.core.api.configuration.model.FileProperty;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.configuration.model.OrderedProperties;
+import com.liferay.imex.core.api.deploy.DeployDirEnum;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.identifier.ProcessIdentifierGenerator;
@@ -18,13 +19,17 @@ import com.liferay.imex.core.api.report.model.ImexOperationEnum;
 import com.liferay.imex.core.api.trigger.Trigger;
 import com.liferay.imex.core.api.trigger.TriggerTracker;
 import com.liferay.imex.core.service.configuration.model.ConfigurationOverrideProcessIdentifier;
+import com.liferay.imex.core.util.exception.ImexException;
+import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -73,6 +78,106 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 	
 	private TriggerTracker triggerTrackerService;
 	
+	@Override
+	public void cleanBundleFiles(DeployDirEnum destinationDirName, String toCopyBundleDirectoryName, Bundle bundle) {
+		
+		if (bundle != null) {
+			
+			if (destinationDirName != null) {
+				
+				List<URL> urls = FileUtil.findBundleResources(bundle, toCopyBundleDirectoryName, StringPool.STAR);
+				
+				if (urls != null && urls.size() > 0) {
+											
+					String imexHomePath = configurationService.getImexPath();
+					
+					String rootPath = imexHomePath + StringPool.SLASH + destinationDirName.getDirectoryPath();
+					String bundleDirectoryPath = rootPath + StringPool.SLASH + bundle.getSymbolicName();
+					
+					File destinationDir = new File(bundleDirectoryPath);
+					if (destinationDir.exists()) {
+						
+						FileUtil.deleteDirectory(destinationDir);
+						
+						File rootDir = new File(rootPath);
+						
+						//Deleting root dir if empty
+						if (rootDir != null && rootDir.exists()) {
+							
+							try {
+								
+								if (FileUtil.isEmptyDirectory(rootDir)) {
+									FileUtil.deleteDirectory(rootDir);
+								} else {
+									_log.debug("rootDirectory is not empty");
+								}
+								
+							} catch (ImexException e) {
+								_log.error(e,e);
+							} catch (IOException e) {
+								_log.error(e,e);
+							}
+							
+						} else {
+							_log.debug("rootDirectory is null or it's does not exists");
+						}
+									
+					} else {
+						_log.info("[" + destinationDir.getAbsolutePath() + "] does not exists. Nothing to clean.");
+					}
+					
+				} else {
+					_log.debug("No files found to copy");
+				}
+				
+			} else {
+				_log.warn("Missing required parameter [destinationDirName]");
+			}
+			
+		} else {
+			_log.warn("Missing required parameter [bundle]");		
+		}
+	}
+	
+	@Override
+	public void deployBundleFiles(DeployDirEnum destinationDirName, String toCopyBundleDirectoryName, Bundle bundle) {
+		
+		if (bundle != null) {
+			
+			if (destinationDirName != null) {
+				
+				List<URL> urls = FileUtil.findBundleResources(bundle, toCopyBundleDirectoryName, StringPool.STAR);
+				
+				if (urls != null && urls.size() > 0) {
+					
+					try {
+						
+						String imexHomePath = configurationService.getImexPath();
+						String bundleDirectoryPath = imexHomePath + StringPool.SLASH + destinationDirName.getDirectoryPath() + StringPool.SLASH + bundle.getSymbolicName();
+						
+						File destinationDir = FileUtil.initializeDirectory(bundleDirectoryPath);
+						FileUtil.copyUrlsAsFiles(destinationDir, urls);
+						
+						setFilesPermissions(destinationDir);
+						
+					} catch (ImexException e) {
+						_log.error(e,e);
+					}
+					
+				} else {
+					_log.debug("No files found to copy");
+				}
+				
+			} else {
+				_log.warn("Missing required parameter [destinationDirName]");
+			}
+			
+		} else {
+			_log.warn("Missing required parameter [bundle]");
+		}
+		
+	}
+
 	@Override
 	public String generateOverrideFileSystemConfigurationFiles() {
 		return generateOverrideFileSystemConfigurationFiles(null, true);
@@ -182,6 +287,47 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 		reportService.getEndMessage(_log, "CFG_OVERRIDE process");
 		
 		return identifier;
+		
+	}
+	
+	private void setFilesPermissions(File destinationDir) throws ImexException {
+		
+		File[] files = destinationDir.listFiles();
+		
+		if (files != null && files.length > 0) {
+			
+			ImexProperties imexProps = new ImexProperties();
+			configurationService.loadCoreConfiguration(imexProps);
+			
+			Properties props = imexProps.getProperties();
+			
+			List<String> readExtensions = CollectionUtil.getList(props.getProperty(ImExCorePropsKeys.DEPLOYER_READ_PERMISSION_FILES_EXTENSIONS));
+			List<String>  writeExtensions = CollectionUtil.getList(props.getProperty(ImExCorePropsKeys.DEPLOYER_WRITE_PERMISSION_FILES_EXTENSIONS));
+			List<String> executeExtensions = CollectionUtil.getList(props.getProperty(ImExCorePropsKeys.DEPLOYER_EXECUTE_PERMISSION_FILES_EXTENSIONS));
+
+			for (File file : files) {
+				
+				String extension = FileUtil.getExtension(file);
+				
+				if (Validator.isNotNull(extension)) {
+				
+					boolean readable = (readExtensions != null && readExtensions.contains(extension));
+					boolean writable = (writeExtensions != null && writeExtensions.contains(extension));
+					boolean executable = (executeExtensions != null && executeExtensions.contains(extension));
+					
+					FileUtil.setFilePermissions(file, writable, readable, executable);
+					
+				} else {
+					_log.warn("Unable to set permission for file [" + file.getAbsolutePath() + "] because his extension is undefined.");
+				}
+				
+			}
+			
+		} else {
+			
+			_log.debug("Directory is empty");
+			
+		}
 		
 	}
 

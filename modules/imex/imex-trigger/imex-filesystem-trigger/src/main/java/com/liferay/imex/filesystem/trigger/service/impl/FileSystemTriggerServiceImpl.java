@@ -4,6 +4,7 @@ import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.exporter.ImexExportService;
 import com.liferay.imex.core.api.importer.ImexImportService;
 import com.liferay.imex.core.util.exception.ImexException;
+import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.imex.filesystem.trigger.service.FilesystemTriggerService;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
@@ -11,6 +12,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
+import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -41,6 +43,24 @@ public class FileSystemTriggerServiceImpl implements FilesystemTriggerService {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexImportService imexImportService;
+	
+	@Override
+	public void cleanFiles() {
+	
+		File workDir = configurationService.getImexWorkFile();
+		List<File> toClean = FileUtil.findFiles(workDir, IMEX_FILESYSTEM_IMPORT_START_FILENAME + ".*", IMEX_FILESYSTEM_EXPORT_START_FILENAME + ".*");
+		
+		for (File file : toClean) {
+			if (file != null && file.isFile()) {
+				file.delete();
+			} else if (file != null) {
+				_log.error("File identified by [" + file.getAbsolutePath() + "] is not a valid file. Mabe it is a directory ?");
+			} else {
+				_log.debug("Unable to clean null file");
+			}
+		}
+		
+	}
 	
 	@Override
 	public synchronized void executeImex() {

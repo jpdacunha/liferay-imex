@@ -2,6 +2,7 @@ package com.liferay.imex.core.util.statics;
 
 import com.liferay.imex.core.util.exception.MissingKeyException;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.util.PropsUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +65,7 @@ public class CollectionUtil {
 		return filteredServiceReferences;
 		
 	}
-	
+		
 	public static List<String> getList(String value) {
 		
 		List<String> retour = new ArrayList<String>();
@@ -83,7 +84,6 @@ public class CollectionUtil {
 	}
 	
 	public static String[] getArray(String value) {
-		//TODO : JDA non optimized code array => List => array (again)
 		List<String> list = getList(value);
 		return list.stream().toArray(String[]::new);
 	}

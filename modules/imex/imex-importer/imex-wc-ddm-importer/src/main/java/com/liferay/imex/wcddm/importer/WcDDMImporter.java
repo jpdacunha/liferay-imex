@@ -3,6 +3,8 @@ package com.liferay.imex.wcddm.importer;
 import com.liferay.counter.kernel.service.CounterLocalService;
 import com.liferay.dynamic.data.mapping.exception.NoSuchStructureException;
 import com.liferay.dynamic.data.mapping.exception.NoSuchTemplateException;
+import com.liferay.dynamic.data.mapping.exception.StructureDuplicateStructureKeyException;
+import com.liferay.dynamic.data.mapping.exception.TemplateDuplicateTemplateKeyException;
 import com.liferay.dynamic.data.mapping.io.DDMFormDeserializer;
 import com.liferay.dynamic.data.mapping.io.DDMFormDeserializerDeserializeRequest;
 import com.liferay.dynamic.data.mapping.io.DDMFormDeserializerDeserializeResponse;
@@ -25,6 +27,8 @@ import com.liferay.imex.wcddm.FileNames;
 import com.liferay.imex.wcddm.importer.configuration.ImExWCDDmImporterPropsKeys;
 import com.liferay.imex.wcddm.model.ImExStructure;
 import com.liferay.imex.wcddm.model.ImExTemplate;
+import com.liferay.imex.wcddm.model.OnExistsStructureMethodEnum;
+import com.liferay.imex.wcddm.model.OnExistsTemplateMethodEnum;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -135,10 +139,14 @@ public class WcDDMImporter implements Importer {
 					//For each structure dir
 					for (File structureDir : structuresDirs) {
 						
-						DDMStructure structure = doImportStructure(serviceContext, debug, group, user, locale, structureDir);
+						DDMStructure structure = doImportStructure(config, serviceContext, debug, group, user, locale, structureDir);
 						
-						doImportTemplate(serviceContext, debug, group, user, locale, structureDir, structure);
-						reportService.getSeparator(_log);
+						if (structure != null) {
+							doImportTemplate(config, serviceContext, debug, group, user, locale, structureDir, structure);
+							reportService.getSeparator(_log);
+						} else {
+							reportService.getError(_log, structureDir.getName(), "Structure import process returned unexpected null result: Skipping associated templates update.");
+						}
 						
 					}
 					
@@ -158,7 +166,7 @@ public class WcDDMImporter implements Importer {
 		}
 	}
 
-	private DDMStructure doImportStructure(ServiceContext serviceContext, boolean debug, Group group, User user, Locale locale, File structureDir) {
+	private DDMStructure doImportStructure(Properties config, ServiceContext serviceContext, boolean debug, Group group, User user, Locale locale, File structureDir) {
 		
 		DDMStructure structure = null;
 		String structurefileBegin = FileNames.getStructureFileNameBegin();
@@ -213,21 +221,46 @@ public class WcDDMImporter implements Importer {
 					//uuid is set only for creation
 					serviceContextStr.setUuid(imexStructure.getUuid());
 					
-					structure = dDMStructureLocalService.addStructure(
-							userId, 
-							groupId, 
-							parentStructureId, 
-							classNameId,
-							structureKey, 
-							nameMap,
-							descriptionMap, 
-							ddmForm,
-							ddmFormLayout, 
-							storageType, 
-							type,
-							serviceContextStr);
-					
-					operation = ImexOperationEnum.CREATE;
+					try {
+						
+						structure = dDMStructureLocalService.addStructure(
+								userId, 
+								groupId, 
+								parentStructureId, 
+								classNameId,
+								structureKey, 
+								nameMap,
+								descriptionMap, 
+								ddmForm,
+								ddmFormLayout, 
+								storageType, 
+								type,
+								serviceContextStr);
+						
+						operation = ImexOperationEnum.CREATE;
+						
+					} catch (StructureDuplicateStructureKeyException e1) {
+						
+						// In case of different structure with same key exists => apply custom behavior or not
+						String behaviorValue = GetterUtil.getString(config.get(ImExWCDDmImporterPropsKeys.IMPORT_STRUCTURE_ON_KEY_EXISTS));
+						OnExistsStructureMethodEnum duplicateMethod = OnExistsStructureMethodEnum.fromValue(behaviorValue);
+
+						if (duplicateMethod.getValue().equals(OnExistsStructureMethodEnum.UPDATE_EXISTING_STRUCTURE_BY_KEY.getValue())) {
+
+							structure = dDMStructureLocalService.getStructure(groupId, classNameId, structureKey);
+
+							parentStructureId = structure.getParentStructureId();
+							classNameId = structure.getClassNameId();
+							structureKey = structure.getStructureKey();
+
+							structure = dDMStructureLocalService.updateStructure(userId, groupId, parentStructureId, classNameId, structureKey, nameMap, descriptionMap, ddmForm, ddmFormLayout, serviceContextStr);
+						
+						} else {
+							reportService.getError(_log, operation.getValue(), " a structure [" + structureKey + "] with the same key [" + structureKey + "] already exists. Please see [" + ImExWCDDmImporterPropsKeys.IMPORT_STRUCTURE_ON_KEY_EXISTS + "] parameter to customize this behavior.");
+							throw new StructureDuplicateStructureKeyException(e1);
+						}
+						
+					}
 						
 				}
 				
@@ -249,7 +282,7 @@ public class WcDDMImporter implements Importer {
 		
 	}
 	
-	private DDMTemplate doImportTemplate(ServiceContext serviceContext, boolean debug, Group group, User user, Locale locale, File structureDir, DDMStructure structure) {
+	private DDMTemplate doImportTemplate(Properties config, ServiceContext serviceContext, boolean debug, Group group, User user, Locale locale, File structureDir, DDMStructure structure) {
 		
 		DDMTemplate template = null;
 		String templatefileBegin = FileNames.getTemplateFileNameBegin();
@@ -284,49 +317,72 @@ public class WcDDMImporter implements Importer {
 					
 					serviceContextTem.setAddGroupPermissions(true);
 					serviceContextTem.setAddGuestPermissions(true);
-					serviceContextTem.setUuid(imexTemplate.getUuid());
+						
+					long groupId = group.getGroupId();
 					
 					try {
 						
 						//Searching for existing template
-						template = dDMTemplateLocalService.getDDMTemplateByUuidAndGroupId(imexTemplate.getUuid(), group.getGroupId());
+						template = dDMTemplateLocalService.getDDMTemplateByUuidAndGroupId(imexTemplate.getUuid(), groupId);
 						
 						long templateId = template.getTemplateId();
 						
 						dDMTemplateLocalService.updateTemplate(userId, templateId, classPK, nameMap, descriptionMap, type, mode, language, script, cacheable, serviceContextTem);
 						
 					} catch (NoSuchTemplateException e) {
-												
+									
 						long classNameId = classNameLocalService.getClassNameId(DDMStructure.class);
 						long resourceClassNameId = classNameLocalService.getClassNameId(JournalArticle.class);
-						long groupId = group.getGroupId();
-						String templateKey = imexTemplate.getKey();
 						
+						String templateKey = imexTemplate.getKey();			
 						boolean smallImage = false;
 						String smallImageURL = null;
 						File smallImageFile = null;
 						
-						template = dDMTemplateLocalService.addTemplate(
-								userId, 
-								groupId, 
-								classNameId, 
-								classPK,
-								resourceClassNameId, 
-								templateKey,
-								nameMap, 
-								descriptionMap,
-								type, 
-								mode, 
-								language, 
-								script,
-								cacheable , 
-								smallImage, 
-								smallImageURL,
-								smallImageFile, 
-								serviceContextTem
-						);
+						try {
+							
+							template = dDMTemplateLocalService.addTemplate(
+									userId, 
+									groupId, 
+									classNameId, 
+									classPK,
+									resourceClassNameId, 
+									templateKey,
+									nameMap, 
+									descriptionMap,
+									type, 
+									mode, 
+									language, 
+									script,
+									cacheable , 
+									smallImage, 
+									smallImageURL,
+									smallImageFile, 
+									serviceContextTem
+							);
+							
+							operation = ImexOperationEnum.CREATE;
+							
+						} catch (TemplateDuplicateTemplateKeyException e1) {
+							
+							// In case of different template with same key exists => apply custom behavior or not
+							String behaviorValue = GetterUtil.getString(config.get(ImExWCDDmImporterPropsKeys.IMPORT_TEMPLATE_ON_KEY_EXISTS));
+							OnExistsTemplateMethodEnum duplicateMethod = OnExistsTemplateMethodEnum.fromValue(behaviorValue);
+							
+							if (duplicateMethod.getValue().equals(OnExistsTemplateMethodEnum.UPDATE_EXISTING_TEMPLATE_BY_KEY.getValue())) {
+																
+								template = dDMTemplateLocalService.getTemplate(groupId, classNameId, templateKey);
+								
+								long templateId = template.getTemplateId();
+								
+								dDMTemplateLocalService.updateTemplate(userId, templateId, classPK, nameMap, descriptionMap, type, mode, language, script, cacheable, serviceContextTem);
 						
-						operation = ImexOperationEnum.CREATE;
+							} else {
+								reportService.getError(_log, templateFile.getName(), " a template with the same key [" + templateKey + "] already exists. Please see [" + ImExWCDDmImporterPropsKeys.IMPORT_STRUCTURE_ON_KEY_EXISTS + "] parameter to customize this behavior.");
+								throw new TemplateDuplicateTemplateKeyException(e1);
+							}
+								
+						}
 						
 					}
 					

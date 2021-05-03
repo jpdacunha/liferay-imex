@@ -315,6 +315,11 @@ public class ImexCoreServiceImpl implements ImexCoreService {
 					boolean writable = (writeExtensions != null && writeExtensions.contains(extension));
 					boolean executable = (executeExtensions != null && executeExtensions.contains(extension));
 					
+					if (!readable && !writable && !executable) {
+						// A file is at least readable
+						readable = true;
+					}
+					
 					FileUtil.setFilePermissions(file, writable, readable, executable);
 					
 				} else {

@@ -245,7 +245,7 @@ public class WcDDMImporter implements Importer {
 						String behaviorValue = GetterUtil.getString(config.get(ImExWCDDmImporterPropsKeys.IMPORT_STRUCTURE_ON_KEY_EXISTS));
 						OnExistsStructureMethodEnum duplicateMethod = OnExistsStructureMethodEnum.fromValue(behaviorValue);
 
-						if (duplicateMethod.getValue().equals(OnExistsStructureMethodEnum.UPDATE_EXISTING_STRUCTURE_BY_KEY.getValue())) {
+						if (duplicateMethod != null && duplicateMethod.getValue().equals(OnExistsStructureMethodEnum.UPDATE_EXISTING_STRUCTURE_BY_KEY.getValue())) {
 
 							structure = dDMStructureLocalService.getStructure(groupId, classNameId, structureKey);
 

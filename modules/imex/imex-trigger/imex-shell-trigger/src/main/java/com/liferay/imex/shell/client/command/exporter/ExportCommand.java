@@ -19,7 +19,6 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 		)
 public class ExportCommand implements ImexCommand {
 	
-	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected ImexExportService imexExportService;
 	

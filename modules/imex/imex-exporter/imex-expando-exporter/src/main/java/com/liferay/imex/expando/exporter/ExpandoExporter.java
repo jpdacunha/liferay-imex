@@ -27,7 +27,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 		immediate = true,
 		property = {
 			"imex.component.execution.priority=20",
-			"imex.component.description=Web Content DDM exporter",
+			"imex.component.description=Expando exporter",
 			"service.ranking:Integer=10"
 		},
 		

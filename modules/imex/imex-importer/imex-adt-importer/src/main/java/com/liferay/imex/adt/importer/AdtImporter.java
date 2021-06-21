@@ -43,7 +43,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 		immediate = true,
 		property = {
 			"imex.component.execution.priority=90",
-			"imex.component.description=Adt importer",
+			"imex.component.description=ADT importer",
 			"service.ranking:Integer=10"
 		},
 		service = Importer.class

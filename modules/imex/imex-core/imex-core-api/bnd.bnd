@@ -15,7 +15,6 @@ Export-Package: \
 	com.liferay.imex.core.api.report.model,\
 	com.liferay.imex.core.api.report,\
 	com.liferay.imex.core.api.configuration.model,\
-	com.liferay.imex.core.api.report.model,\
 	com.liferay.imex.core.api.lar,\
 	com.liferay.imex.core.api.exporter.model,\
 	com.liferay.imex.core.api.deploy

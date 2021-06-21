@@ -10,7 +10,7 @@ buildscript {
 	}
 }
 
-apply plugin: "com.liferay.portal.tools.rest.builder"
+//apply plugin: "com.liferay.portal.tools.rest.builder"
 
 dependencies {
 	compile project(":modules:imex:imex-trigger:imex-rest-trigger:imex-rest-trigger-api")

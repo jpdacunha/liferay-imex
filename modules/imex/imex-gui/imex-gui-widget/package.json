@@ -1,0 +1,60 @@
+{
+  "name": "imex-gui",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@clayui/alert": "^3.26.0",
+    "@clayui/button": "^3.6.0",
+    "@clayui/card": "^3.30.0",
+    "@clayui/css": "^3.30.0",
+    "@clayui/loading-indicator": "^3.2.0",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^12.8.3",
+    "dotenv": "^8.2.0",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
+    "react-scripts": "3.4.0",
+    "web-vitals": "^1.1.2"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "build:liferay": "lnbs-build",
+    "deploy:liferay": "npm run build:liferay && lnbs-deploy"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "liferay-npm-build-support": "^2.26.0",
+    "liferay-npm-bundler": "^2.26.0",
+    "liferay-npm-bundler-preset-create-react-app": "^2.26.0",
+    "standard": "^16.0.3"
+  },
+  "portlet": {
+    "com.liferay.portlet.display-category": "category.hidden",
+    "javax.portlet.name": "imex-gui",
+    "javax.portlet.display-name": "Administration",
+    "javax.portlet.security-role-ref": "power-user,user",
+    "javax.portlet.resource-bundle": "content.Language",
+    "com.liferay.portlet.instanceable": false
+  }
+}

@@ -76,9 +76,10 @@ public class ImportersResourceImpl extends BaseImportersResourceImpl {
 				configurationService.loadCoreConfiguration(config);
 				Properties configAsProperties = config.getProperties();
 				
-				String[] supportedProfilesIds = CollectionUtil.getArray(configAsProperties.getProperty(ImExCorePropsKeys.MANAGES_PROFILES_LIST));
-				
-				descriptor.setSupportedProfilesIds(supportedProfilesIds);
+				if (profiled) {
+					String[] supportedProfilesIds = CollectionUtil.getArray(configAsProperties.getProperty(ImExCorePropsKeys.MANAGES_PROFILES_LIST));
+					descriptor.setSupportedProfilesIds(supportedProfilesIds);
+				}
 				
 				descriptors.add(descriptor);
 				

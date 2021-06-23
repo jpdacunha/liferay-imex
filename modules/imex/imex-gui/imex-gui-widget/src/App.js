@@ -1,6 +1,8 @@
 import React from 'react'
 import ClayAlert from '@clayui/alert'
 import ClayLayout from '@clayui/layout'
+import ClayIcon from '@clayui/icon'
+import TaskList from './components/TaskList/TaskList'
 import '@clayui/css/lib/css/atlas.css'
 import './App.css'
 
@@ -13,30 +15,46 @@ import 'dotenv/config'
 
 function App () {
   const { t, i18n } = useTranslation()
-  const alertTitle = 'Warning :'
-  const alertMessage = 'You need to sign in to see this content.'
 
   return (
     <div className='App'>
-      <div className='container'>
-        {isSignedIn()
-          ? (
-            <ClayLayout.ContainerFluid view>
-              <ClayLayout.Row justify='center'>
-                <ClayLayout.Col size={6}>
-                  {t('Welcome to React')}
-                </ClayLayout.Col>
-                <ClayLayout.Col size={6}>
-                  One of two columns
-                </ClayLayout.Col>
-              </ClayLayout.Row>
-            </ClayLayout.ContainerFluid>
-            )
-          : (
-            <ClayAlert displayType='warning' title={alertTitle}>
-              {alertMessage}
-            </ClayAlert>
-            )}
+      <div className='container-fluid container-fluid-max-xl container-view'>
+        <div className='sheet'>
+          <div className='sheet-header'>
+            <h2 className='sheet-title'>{t('main-title')}</h2>
+            <div className='sheet-text text-justify'>{t('main-description')}</div>
+          </div>
+          <div className='sheet-section'>
+            {isSignedIn()
+              ? (
+                <ClayLayout.ContainerFluid view>
+                  <ClayLayout.Row justify='center'>
+                    <ClayLayout.Col size={6}>
+                      <ClayLayout.Row justify='start'>
+                        <h3 class='sheet-subtitle text-left'>{t('export-process-description')}</h3>
+                      </ClayLayout.Row>
+                      <ClayLayout.Row justify='start'>
+                        <TaskList title={t('title-exporters')} />
+                      </ClayLayout.Row>
+                    </ClayLayout.Col>
+                    <ClayLayout.Col size={6}>
+                      <ClayLayout.Row justify='start'>
+                        <h3 class='sheet-subtitle text-left'>{t('import-process-description')}</h3>
+                      </ClayLayout.Row>
+                      <ClayLayout.Row justify='start'>
+                        <TaskList title={t('title-importers')} />
+                      </ClayLayout.Row>
+                    </ClayLayout.Col>
+                  </ClayLayout.Row>
+                </ClayLayout.ContainerFluid>
+                )
+              : (
+                <ClayAlert displayType='warning' title={t('unsigned-alert-message-title')}>
+                  {t('unsigned-alert-message-description')}
+                </ClayAlert>
+                )}
+          </div>
+        </div>
       </div>
     </div>
   )

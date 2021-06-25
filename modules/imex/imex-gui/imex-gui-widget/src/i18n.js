@@ -15,12 +15,12 @@ const resources = {
       'main-description': 'Use available exporter or importers to load or extract datas from Liferay.',
       'title-exporters': 'List of registered exporters',
       'title-importers': 'List of registered importers',
-      'heading-table-name': 'Name',
-      'heading-table-description': 'Description',
-      'heading-table-priority': 'Priority',
-      'heading-table-ranking': 'Ranking',
-      'heading-table-profiled': 'Profiled',
-      'heading-table-supported-profiles-ids': 'Supported profiles'
+      'label-priority': 'Priority',
+      'label-ranking': 'Ranking',
+      'label-supported-profiles-ids': 'Supported profiles',
+      'button-label-run': 'Run',
+      'button-import': 'Import all TO Liferay',
+      'button-export': 'Export all FROM Liferay'
     }
   },
   fr: {
@@ -33,12 +33,12 @@ const resources = {
       'main-description': 'Utiliser les processus d\'import / export disponibles pour charger ou récupérer des données de votre instance Liferay.',
       'title-exporters': 'Liste des exporteurs disponibles',
       'title-importers': 'Liste des importeurs disponibles',
-      'heading-table-name': 'Nom',
-      'heading-table-description': 'Description',
-      'heading-table-priority': 'Priorité',
-      'heading-table-ranking': 'Ranking',
-      'heading-table-profiled': 'Mode profilé',
-      'heading-table-supported-profiles-ids': 'Profiles supportés'
+      'label-priority': 'Priorité',
+      'label-ranking': 'Ranking',
+      'label-supported-profiles-ids': 'Profiles supportés',
+      'button-label-run': 'Lancer',
+      'button-import': 'Tout importer DANS liferay',
+      'button-export': 'Tout Exporter DE Liferay'
     }
   }
 }

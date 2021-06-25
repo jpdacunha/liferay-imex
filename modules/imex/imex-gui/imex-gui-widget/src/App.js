@@ -2,9 +2,11 @@ import React from 'react'
 import ClayAlert from '@clayui/alert'
 import ClayLayout from '@clayui/layout'
 import ClayIcon from '@clayui/icon'
+import ClayButton from '@clayui/button'
 import TaskList from './components/TaskList/TaskList'
 import '@clayui/css/lib/css/atlas.css'
 import './App.css'
+import spritemap from './icons.svg'
 
 import { useTranslation } from 'react-i18next'
 
@@ -34,7 +36,15 @@ function App () {
                         <h3 class='sheet-subtitle text-left'>{t('export-process-description')}</h3>
                       </ClayLayout.Row>
                       <ClayLayout.Row justify='start'>
-                        <TaskList title={t('title-exporters')} />
+                        <TaskList title={t('title-exporters')} position='left' />
+                      </ClayLayout.Row>
+                      <ClayLayout.Row justify='center'>
+                        <ClayButton>
+                          <span className='inline-item inline-item-before'>
+                            <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
+                          </span>
+                          {t('button-export')}
+                        </ClayButton>
                       </ClayLayout.Row>
                     </ClayLayout.Col>
                     <ClayLayout.Col size={6}>
@@ -42,7 +52,15 @@ function App () {
                         <h3 class='sheet-subtitle text-left'>{t('import-process-description')}</h3>
                       </ClayLayout.Row>
                       <ClayLayout.Row justify='start'>
-                        <TaskList title={t('title-importers')} />
+                        <TaskList title={t('title-importers')} position='right' />
+                      </ClayLayout.Row>
+                      <ClayLayout.Row justify='center'>
+                        <ClayButton>
+                          <span className='inline-item inline-item-before'>
+                            <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
+                          </span>
+                          {t('button-import')}
+                        </ClayButton>
                       </ClayLayout.Row>
                     </ClayLayout.Col>
                   </ClayLayout.Row>

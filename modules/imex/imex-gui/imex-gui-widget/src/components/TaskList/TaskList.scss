@@ -1,1 +1,13 @@
-.task-list {}
+.task-list {
+    width:100%;
+    margin:0px;
+    text-align: left;
+}
+
+.task-list-left {
+    margin-right: 24px;
+}
+
+.task-list-right {
+    margin-left: 0px;
+}

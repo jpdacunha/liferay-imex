@@ -7,6 +7,8 @@ import TaskList from './components/TaskList/TaskList'
 import '@clayui/css/lib/css/atlas.css'
 import './App.css'
 import spritemap from './icons.svg'
+import allImporters from './statics/all.importers.json'
+import allExporters from './statics/all.exporters.json'
 
 import { useTranslation } from 'react-i18next'
 
@@ -33,10 +35,10 @@ function App () {
                   <ClayLayout.Row justify='center'>
                     <ClayLayout.Col size={6}>
                       <ClayLayout.Row justify='start'>
-                        <h3 class='sheet-subtitle text-left'>{t('export-process-description')}</h3>
+                        <h3 className='sheet-subtitle text-left'>{t('export-process-description')}</h3>
                       </ClayLayout.Row>
                       <ClayLayout.Row justify='start'>
-                        <TaskList title={t('title-exporters')} position='left' />
+                        <TaskList title={t('title-exporters')} position='left' datas={retrieveAllExporter()} />
                       </ClayLayout.Row>
                       <ClayLayout.Row justify='center'>
                         <ClayButton>
@@ -49,10 +51,10 @@ function App () {
                     </ClayLayout.Col>
                     <ClayLayout.Col size={6}>
                       <ClayLayout.Row justify='start'>
-                        <h3 class='sheet-subtitle text-left'>{t('import-process-description')}</h3>
+                        <h3 className='sheet-subtitle text-left'>{t('import-process-description')}</h3>
                       </ClayLayout.Row>
                       <ClayLayout.Row justify='start'>
-                        <TaskList title={t('title-importers')} position='right' />
+                        <TaskList title={t('title-importers')} position='right' datas={retrieveAllImporter()} />
                       </ClayLayout.Row>
                       <ClayLayout.Row justify='center'>
                         <ClayButton>
@@ -76,6 +78,14 @@ function App () {
       </div>
     </div>
   )
+}
+
+function retrieveAllExporter () {
+  return allExporters
+}
+
+function retrieveAllImporter () {
+  return allImporters
 }
 
 export function isSignedIn () {

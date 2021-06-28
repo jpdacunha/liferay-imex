@@ -1,0 +1,51 @@
+{
+  "actions" : { },
+  "facets" : [ ],
+  "items" : [ {
+    "description" : "ADT exporter",
+    "name" : "imex.adt.exporter",
+    "priority" : 100,
+    "profiled" : false,
+    "ranking" : "10",
+    "supportedProfilesIds" : [ "dev", "int", "test", "preprod", "prod" ]
+  }, {
+    "description" : "Expando exporter",
+    "name" : "imex.expando.exporter",
+    "priority" : 20,
+    "profiled" : false,
+    "ranking" : "10",
+    "supportedProfilesIds" : [ "dev", "int", "test", "preprod", "prod" ]
+  }, {
+    "description" : "Web Content DDM exporter",
+    "name" : "imex.wc.ddm.exporter",
+    "priority" : 20,
+    "profiled" : false,
+    "ranking" : "10",
+    "supportedProfilesIds" : [ "dev", "int", "test", "preprod", "prod" ]
+  }, {
+    "description" : "Role exporter",
+    "name" : "imex.role.exporter",
+    "priority" : 10,
+    "profiled" : false,
+    "ranking" : "10",
+    "supportedProfilesIds" : [ "dev", "int", "test", "preprod", "prod" ]
+  }, {
+    "description" : "Site exporter",
+    "name" : "imex.site.exporter",
+    "priority" : 10,
+    "profiled" : false,
+    "ranking" : "10",
+    "supportedProfilesIds" : [ "dev", "int", "test", "preprod", "prod" ]
+  }, {
+    "description" : "Virtualhost exporter",
+    "name" : "imex.virtualhost.exporter",
+    "priority" : 10,
+    "profiled" : true,
+    "ranking" : "10",
+    "supportedProfilesIds" : [ "dev", "int", "test", "preprod", "prod" ]
+  } ],
+  "lastPage" : 1,
+  "page" : 1,
+  "pageSize" : 6,
+  "totalCount" : 6
+}

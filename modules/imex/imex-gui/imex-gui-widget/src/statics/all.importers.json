@@ -1,0 +1,44 @@
+{
+  "actions" : { },
+  "facets" : [ ],
+  "items" : [ {
+    "description" : "Site importer",
+    "name" : "imex.site.importer",
+    "priority" : 100,
+    "profiled" : false,
+    "ranking" : "10",
+    "supportedProfilesIds" : [ "dev", "int", "test", "preprod", "prod" ]
+  }, {
+    "description" : "ADT importer",
+    "name" : "imex.adt.importer",
+    "priority" : 90,
+    "profiled" : false,
+    "ranking" : "10",
+    "supportedProfilesIds" : [ "dev", "int", "test", "preprod", "prod" ]
+  }, {
+    "description" : "Virtualhost importer",
+    "name" : "imex.virtualhost.importer",
+    "priority" : 20,
+    "profiled" : true,
+    "ranking" : "10",
+    "supportedProfilesIds" : [ "dev", "int", "test", "preprod", "prod" ]
+  }, {
+    "description" : "Web Content DDM importer",
+    "name" : "imex.wc.ddm.importer",
+    "priority" : 20,
+    "profiled" : false,
+    "ranking" : "10",
+    "supportedProfilesIds" : [ "dev", "int", "test", "preprod", "prod" ]
+  }, {
+    "description" : "Roles importer",
+    "name" : "imex.role.importer",
+    "priority" : 10,
+    "profiled" : false,
+    "ranking" : "10",
+    "supportedProfilesIds" : [ "dev", "int", "test", "preprod", "prod" ]
+  } ],
+  "lastPage" : 1,
+  "page" : 1,
+  "pageSize" : 5,
+  "totalCount" : 5
+}

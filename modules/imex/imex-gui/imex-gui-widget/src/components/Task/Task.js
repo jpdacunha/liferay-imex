@@ -13,8 +13,7 @@ import { useTranslation } from 'react-i18next'
 const UNKNOWN = 'unkown'
 
 export function getSupportedProfilLabelComponent (props, labelText) {
-  // TODO JDA : Remove boolean as String value here
-  const profiled = (props.profiled === 'true')
+  const profiled = props.profiled
 
   let profileLabel
   if (profiled) {
@@ -30,13 +29,14 @@ export function getSupportedProfilLabelComponent (props, labelText) {
   return profileLabel
 }
 
-export default function Task (props, { launchAction }) {
+export default function Task (props) {
   const { t, i18n } = useTranslation()
   const labelSupportedProfiles = t('label-supported-profiles-ids')
   const labelPriority = t('label-priority')
   const labelRanking = t('label-ranking')
   const labelRun = t('button-label-run')
   const profilLabelComponent = getSupportedProfilLabelComponent(props, labelSupportedProfiles)
+  const actionFunction = props.launchAction
 
   return (
     <ClayList.Item flex className='task'>
@@ -55,7 +55,7 @@ export default function Task (props, { launchAction }) {
         {profilLabelComponent}
       </ClayList.ItemField>
       <ClayList.ItemField>
-        <ClayButton displayType='secondary' onClick={launchAction}>
+        <ClayButton displayType='secondary' onClick={actionFunction}>
           <span className='inline-item inline-item-before'>
             <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
           </span>

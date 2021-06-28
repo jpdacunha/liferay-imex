@@ -5,28 +5,32 @@ import Task from '../Task/Task'
 import './TaskList.scss'
 // import { useTranslation } from 'react-i18next'
 
-export function handlePartialLaunch (bundleName) {
+function handlePartialLaunch (bundleName) {
   console.log('handlePartialLaunch : ' + bundleName)
 }
 
 export default function TaskList (props) {
   // const { t, i18n } = useTranslation()
-  const sample = ['dev', 'prod']
+  console.log('>>>>>>>>>>> Received datas : ' + JSON.stringify(props.datas.items))
 
   return (
     <ClayList className={'task-list task-list-' + props.position}>
       <ClayList.Header>{props.title}</ClayList.Header>
-      <Task description='Description ' name='Nom' priority='1' profiled='true' ranking='100' supportedProfilesIds={sample} launchAction={() => this.handlePartialLaunch('My Name')} />
+      {props.datas.items.map(item => (
+        <Task key={item.name} description={item.description} name={item.name} priority={item.priority} profiled={item.profiled} ranking={item.ranking} supportedProfilesIds={item.supportedProfilesIds} launchAction={() => handlePartialLaunch(item.name)} />
+      ))}
     </ClayList>
   )
 }
 
 TaskList.propTypes = {
   title: PropTypes.string,
-  position: PropTypes.oneOf(['right', 'left'])
+  position: PropTypes.oneOf(['right', 'left']),
+  datas: PropTypes.object
 }
 
 TaskList.defaultProps = {
   title: '',
-  position: 'left'
+  position: 'left',
+  datas: {}
 }

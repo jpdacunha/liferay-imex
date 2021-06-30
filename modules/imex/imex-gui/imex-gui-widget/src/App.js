@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import ClayAlert from '@clayui/alert'
 import ClayLayout from '@clayui/layout'
 import ClayIcon from '@clayui/icon'
@@ -7,10 +7,10 @@ import TaskList from './components/TaskList/TaskList'
 import '@clayui/css/lib/css/atlas.css'
 import './App.css'
 import spritemap from './icons.svg'
-import allImporters from './statics/all.importers.json'
-import allExporters from './statics/all.exporters.json'
-
+import { trackPromise } from 'react-promise-tracker'
+import client from './commons/axios-client'
 import { useTranslation } from 'react-i18next'
+import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator'
 
 // Don't forget to create a file '.env.local'
 // and to add keys & values that we're using in this app
@@ -19,6 +19,8 @@ import 'dotenv/config'
 
 function App () {
   const { t, i18n } = useTranslation()
+  const allExporters = RetrieveAllExporters()
+  const allImporters = RetrieveAllImporters()
 
   return (
     <div className='App'>
@@ -38,10 +40,11 @@ function App () {
                         <h3 className='sheet-subtitle text-left'>{t('export-process-description')}</h3>
                       </ClayLayout.Row>
                       <ClayLayout.Row justify='start'>
-                        <TaskList title={t('title-exporters')} position='left' datas={retrieveAllExporter()} />
+                        <TaskList title={t('title-exporters')} position='left' datas={allExporters} />
+                        <LoadingIndicator />
                       </ClayLayout.Row>
                       <ClayLayout.Row justify='center'>
-                        <ClayButton>
+                        <ClayButton onClick={executeAllExporter}>
                           <span className='inline-item inline-item-before'>
                             <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
                           </span>
@@ -54,10 +57,11 @@ function App () {
                         <h3 className='sheet-subtitle text-left'>{t('import-process-description')}</h3>
                       </ClayLayout.Row>
                       <ClayLayout.Row justify='start'>
-                        <TaskList title={t('title-importers')} position='right' datas={retrieveAllImporter()} />
+                        <TaskList title={t('title-importers')} position='right' datas={allImporters} />
+                        <LoadingIndicator />
                       </ClayLayout.Row>
                       <ClayLayout.Row justify='center'>
-                        <ClayButton>
+                        <ClayButton onClick={executeAllImporter}>
                           <span className='inline-item inline-item-before'>
                             <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
                           </span>
@@ -69,7 +73,7 @@ function App () {
                 </ClayLayout.ContainerFluid>
                 )
               : (
-                <ClayAlert displayType='warning' title={t('unsigned-alert-message-title')}>
+                <ClayAlert displayType='warning' title={t('unsigned-alert-message-title')} spritemap={spritemap}>
                   {t('unsigned-alert-message-description')}
                 </ClayAlert>
                 )}
@@ -80,12 +84,37 @@ function App () {
   )
 }
 
-function retrieveAllExporter () {
-  return allExporters
+function executeAllExporter () {
+  console.log('executeAllExporter')
 }
 
-function retrieveAllImporter () {
-  return allImporters
+function executeAllImporter () {
+  console.log('executeAllImporter')
+}
+
+// Uppercase in function name is mandatory to allow using hooks in function call hierarchy (useState end useEffect)
+function RetrieveAllExporters () {
+  const [exporters, setExporters] = useState([])
+  RetrieveAll('exporters', setExporters)
+  return exporters
+}
+
+function RetrieveAllImporters () {
+  const [importers, setImporters] = useState([])
+  RetrieveAll('importers', setImporters)
+  return importers
+}
+
+const RetrieveAll = (endPoint, updateStateCalBack) => {
+  useEffect(() => {
+    trackPromise(
+      client.get(endPoint)
+        .then(response => {
+          const allDatas = response.data.items
+          console.log('Received response for API call =>' + JSON.stringify(allDatas))
+          updateStateCalBack(allDatas)
+        }))
+  }, [])
 }
 
 export function isSignedIn () {

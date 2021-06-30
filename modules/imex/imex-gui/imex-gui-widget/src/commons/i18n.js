@@ -17,10 +17,11 @@ const resources = {
       'title-importers': 'List of registered importers',
       'label-priority': 'Priority',
       'label-ranking': 'Ranking',
-      'label-supported-profiles-ids': 'Supported profiles',
+      'label-supported-profiles-ids': 'Profiles',
       'button-label-run': 'Run',
       'button-import': 'Import all TO Liferay',
-      'button-export': 'Export all FROM Liferay'
+      'button-export': 'Export all FROM Liferay',
+      'empty-datas-message': 'No elements to display'
     }
   },
   fr: {
@@ -35,10 +36,11 @@ const resources = {
       'title-importers': 'Liste des importeurs disponibles',
       'label-priority': 'Priorité',
       'label-ranking': 'Ranking',
-      'label-supported-profiles-ids': 'Profiles supportés',
+      'label-supported-profiles-ids': 'Profiles',
       'button-label-run': 'Lancer',
       'button-import': 'Tout importer DANS liferay',
-      'button-export': 'Tout Exporter DE Liferay'
+      'button-export': 'Tout Exporter DE Liferay',
+      'empty-datas-message': 'Il n\'y a pas d\'éléments à afficher'
     }
   }
 }

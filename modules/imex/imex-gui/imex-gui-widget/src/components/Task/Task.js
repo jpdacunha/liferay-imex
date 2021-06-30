@@ -23,7 +23,7 @@ export function getSupportedProfilLabelComponent (props, labelText) {
       formatedProfile = supportedProfiles.join(', ')
     }
 
-    profileLabel = <ClayLabel displayType='info' spritemap={spritemap}>{labelText} : {formatedProfile}</ClayLabel>
+    profileLabel = <ClayLabel displayType='info' spritemap={spritemap} className='imex-label'>{labelText} : {formatedProfile}</ClayLabel>
   }
 
   return profileLabel
@@ -50,8 +50,8 @@ export default function Task (props) {
         <ClayList.ItemText>{props.description}</ClayList.ItemText>
       </ClayList.ItemField>
       <ClayList.ItemField>
-        <ClayLabel displayType='success' spritemap={spritemap}>{labelPriority} : {props.priority}</ClayLabel>
-        <ClayLabel displayType='secondary' spritemap={spritemap}>{labelRanking} : {props.ranking}</ClayLabel>
+        <ClayLabel displayType='success' spritemap={spritemap} className='imex-label'>{labelPriority} : {props.priority}</ClayLabel>
+        <ClayLabel displayType='secondary' spritemap={spritemap} className='imex-label'>{labelRanking} : {props.ranking}</ClayLabel>
         {profilLabelComponent}
       </ClayList.ItemField>
       <ClayList.ItemField>

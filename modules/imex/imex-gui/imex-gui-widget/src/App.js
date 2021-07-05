@@ -11,6 +11,8 @@ import { trackPromise } from 'react-promise-tracker'
 import client from './commons/axios-client'
 import { useTranslation } from 'react-i18next'
 import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator'
+import { useErrorHandler } from 'react-error-boundary'
+import AppContainer from './components/AppContainer/AppContainer'
 
 // Don't forget to create a file '.env.local'
 // and to add keys & values that we're using in this app
@@ -23,64 +25,54 @@ function App () {
   const allImporters = RetrieveAllImporters()
 
   return (
-    <div className='App'>
-      <div className='container-fluid container-fluid-max-xl container-view'>
-        <div className='sheet'>
-          <div className='sheet-header'>
-            <h2 className='sheet-title'>{t('main-title')}</h2>
-            <div className='sheet-text text-justify'>{t('main-description')}</div>
-          </div>
-          <div className='sheet-section'>
-            {isSignedIn()
-              ? (
-                <ClayLayout.ContainerFluid view>
-                  <ClayLayout.Row justify='center'>
-                    <ClayLayout.Col size={6}>
-                      <ClayLayout.Row justify='start'>
-                        <h3 className='sheet-subtitle text-left'>{t('export-process-description')}</h3>
-                      </ClayLayout.Row>
-                      <ClayLayout.Row justify='start'>
-                        <TaskList title={t('title-exporters')} position='left' datas={allExporters} />
-                        <LoadingIndicator />
-                      </ClayLayout.Row>
-                      <ClayLayout.Row justify='center'>
-                        <ClayButton onClick={executeAllExporter}>
-                          <span className='inline-item inline-item-before'>
-                            <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
-                          </span>
-                          {t('button-export')}
-                        </ClayButton>
-                      </ClayLayout.Row>
-                    </ClayLayout.Col>
-                    <ClayLayout.Col size={6}>
-                      <ClayLayout.Row justify='start'>
-                        <h3 className='sheet-subtitle text-left'>{t('import-process-description')}</h3>
-                      </ClayLayout.Row>
-                      <ClayLayout.Row justify='start'>
-                        <TaskList title={t('title-importers')} position='right' datas={allImporters} />
-                        <LoadingIndicator />
-                      </ClayLayout.Row>
-                      <ClayLayout.Row justify='center'>
-                        <ClayButton onClick={executeAllImporter}>
-                          <span className='inline-item inline-item-before'>
-                            <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
-                          </span>
-                          {t('button-import')}
-                        </ClayButton>
-                      </ClayLayout.Row>
-                    </ClayLayout.Col>
-                  </ClayLayout.Row>
-                </ClayLayout.ContainerFluid>
-                )
-              : (
-                <ClayAlert displayType='warning' title={t('unsigned-alert-message-title')} spritemap={spritemap}>
-                  {t('unsigned-alert-message-description')}
-                </ClayAlert>
-                )}
-          </div>
-        </div>
-      </div>
-    </div>
+    <AppContainer>
+      {isSignedIn()
+        ? (
+          <ClayLayout.ContainerFluid view>
+            <ClayLayout.Row justify='center'>
+              <ClayLayout.Col size={6}>
+                <ClayLayout.Row justify='start'>
+                  <h3 className='sheet-subtitle text-left'>{t('export-process-description')}</h3>
+                </ClayLayout.Row>
+                <ClayLayout.Row justify='start'>
+                  <TaskList title={t('title-exporters')} position='left' datas={allExporters} />
+                  <LoadingIndicator />
+                </ClayLayout.Row>
+                <ClayLayout.Row justify='center'>
+                  <ClayButton onClick={executeAllExporter}>
+                    <span className='inline-item inline-item-before'>
+                      <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
+                    </span>
+                    {t('button-export')}
+                  </ClayButton>
+                </ClayLayout.Row>
+              </ClayLayout.Col>
+              <ClayLayout.Col size={6}>
+                <ClayLayout.Row justify='start'>
+                  <h3 className='sheet-subtitle text-left'>{t('import-process-description')}</h3>
+                </ClayLayout.Row>
+                <ClayLayout.Row justify='start'>
+                  <TaskList title={t('title-importers')} position='right' datas={allImporters} />
+                  <LoadingIndicator />
+                </ClayLayout.Row>
+                <ClayLayout.Row justify='center'>
+                  <ClayButton onClick={executeAllImporter}>
+                    <span className='inline-item inline-item-before'>
+                      <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
+                    </span>
+                    {t('button-import')}
+                  </ClayButton>
+                </ClayLayout.Row>
+              </ClayLayout.Col>
+            </ClayLayout.Row>
+          </ClayLayout.ContainerFluid>
+          )
+        : (
+          <ClayAlert displayType='warning' title={t('unsigned-alert-message-title')} spritemap={spritemap}>
+            {t('unsigned-alert-message-description')}
+          </ClayAlert>
+          )}
+      </AppContainer>
   )
 }
 
@@ -105,15 +97,24 @@ function RetrieveAllImporters () {
   return importers
 }
 
-const RetrieveAll = (endPoint, updateStateCalBack) => {
+const RetrieveAll = (endPoint, updateStateSuccessCallBack) => {
+  const handleError = useErrorHandler()
+
   useEffect(() => {
+    // TackPromise is used to manage loader waiting for promise execution see react-promise-tracker
     trackPromise(
       client.get(endPoint)
-        .then(response => {
-          const allDatas = response.data.items
-          console.log('Received response for API call =>' + JSON.stringify(allDatas))
-          updateStateCalBack(allDatas)
-        }))
+        .then(
+          response => {
+            const allDatas = response.data.items
+            console.log('Received response for API call =>' + JSON.stringify(allDatas))
+            updateStateSuccessCallBack(allDatas)
+          },
+          error => {
+            handleError(error)
+          }
+        )
+    )
   }, [])
 }
 

@@ -42,6 +42,27 @@ public class ReportFiles implements Cloneable, Serializable {
 
 	protected Date creationDate;
 
+	public String getHumanReadableSize() {
+		return humanReadableSize;
+	}
+
+	public void setHumanReadableSize(String humanReadableSize) {
+		this.humanReadableSize = humanReadableSize;
+	}
+
+	public void setHumanReadableSize(
+		UnsafeSupplier<String, Exception> humanReadableSizeUnsafeSupplier) {
+
+		try {
+			humanReadableSize = humanReadableSizeUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected String humanReadableSize;
+
 	public Date getLastModifiedDate() {
 		return lastModifiedDate;
 	}
@@ -82,15 +103,15 @@ public class ReportFiles implements Cloneable, Serializable {
 
 	protected String name;
 
-	public String getSize() {
+	public Integer getSize() {
 		return size;
 	}
 
-	public void setSize(String size) {
+	public void setSize(Integer size) {
 		this.size = size;
 	}
 
-	public void setSize(UnsafeSupplier<String, Exception> sizeUnsafeSupplier) {
+	public void setSize(UnsafeSupplier<Integer, Exception> sizeUnsafeSupplier) {
 		try {
 			size = sizeUnsafeSupplier.get();
 		}
@@ -99,7 +120,7 @@ public class ReportFiles implements Cloneable, Serializable {
 		}
 	}
 
-	protected String size;
+	protected Integer size;
 
 	@Override
 	public ReportFiles clone() throws CloneNotSupportedException {

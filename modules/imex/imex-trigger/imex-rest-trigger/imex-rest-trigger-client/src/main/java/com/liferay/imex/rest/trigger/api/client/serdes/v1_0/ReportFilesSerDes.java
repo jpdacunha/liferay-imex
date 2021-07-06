@@ -62,6 +62,20 @@ public class ReportFilesSerDes {
 			sb.append("\"");
 		}
 
+		if (reportFiles.getHumanReadableSize() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"humanReadableSize\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(reportFiles.getHumanReadableSize()));
+
+			sb.append("\"");
+		}
+
 		if (reportFiles.getLastModifiedDate() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -99,11 +113,7 @@ public class ReportFilesSerDes {
 
 			sb.append("\"size\": ");
 
-			sb.append("\"");
-
-			sb.append(_escape(reportFiles.getSize()));
-
-			sb.append("\"");
+			sb.append(reportFiles.getSize());
 		}
 
 		sb.append("}");
@@ -135,6 +145,15 @@ public class ReportFilesSerDes {
 			map.put(
 				"creationDate",
 				liferayToJSONDateFormat.format(reportFiles.getCreationDate()));
+		}
+
+		if (reportFiles.getHumanReadableSize() == null) {
+			map.put("humanReadableSize", null);
+		}
+		else {
+			map.put(
+				"humanReadableSize",
+				String.valueOf(reportFiles.getHumanReadableSize()));
 		}
 
 		if (reportFiles.getLastModifiedDate() == null) {
@@ -188,6 +207,12 @@ public class ReportFilesSerDes {
 						toDate((String)jsonParserFieldValue));
 				}
 			}
+			else if (Objects.equals(jsonParserFieldName, "humanReadableSize")) {
+				if (jsonParserFieldValue != null) {
+					reportFiles.setHumanReadableSize(
+						(String)jsonParserFieldValue);
+				}
+			}
 			else if (Objects.equals(jsonParserFieldName, "lastModifiedDate")) {
 				if (jsonParserFieldValue != null) {
 					reportFiles.setLastModifiedDate(
@@ -201,7 +226,8 @@ public class ReportFilesSerDes {
 			}
 			else if (Objects.equals(jsonParserFieldName, "size")) {
 				if (jsonParserFieldValue != null) {
-					reportFiles.setSize((String)jsonParserFieldValue);
+					reportFiles.setSize(
+						Integer.valueOf((String)jsonParserFieldValue));
 				}
 			}
 		}

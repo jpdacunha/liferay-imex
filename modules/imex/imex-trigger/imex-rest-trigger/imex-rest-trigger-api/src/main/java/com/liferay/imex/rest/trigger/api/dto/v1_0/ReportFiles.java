@@ -72,6 +72,34 @@ public class ReportFiles implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Date creationDate;
 
+	@Schema(description = "Size in octets")
+	public String getHumanReadableSize() {
+		return humanReadableSize;
+	}
+
+	public void setHumanReadableSize(String humanReadableSize) {
+		this.humanReadableSize = humanReadableSize;
+	}
+
+	@JsonIgnore
+	public void setHumanReadableSize(
+		UnsafeSupplier<String, Exception> humanReadableSizeUnsafeSupplier) {
+
+		try {
+			humanReadableSize = humanReadableSizeUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField(description = "Size in octets")
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected String humanReadableSize;
+
 	@Schema(description = "Date of last modification")
 	public Date getLastModifiedDate() {
 		return lastModifiedDate;
@@ -127,16 +155,16 @@ public class ReportFiles implements Serializable {
 	protected String name;
 
 	@Schema(description = "Size in octets")
-	public String getSize() {
+	public Integer getSize() {
 		return size;
 	}
 
-	public void setSize(String size) {
+	public void setSize(Integer size) {
 		this.size = size;
 	}
 
 	@JsonIgnore
-	public void setSize(UnsafeSupplier<String, Exception> sizeUnsafeSupplier) {
+	public void setSize(UnsafeSupplier<Integer, Exception> sizeUnsafeSupplier) {
 		try {
 			size = sizeUnsafeSupplier.get();
 		}
@@ -150,7 +178,7 @@ public class ReportFiles implements Serializable {
 
 	@GraphQLField(description = "Size in octets")
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected String size;
+	protected Integer size;
 
 	@Override
 	public boolean equals(Object object) {
@@ -196,6 +224,20 @@ public class ReportFiles implements Serializable {
 			sb.append("\"");
 		}
 
+		if (humanReadableSize != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"humanReadableSize\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(humanReadableSize));
+
+			sb.append("\"");
+		}
+
 		if (lastModifiedDate != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -231,11 +273,7 @@ public class ReportFiles implements Serializable {
 
 			sb.append("\"size\": ");
 
-			sb.append("\"");
-
-			sb.append(_escape(size));
-
-			sb.append("\"");
+			sb.append(size);
 		}
 
 		sb.append("}");

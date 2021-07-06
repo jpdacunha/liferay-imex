@@ -242,6 +242,9 @@ components:
           type: string
         size:
           description: "Size in octets"
+          type: integer
+        humanReadableSize:
+          description: "Size in octets"
           type: string
         lastModifiedDate:
           description: "Date of last modification"

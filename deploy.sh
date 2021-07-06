@@ -5,12 +5,48 @@ set -e
 
 # keep track of the last executed command
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
-# echo an error message before exiting
+# echo  an error message before exiting
 trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
+# COLORS MAPPING :
+# Num  Colour    #define         R G B
+
+# 0    black     COLOR_BLACK     0,0,0
+# 1    red       COLOR_RED       1,0,0
+# 2    green     COLOR_GREEN     0,1,0
+# 3    yellow    COLOR_YELLOW    1,1,0
+# 4    blue      COLOR_BLUE      0,0,1
+# 5    magenta   COLOR_MAGENTA   1,0,1
+# 6    cyan      COLOR_CYAN      0,1,1
+# 7    white     COLOR_WHITE     1,1,1
+
+BLUE=`tput setaf 4`
+RED=`tput setaf 1`
+NC=`tput sgr0` # No Color
+
+liferay_home="/home/dev/liferay/liferay-compose-73/mount/files/"
+# Separating deploy dir from LIFERAY_HOME because in docker context deploy dir can be outside LIFERAY_HOME
+liferay_deploy_dir="/home/dev/liferay/liferay-compose-73/mount/deploy"
 imex_home=$(pwd)
 imex_modules_home="./modules/imex"
 
+
+function restartALL() {
+
+	if [[ ! -e $liferay_home ]]
+	then
+		echo -e  "${RED} Invalid path to LIFERAY_HOME : $liferay_home ${NC}"
+		exit 1		
+	fi
+
+	echo -e  " "	
+	echo -e  "${BLUE}# - Restarting modules from LIFERAY...${NC}"
+	echo -e 
+	cp -f $liferay_home/osgi/modules/imex*.jar $liferay_deploy_dir
+	echo -e  "${BLUE}#${NC}"
+	echo -e  "${BLUE}# Done.${NC}"
+
+}
 
 function deployALL() {
 
@@ -21,41 +57,68 @@ function deployALL() {
 
 function deployJAVA() {
 
-	executeJAVA deploy
+	echo -e  " "	
+	echo -e  "${BLUE}# - Cleaning JAVA modules ...${NC}"
+	echo -e  " "
+	executeJAVA clean
+	echo -e  " "
+	echo -e  "${BLUE}#${NC}"
+	echo -e  "${BLUE}# Done.${NC}"
 
+	echo -e  " "
+	echo -e  "${BLUE}# - Deploying JAVA modules ...${NC}"
+	echo -e  " "
+	executeJAVA deploy
+	echo -e  " "
+	echo -e  "${BLUE}#${NC}"
+	echo -e  "${BLUE}# Done.${NC}"
 }
 
 function buildJAVA() {
 
-	executeJAVA build
+	echo -e  " "
+	echo -e  "${BLUE}# - Cleaning JAVA modules ...${NC}"
+	echo -e  " "
+	executeJAVA clean
+	echo -e  " "
+	echo -e  "${BLUE}#${NC}"
+	echo -e  "${BLUE}# Done.${NC}"
 
+	echo -e  " "
+	echo -e  "${BLUE}# - Building JAVA modules ...${NC}"
+	echo -e  " "
+	executeJAVA build
+	echo -e  " "
+	echo -e  "${BLUE}#${NC}"
+	echo -e  "${BLUE}# Done.${NC}"
 }
 
 function buildREST() {
 
-	echo "# - Building REST Service ..."
-	echo " "
+	echo -e  " "
+	echo -e  "${BLUE}# - Building REST Service ...${NC}"
+	echo -e  " "
 
 	cd $imex_home/$imex_modules_home/imex-trigger/imex-rest-trigger/imex-rest-trigger-impl
 	$imex_home/gradlew buildREST
 
-	echo " "
-	echo "#"
-	echo "# Done."
+	echo -e  " "
+	echo -e  "${BLUE}#${NC}"
+	echo -e  "${BLUE}# Done.${NC}"
 
 }
 
 function deployREACT() {
 
-	echo "# - Deploying REACT APP ..."
-	echo " "
+	echo -e  "${BLUE}# - Deploying REACT APP ...${NC}"
+	echo -e  " "
 
 	cd $imex_home/$imex_modules_home/imex-gui/imex-gui-widget
 	npm run deploy:liferay
 
-	echo " "
-	echo "#"
-	echo "# Done."
+	echo -e  " "
+	echo -e  "${BLUE}#${NC}"
+	echo -e  "${BLUE}# Done.${NC}"
 
 }
 
@@ -63,7 +126,7 @@ function executeJAVA() {
 
 	if [ -z $1 ]
 	then
-		echo " Missing required command (ex: deploy)"
+		echo -e  "${RED} Missing required command (ex: deploy)${NC}"
 		exit 1
 	fi
 
@@ -89,19 +152,20 @@ function executeJAVA() {
 
 function manual() {
 
-	echo "##"
-	echo "# Usage: deploy.sh"
-	echo "##"
-	echo " "	
-	echo " -- DEV FUNCTIONS -- "
-	echo "  deployALL             : Deploy All modules to Liferay"
-	echo "  buildAll              : Build All modules"
-	echo "  deployJAVA            : Deploy only JAVA modules"
-	echo "  buildJAVA             : Build JAVA modules"
-	echo "  deployREACT           : Deploy react app"
-	echo "  buildREST             : Build REST services"	
-	echo " "
-	echo " "
+	echo -e   "${BLUE}##"
+	echo -e  "# Usage: deploy.sh"
+	echo -e  "##"
+	echo -e  " "	
+	echo -e  " -- DEV FUNCTIONS -- "
+	echo -e  "  deployALL             : Deploy All modules to Liferay"
+	echo -e  "  buildAll              : Build All modules"
+	echo -e  "  deployJAVA            : Deploy only JAVA modules"
+	echo -e  "  buildJAVA             : Build JAVA modules"
+	echo -e  "  deployREACT           : Deploy react app"
+	echo -e  "  buildREST             : Build REST services"	
+	echo -e  "  restartALL            : Restart all modules deployed in OSGI container"
+	echo -e  " "
+	echo -e  " ${NC}"
 
 }
 
@@ -128,6 +192,9 @@ case "$1" in
 	;;
 "buildJAVA")
 	buildJAVA "$@"
+	;;
+"restartALL")
+	restartALL "$@"
 	;;
 *)
     manual

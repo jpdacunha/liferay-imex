@@ -326,6 +326,16 @@ public abstract class BaseReportsResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals(
+					"humanReadableSize", additionalAssertFieldName)) {
+
+				if (reportFiles.getHumanReadableSize() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("lastModifiedDate", additionalAssertFieldName)) {
 				if (reportFiles.getLastModifiedDate() == null) {
 					valid = false;
@@ -495,6 +505,19 @@ public abstract class BaseReportsResourceTestCase {
 				if (!Objects.deepEquals(
 						reportFiles1.getCreationDate(),
 						reportFiles2.getCreationDate())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					"humanReadableSize", additionalAssertFieldName)) {
+
+				if (!Objects.deepEquals(
+						reportFiles1.getHumanReadableSize(),
+						reportFiles2.getHumanReadableSize())) {
 
 					return false;
 				}
@@ -689,9 +712,10 @@ public abstract class BaseReportsResourceTestCase {
 		return new ReportFiles() {
 			{
 				creationDate = RandomTestUtil.nextDate();
+				humanReadableSize = RandomTestUtil.randomString();
 				lastModifiedDate = RandomTestUtil.nextDate();
 				name = RandomTestUtil.randomString();
-				size = RandomTestUtil.randomString();
+				size = RandomTestUtil.randomInteger();
 			}
 		};
 	}

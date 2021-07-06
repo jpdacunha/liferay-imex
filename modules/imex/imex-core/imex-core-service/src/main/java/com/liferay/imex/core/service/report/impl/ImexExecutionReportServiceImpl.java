@@ -5,6 +5,7 @@ import com.liferay.imex.core.api.configuration.ImexConfigurationService;
 import com.liferay.imex.core.api.configuration.model.ImexProperties;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.api.report.model.ImexOperationEnum;
+import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.imex.core.util.statics.ReportMessageUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
@@ -15,6 +16,8 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -47,10 +50,30 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 
 	protected final static String PREFIX = "[" + ImExCorePropsKeys.IMEX_PREFIX.toUpperCase() + "] : ";
 	
+	private final static String LOG_FILE_NAME_EXTENSION = ".log";
+	
+	private final static String LOG_FILE_NAME_PREFIX = "imex";
+	
+	private final static String LOG_FILE_NAME = LOG_FILE_NAME_PREFIX + LOG_FILE_NAME_EXTENSION;
+	
 	/* Root methods */
 
 	public void getSeparator(Log logger) {
 		imexLog(logger, StringPool.BLANK);
+	}
+	
+	public List<File> getAllLogs() {
+		
+		List<File> files = new ArrayList<File>();
+		String logsPath = configurationService.getImexLogsPath();		
+		File logsDirectory = new File(logsPath);
+		
+		if (logsDirectory != null && logsDirectory.exists()) {
+			files = FileUtil.findFiles(logsDirectory, LOG_FILE_NAME_PREFIX + ".*");
+		} else {
+			_log.warn(logsPath + " does not exists");
+		}
+		return files;
 	}
 	
 	public void getStartMessage(Log logger, String description, int nbPadLeft) {
@@ -351,7 +374,7 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 				_log.debug("IMEX output log path : " + logsPath);
 			}
 			
-			RollingFileWriter writer = new RollingFileWriter(logsPath + "/imex.log", 3, new TimestampLabeler("yyyy-MM-dd"), new DailyPolicy());
+			RollingFileWriter writer = new RollingFileWriter(logsPath + "/" + LOG_FILE_NAME, 3, new TimestampLabeler("yyyy-MM-dd"), new DailyPolicy());
 			
 			configurator.addWriter(writer);
 			

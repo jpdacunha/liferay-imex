@@ -88,7 +88,9 @@ public abstract class BaseImportsResourceTestCase {
 
 		ImportsResource.Builder builder = ImportsResource.builder();
 
-		importsResource = builder.locale(
+		importsResource = builder.authentication(
+			"test@liferay.com", "test"
+		).locale(
 			LocaleUtil.getDefault()
 		).build();
 	}
@@ -219,7 +221,8 @@ public abstract class BaseImportsResourceTestCase {
 	}
 
 	protected void assertValid(
-		com.liferay.imex.rest.trigger.api.client.dto.v1_0.Imports imports) {
+			com.liferay.imex.rest.trigger.api.client.dto.v1_0.Imports imports)
+		throws Exception {
 
 		boolean valid = true;
 
@@ -329,9 +332,11 @@ public abstract class BaseImportsResourceTestCase {
 					return false;
 				}
 			}
+
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	protected java.util.Collection<EntityField> getEntityFields()
@@ -486,12 +491,12 @@ public abstract class BaseImportsResourceTestCase {
 						_parameterMap.entrySet()) {
 
 					sb.append(entry.getKey());
-					sb.append(":");
+					sb.append(": ");
 					sb.append(entry.getValue());
-					sb.append(",");
+					sb.append(", ");
 				}
 
-				sb.setLength(sb.length() - 1);
+				sb.setLength(sb.length() - 2);
 
 				sb.append(")");
 			}
@@ -501,10 +506,10 @@ public abstract class BaseImportsResourceTestCase {
 
 				for (GraphQLField graphQLField : _graphQLFields) {
 					sb.append(graphQLField.toString());
-					sb.append(",");
+					sb.append(", ");
 				}
 
-				sb.setLength(sb.length() - 1);
+				sb.setLength(sb.length() - 2);
 
 				sb.append("}");
 			}

@@ -3,6 +3,8 @@ package com.liferay.imex.rest.trigger.api.client.dto.v1_0;
 import com.liferay.imex.rest.trigger.api.client.function.UnsafeSupplier;
 import com.liferay.imex.rest.trigger.api.client.serdes.v1_0.ImporterDescriptorSerDes;
 
+import java.io.Serializable;
+
 import java.util.Objects;
 
 import javax.annotation.Generated;
@@ -12,7 +14,7 @@ import javax.annotation.Generated;
  * @generated
  */
 @Generated("")
-public class ImporterDescriptor implements Cloneable {
+public class ImporterDescriptor implements Cloneable, Serializable {
 
 	public static ImporterDescriptor toDTO(String json) {
 		return ImporterDescriptorSerDes.toDTO(json);

@@ -12,6 +12,8 @@ import com.liferay.portal.vulcan.util.ObjectMapperUtil;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.io.Serializable;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -26,10 +28,13 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @generated
  */
 @Generated("")
-@GraphQLName("ImporterDescriptor")
+@GraphQLName(
+	description = "This is the model representation for importer",
+	value = "ImporterDescriptor"
+)
 @JsonFilter("Liferay.Vulcan")
 @XmlRootElement(name = "ImporterDescriptor")
-public class ImporterDescriptor {
+public class ImporterDescriptor implements Serializable {
 
 	public static ImporterDescriptor toDTO(String json) {
 		return ObjectMapperUtil.readValue(ImporterDescriptor.class, json);
@@ -325,6 +330,7 @@ public class ImporterDescriptor {
 	}
 
 	@Schema(
+		accessMode = Schema.AccessMode.READ_ONLY,
 		defaultValue = "com.liferay.imex.rest.trigger.api.dto.v1_0.ImporterDescriptor",
 		name = "x-class-name"
 	)
@@ -334,6 +340,16 @@ public class ImporterDescriptor {
 		String string = String.valueOf(object);
 
 		return string.replaceAll("\"", "\\\\\"");
+	}
+
+	private static boolean _isArray(Object value) {
+		if (value == null) {
+			return false;
+		}
+
+		Class<?> clazz = value.getClass();
+
+		return clazz.isArray();
 	}
 
 	private static String _toJSON(Map<String, ?> map) {
@@ -350,13 +366,11 @@ public class ImporterDescriptor {
 
 			sb.append("\"");
 			sb.append(entry.getKey());
-			sb.append("\":");
+			sb.append("\": ");
 
 			Object value = entry.getValue();
 
-			Class<?> clazz = value.getClass();
-
-			if (clazz.isArray()) {
+			if (_isArray(value)) {
 				sb.append("[");
 
 				Object[] valueArray = (Object[])value;
@@ -391,7 +405,7 @@ public class ImporterDescriptor {
 			}
 
 			if (iterator.hasNext()) {
-				sb.append(",");
+				sb.append(", ");
 			}
 		}
 

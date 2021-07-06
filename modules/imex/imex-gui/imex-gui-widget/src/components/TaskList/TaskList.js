@@ -2,9 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ClayList from '@clayui/list'
 import ClayAlert from '@clayui/alert'
-import Task from '../Task/Task'
+import Task from '@components/Task/Task'
 import './TaskList.scss'
-import spritemap from '../../icons.svg'
+import spritemap from '@images/icons.svg'
 import { useTranslation } from 'react-i18next'
 
 function handlePartialLaunch (bundleName) {

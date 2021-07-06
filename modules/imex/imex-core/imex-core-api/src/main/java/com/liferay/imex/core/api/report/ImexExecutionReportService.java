@@ -7,6 +7,7 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 
 import java.io.File;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -104,5 +105,7 @@ public interface ImexExecutionReportService {
 	public void displayConfigurationLoadingInformation(ImexProperties properties, Log log);
 	
 	public void displayConfigurationLoadingInformation(ImexProperties properties, Log log, Bundle bundle);
+	
+	public List<File> getAllLogs();
 	
 }

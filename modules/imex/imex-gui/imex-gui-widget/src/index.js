@@ -3,12 +3,12 @@ import ReactDOM from 'react-dom'
 import './index.css'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
-import './commons/i18n'
+import '@commons/i18n'
+import AppContainer from '@components/AppContainer/AppContainer'
 import { ErrorBoundary } from 'react-error-boundary'
-import AppContainer from './components/AppContainer/AppContainer'
 import ClayAlert from '@clayui/alert'
 import { useTranslation } from 'react-i18next'
-import spritemap from './icons.svg'
+import spritemap from '@images/icons.svg'
 
 const ErrorFallbackComponent = ({ error, componentStack, resetErrorBoundary }) => {
   const { t, i18n } = useTranslation()

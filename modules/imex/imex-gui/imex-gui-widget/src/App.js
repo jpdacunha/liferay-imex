@@ -3,16 +3,16 @@ import ClayAlert from '@clayui/alert'
 import ClayLayout from '@clayui/layout'
 import ClayIcon from '@clayui/icon'
 import ClayButton from '@clayui/button'
-import TaskList from './components/TaskList/TaskList'
+import TaskList from '@components/TaskList/TaskList'
 import '@clayui/css/lib/css/atlas.css'
 import './App.css'
-import spritemap from './icons.svg'
+import spritemap from '@images/icons.svg'
 import { trackPromise } from 'react-promise-tracker'
-import client from './commons/axios-client'
+import client from '@commons/axios-client'
 import { useTranslation } from 'react-i18next'
-import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator'
+import LoadingIndicator from '@components/LoadingIndicator/LoadingIndicator'
 import { useErrorHandler } from 'react-error-boundary'
-import AppContainer from './components/AppContainer/AppContainer'
+import AppContainer from '@components/AppContainer/AppContainer'
 
 // Don't forget to create a file '.env.local'
 // and to add keys & values that we're using in this app
@@ -72,7 +72,7 @@ function App () {
             {t('unsigned-alert-message-description')}
           </ClayAlert>
           )}
-      </AppContainer>
+    </AppContainer>
   )
 }
 

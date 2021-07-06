@@ -6,7 +6,7 @@ import ClaySticker from '@clayui/sticker'
 import ClayLabel from '@clayui/label'
 import ClayButton from '@clayui/button'
 import './Task.scss'
-import spritemap from '../../icons.svg'
+import spritemap from '@images/icons.svg'
 
 import { useTranslation } from 'react-i18next'
 

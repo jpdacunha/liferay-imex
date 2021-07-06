@@ -4,6 +4,7 @@ import com.liferay.imex.rest.trigger.api.dto.v1_0.ExportProcess;
 import com.liferay.imex.rest.trigger.api.resource.v1_0.ExportsResource;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.model.GroupedModel;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ResourceActionLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
@@ -48,11 +49,11 @@ public abstract class BaseExportsResourceImpl implements ExportsResource {
 	 *
 	 * curl -X 'POST' 'http://localhost:8080/o/imex-rest-trigger/v1.0/exports' -d $'{"debug": ___, "exporterNames": ___, "profileId": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
 	 */
-	@Override
 	@Consumes({"application/json", "application/xml"})
 	@Operation(description = "Create new export process")
-	@POST
+	@Override
 	@Path("/exports")
+	@POST
 	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "Exports")})
 	public Response postExports(ExportProcess exportProcess) throws Exception {
@@ -66,19 +67,19 @@ public abstract class BaseExportsResourceImpl implements ExportsResource {
 	 *
 	 * curl -X 'POST' 'http://localhost:8080/o/imex-rest-trigger/v1.0/exports/batch' -d $'{"debug": ___, "exporterNames": ___, "profileId": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
 	 */
-	@Override
 	@Consumes("application/json")
-	@POST
+	@Override
 	@Parameters(
 		value = {@Parameter(in = ParameterIn.QUERY, name = "callbackURL")}
 	)
 	@Path("/exports/batch")
+	@POST
 	@Produces("application/json")
 	@Tags(value = {@Tag(name = "Exports")})
 	public Response postExportsBatch(
 			ExportProcess exportProcess,
-			@Parameter(hidden = true) @QueryParam("callbackURL") String
-				callbackURL,
+			@Parameter(hidden = true) @QueryParam("callbackURL")
+				String callbackURL,
 			Object object)
 		throws Exception {
 
@@ -119,6 +120,14 @@ public abstract class BaseExportsResourceImpl implements ExportsResource {
 		this.contextUser = contextUser;
 	}
 
+	public void setGroupLocalService(GroupLocalService groupLocalService) {
+		this.groupLocalService = groupLocalService;
+	}
+
+	public void setRoleLocalService(RoleLocalService roleLocalService) {
+		this.roleLocalService = roleLocalService;
+	}
+
 	protected Map<String, String> addAction(
 		String actionName, GroupedModel groupedModel, String methodName) {
 
@@ -134,6 +143,15 @@ public abstract class BaseExportsResourceImpl implements ExportsResource {
 		return ActionUtil.addAction(
 			actionName, getClass(), id, methodName, contextScopeChecker,
 			ownerId, permissionName, siteId, contextUriInfo);
+	}
+
+	protected Map<String, String> addAction(
+		String actionName, Long id, String methodName,
+		ModelResourcePermission modelResourcePermission) {
+
+		return ActionUtil.addAction(
+			actionName, getClass(), id, methodName, contextScopeChecker,
+			modelResourcePermission, contextUriInfo);
 	}
 
 	protected Map<String, String> addAction(

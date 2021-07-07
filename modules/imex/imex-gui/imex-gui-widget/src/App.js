@@ -21,8 +21,24 @@ import 'dotenv/config'
 
 function App () {
   const { t, i18n } = useTranslation()
-  const allExporters = RetrieveAllExporters()
-  const allImporters = RetrieveAllImporters()
+
+  // Various loader in a page. This constants declare an area for execution of eache of them
+  const importersListLoaderArea = 'importers-loader-area'
+  const exportersListLoaderArea = 'exporters-loader-area'
+  const exportAllButtonLoaderArea = 'export-all-loader-area'
+  const importAllButtonLoaderArea = 'import-all-loader-area'
+
+  // Hooks are used in main App to follow React rules to uses hooks (for example it is not allowed to use a hook inside a function triggered bye an event etc ...)
+  const errorHandler = useErrorHandler()
+
+  const [allExporters, setAllExporters] = useState([])
+  RetrieveAllExporters(setAllExporters, errorHandler, exportAllButtonLoaderArea)
+
+  const [allImporters, setAllImporters] = useState([])
+  RetrieveAllImporters(setAllImporters, errorHandler, importAllButtonLoaderArea)
+
+  const [exportId, setExportId] = useState('')
+  const [importId, setImportId] = useState('')
 
   return (
     <AppContainer>
@@ -36,12 +52,13 @@ function App () {
                 </ClayLayout.Row>
                 <ClayLayout.Row justify='start'>
                   <TaskList title={t('title-exporters')} position='left' datas={allExporters} />
-                  <LoadingIndicator />
+                  <LoadingIndicator area={exportersListLoaderArea} />
                 </ClayLayout.Row>
                 <ClayLayout.Row justify='center'>
-                  <ClayButton onClick={executeAllExporter}>
+                  <ClayButton onClick={() => ExecuteAllExporter(setExportId, errorHandler, exportAllButtonLoaderArea)}>
                     <span className='inline-item inline-item-before'>
                       <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
+                      <LoadingIndicator area={exportAllButtonLoaderArea} />
                     </span>
                     {t('button-export')}
                   </ClayButton>
@@ -53,12 +70,13 @@ function App () {
                 </ClayLayout.Row>
                 <ClayLayout.Row justify='start'>
                   <TaskList title={t('title-importers')} position='right' datas={allImporters} />
-                  <LoadingIndicator />
+                  <LoadingIndicator area={importersListLoaderArea} />
                 </ClayLayout.Row>
                 <ClayLayout.Row justify='center'>
-                  <ClayButton onClick={executeAllImporter}>
+                  <ClayButton onClick={() => ExecuteAllImporter(setImportId, errorHandler, importAllButtonLoaderArea)}>
                     <span className='inline-item inline-item-before'>
                       <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
+                      <LoadingIndicator area={importAllButtonLoaderArea} />
                     </span>
                     {t('button-import')}
                   </ClayButton>
@@ -76,30 +94,58 @@ function App () {
   )
 }
 
-function executeAllExporter () {
-  console.log('executeAllExporter')
+function ExecuteAllExporter (updateStateSuccessCallBack, errorHandler, loaderArea) {
+  const body = {
+    profileId: 'dev',
+    exporterNames: null,
+    debug: false
+  }
+
+  const id = ExecuteAll('/exports', body, errorHandler, loaderArea)
+
+  updateStateSuccessCallBack(id)
 }
 
-function executeAllImporter () {
-  console.log('executeAllImporter')
+function ExecuteAllImporter (updateStateSuccessCallBack, errorHandler, loaderArea) {
+  const body = {
+    profileId: 'dev',
+    exporterNames: null,
+    debug: false
+  }
+
+  const id = ExecuteAll('/imports', body, errorHandler, loaderArea)
+
+  updateStateSuccessCallBack(id)
+}
+
+function ExecuteAll (endPoint, body, errorHandler, loaderArea) {
+  trackPromise(
+    client.post(endPoint, body)
+      .then(
+        response => {
+          const id = response.data
+          console.log('Executed with returned id =>' + JSON.stringify(id))
+          return id
+        },
+        error => {
+          // Unable to use hooks (handleError()) in function triggered by click!, Limitation of React
+          errorHandler(error)
+          console.log(error)
+        }
+      )
+    , loaderArea)
 }
 
 // Uppercase in function name is mandatory to allow using hooks in function call hierarchy (useState end useEffect)
-function RetrieveAllExporters () {
-  const [exporters, setExporters] = useState([])
-  RetrieveAll('exporters', setExporters)
-  return exporters
+function RetrieveAllExporters (updateStateSuccessCallBack, errorHandler, loaderArea) {
+  RetrieveAll('/exporters', updateStateSuccessCallBack, errorHandler, loaderArea)
 }
 
-function RetrieveAllImporters () {
-  const [importers, setImporters] = useState([])
-  RetrieveAll('importers', setImporters)
-  return importers
+function RetrieveAllImporters (updateStateSuccessCallBack, errorHandler, loaderArea) {
+  RetrieveAll('/importers', updateStateSuccessCallBack, errorHandler, loaderArea)
 }
 
-const RetrieveAll = (endPoint, updateStateSuccessCallBack) => {
-  const handleError = useErrorHandler()
-
+function RetrieveAll (endPoint, updateStateSuccessCallBack, errorHandler, loaderArea) {
   useEffect(() => {
     // TackPromise is used to manage loader waiting for promise execution see react-promise-tracker
     trackPromise(
@@ -111,10 +157,10 @@ const RetrieveAll = (endPoint, updateStateSuccessCallBack) => {
             updateStateSuccessCallBack(allDatas)
           },
           error => {
-            handleError(error)
+            errorHandler(error)
           }
         )
-    )
+      , loaderArea)
   }, [])
 }
 

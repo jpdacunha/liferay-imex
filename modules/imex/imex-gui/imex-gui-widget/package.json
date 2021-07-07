@@ -7,6 +7,7 @@
     "@clayui/button": "^3.6.0",
     "@clayui/card": "^3.30.0",
     "@clayui/css": "^3.30.0",
+    "@clayui/form": "^3.29.0",
     "@clayui/icon": "^3.1.0",
     "@clayui/list": "^3.30.0",
     "@clayui/loading-indicator": "^3.2.0",
@@ -54,6 +55,7 @@
     ]
   },
   "devDependencies": {
+    "eslint-plugin-react-hooks": "^1.7.0",
     "liferay-npm-build-support": "^2.26.0",
     "liferay-npm-bundler": "^2.26.0",
     "liferay-npm-bundler-preset-create-react-app": "^2.26.0",

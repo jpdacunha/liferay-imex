@@ -4,7 +4,7 @@ import ClayLoadingIndicator from '@clayui/loading-indicator'
 import { usePromiseTracker } from 'react-promise-tracker'
 
 const LoadingIndicator = props => {
-  const { promiseInProgress } = usePromiseTracker()
+  const { promiseInProgress } = usePromiseTracker({ area: props.area })
   return (
     promiseInProgress && <ClayLoadingIndicator />
   )

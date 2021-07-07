@@ -1,10 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ClayList from '@clayui/list'
-import ClayIcon from '@clayui/icon'
-import ClaySticker from '@clayui/sticker'
 import ClayLabel from '@clayui/label'
-import ClayButton from '@clayui/button'
+import {ClayCheckbox} from '@clayui/form';
 import './Task.scss'
 import spritemap from '@images/icons.svg'
 
@@ -12,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 
 const UNKNOWN = 'unkown'
 
-export function getSupportedProfilLabelComponent (props, labelText) {
+function getSupportedProfilLabelComponent (props, labelText) {
   const profiled = props.profiled
 
   let profileLabel
@@ -29,21 +27,37 @@ export function getSupportedProfilLabelComponent (props, labelText) {
   return profileLabel
 }
 
+const handleChange = (setSelectedItemsCallBack, selectedItems, event) => {
+  // this.items = new Set()
+  const itemName = event.target.name
+  console.log('->' + itemName)
+  console.log('(>' + event.target.checked)
+  console.log('(:' + JSON.stringify(selectedItems))
+
+  const setOfSelectedItems = new Set(selectedItems)
+
+  if (event.target.checked === true) {
+    setOfSelectedItems.add(itemName)
+  } else {
+    setOfSelectedItems.delete(itemName)
+  }
+  console.log(setOfSelectedItems)
+  setSelectedItemsCallBack(Array.from(setOfSelectedItems))
+  console.log(selectedItems)
+}
+
 export default function Task (props) {
   const { t, i18n } = useTranslation()
   const labelSupportedProfiles = t('label-supported-profiles-ids')
   const labelPriority = t('label-priority')
   const labelRanking = t('label-ranking')
-  const labelRun = t('button-label-run')
   const profilLabelComponent = getSupportedProfilLabelComponent(props, labelSupportedProfiles)
-  const actionFunction = props.launchAction
-
+  const setSelectedItemsCallBack = props.setSelectedItemsCallBack
+  const selectedItems = props.selectedItems
   return (
     <ClayList.Item flex className='task'>
       <ClayList.ItemField>
-        <ClaySticker displayType='secondary'>
-          <ClayIcon spritemap={spritemap} symbol='angle-right-small' />
-        </ClaySticker>
+        <ClayCheckbox name={props.name} onChange={(e) => handleChange(setSelectedItemsCallBack, selectedItems, e)} />
       </ClayList.ItemField>
       <ClayList.ItemField expand>
         <ClayList.ItemTitle>{props.name}</ClayList.ItemTitle>
@@ -53,14 +67,6 @@ export default function Task (props) {
         <ClayLabel displayType='success' spritemap={spritemap} className='imex-label'>{labelPriority} : {props.priority}</ClayLabel>
         <ClayLabel displayType='secondary' spritemap={spritemap} className='imex-label'>{labelRanking} : {props.ranking}</ClayLabel>
         {profilLabelComponent}
-      </ClayList.ItemField>
-      <ClayList.ItemField>
-        <ClayButton displayType='secondary' onClick={actionFunction}>
-          <span className='inline-item inline-item-before'>
-            <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
-          </span>
-          {labelRun}
-        </ClayButton>
       </ClayList.ItemField>
     </ClayList.Item>
   )
@@ -72,7 +78,9 @@ Task.propTypes = {
   priority: PropTypes.number,
   profiled: PropTypes.bool,
   ranking: PropTypes.string,
-  supportedProfilesIds: PropTypes.array
+  supportedProfilesIds: PropTypes.array,
+  setSelectedItemsCallBack: PropTypes.func.isRequired,
+  selectedItems: PropTypes.array
 }
 
 Task.defaultProps = {
@@ -81,5 +89,7 @@ Task.defaultProps = {
   priority: 0,
   profiled: false,
   ranking: UNKNOWN,
-  supportedProfilesIds: []
+  supportedProfilesIds: [],
+  setSelectedItemsCallBack: () => {},
+  selectedItems: []
 }

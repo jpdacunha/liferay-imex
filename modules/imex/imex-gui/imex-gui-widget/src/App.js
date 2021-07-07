@@ -32,9 +32,11 @@ function App () {
   const errorHandler = useErrorHandler()
 
   const [allExporters, setAllExporters] = useState([])
+  const [selectedExporters, setSelectedExporters] = useState([])
   RetrieveAllExporters(setAllExporters, errorHandler, exportAllButtonLoaderArea)
 
   const [allImporters, setAllImporters] = useState([])
+  const [selectedImporters, setSelectedImporters] = useState([])
   RetrieveAllImporters(setAllImporters, errorHandler, importAllButtonLoaderArea)
 
   const [exportId, setExportId] = useState('')
@@ -51,7 +53,7 @@ function App () {
                   <h3 className='sheet-subtitle text-left'>{t('export-process-description')}</h3>
                 </ClayLayout.Row>
                 <ClayLayout.Row justify='start'>
-                  <TaskList title={t('title-exporters')} position='left' datas={allExporters} />
+                  <TaskList title={t('title-exporters')} position='left' datas={allExporters} selectedItems={selectedExporters} setSelectedItemsCallBack={setSelectedExporters} />
                   <LoadingIndicator area={exportersListLoaderArea} />
                 </ClayLayout.Row>
                 <ClayLayout.Row justify='center'>
@@ -69,7 +71,7 @@ function App () {
                   <h3 className='sheet-subtitle text-left'>{t('import-process-description')}</h3>
                 </ClayLayout.Row>
                 <ClayLayout.Row justify='start'>
-                  <TaskList title={t('title-importers')} position='right' datas={allImporters} />
+                  <TaskList title={t('title-importers')} position='right' datas={allImporters} selectedItems={selectedImporters} setSelectedItemsCallBack={setSelectedImporters} />
                   <LoadingIndicator area={importersListLoaderArea} />
                 </ClayLayout.Row>
                 <ClayLayout.Row justify='center'>

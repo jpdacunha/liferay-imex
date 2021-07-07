@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import './ProfilesSelector.scss'
 import { ClayRadio, ClayRadioGroup } from '@clayui/form'
 
@@ -17,4 +18,14 @@ export default function ProfileSelector (props) {
       <ClayRadio label='Three' value='three' />
     </ClayRadioGroup>
   )
+}
+
+ProfileSelector.propTypes = {
+  onSelectCallBack: PropTypes.func,
+  selectedValue: PropTypes.string
+}
+
+ProfileSelector.defaultProps = {
+  onSelectCallBack: () => {},
+  selectedValue: ''
 }

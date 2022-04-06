@@ -1,7 +1,6 @@
 package com.liferay.imex.core.util.statics;
 
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
@@ -32,13 +31,8 @@ public class ReportMessageUtil {
 			return StringPool.BLANK;
 		}
 		
-		String name = "";
-		try {
-			name = company.getName();
-		} catch (PortalException e) {
-			_log.error(e,e);
-		}
-		
+		String	name = company.getName();
+
 		return " companyWebId:[" + company.getWebId() + "] companyName:[" + name + "]";
 		
 	}

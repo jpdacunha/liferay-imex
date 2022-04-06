@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 export default function TaskList (props) {
   const { t, i18n } = useTranslation()
   const arrayOfDatas = props.datas
-  console.log('Received datas : ' + JSON.stringify(arrayOfDatas))
+  // console.log('Received datas : ' + JSON.stringify(arrayOfDatas))
 
   if (arrayOfDatas && arrayOfDatas.length > 0) {
     return (

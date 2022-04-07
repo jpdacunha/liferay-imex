@@ -1,0 +1,13 @@
+liferayOSGi {
+    expandCompileInclude = false
+}
+
+dependencies {
+
+	compileOnly group: "org.osgi", name: "org.osgi.core"
+	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations"
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel"
+	compileInclude group: "org.simpleframework", name: "simple-xml", version: "2.7.1"
+	compileOnly project(":modules:imex:imex-core:imex-core-api")
+	
+}

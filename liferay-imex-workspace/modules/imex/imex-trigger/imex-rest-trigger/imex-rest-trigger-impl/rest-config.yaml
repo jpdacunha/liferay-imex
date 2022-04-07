@@ -1,0 +1,9 @@
+apiDir: "../imex-rest-trigger-api/src/main/java"
+apiPackagePath: "com.liferay.imex.rest.trigger.api"
+application:
+    baseURI: "/imex-rest-trigger"
+    className: "ImexRestTriggerApplication"
+    name: "ImexRestTrigger"
+author: "jpdacunha"
+clientDir: "../imex-rest-trigger-client/src/main/java"
+testDir: "../imex-rest-trigger-test/src/testIntegration/java"

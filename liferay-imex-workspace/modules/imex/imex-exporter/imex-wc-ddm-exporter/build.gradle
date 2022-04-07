@@ -1,0 +1,11 @@
+dependencies {
+	compileOnly group: "org.osgi", name: "org.osgi.core"
+	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations"
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel"
+	compileOnly group: "com.liferay", name: "com.liferay.petra.string"
+	compileOnly group: "com.liferay", name: "com.liferay.journal.api"
+	compileOnly group: "com.liferay", name: "com.liferay.dynamic.data.mapping.api"
+	compileOnly project(":modules:imex:imex-core:imex-core-api")
+	compileOnly project(":modules:imex:imex-core:imex-core-util")
+	compileOnly project(":modules:imex:imex-exporter-importer-common:imex-wc-ddm-common")
+}

@@ -1,0 +1,4 @@
+// Check GETTING_STARTED.markdown for information regarding usage.
+distBundle {
+	exclude "imex-gui-*.jar"
+}

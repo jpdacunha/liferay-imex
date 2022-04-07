@@ -1,0 +1,265 @@
+info:
+    description:
+        "This file describes rest api for using IMEX with Rest endpoints. A Java client JAR is available for use with
+        the group ID 'com.liferay', artifact ID 'com.liferay.imex.rest.trigger.api.client', and version '1.0.0'."
+    license:
+        name: "Apache 2.0"
+        url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+    title: "Imex Rest API"
+    version: v1.0
+openapi: 3.0.1
+paths:
+  "/exports":
+    post:
+      description: "Create new export process"
+      requestBody:
+          description: "Export process options description"
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportProcess"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/ExportProcess"
+      responses:
+        200:
+          description: "Exporter unique identifier"
+          content:
+            application/json:
+              schema:
+                description: "Unique export process identifier"
+                type: string
+            application/xml:
+              schema:
+                description: "Unique export process identifier"              
+                type: string
+      tags: ["Exports"]
+  "/imports":
+    post:
+      description: "Create new import process"
+      requestBody:
+          description: "Import process options description"
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportProcess"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/ImportProcess"
+      responses:
+        200:
+          description: "Importer unique identifier"
+          content:
+            application/json:
+              schema:
+                description: "Unique import process identifier"              
+                type: string
+            application/xml:
+              schema:
+                description: "Unique import process identifier"              
+                type: string
+      tags: ["Imports"]  
+  "/exporters":
+    get:
+      description: "Gets the list of registered exporters"
+      responses:
+        200:
+          description: "Exporters descriptor list"
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ExporterDescriptor"
+                type: array
+            application/xml:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ExporterDescriptor"
+                type: array
+      tags: ["Exporters"]
+  "/importers":
+    get:
+      description: "Gets the list of registered exporters"
+      responses:
+        200:
+          description: "Importers descriptor list"
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ImporterDescriptor"
+                type: array
+            application/xml:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ImporterDescriptor"
+                type: array
+      tags: ["Importers"]
+  "/reports/files":
+    get:
+      description: "Gets the list of execution reports as file"
+      responses:
+        200:
+          description: "Reports files list"
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ReportFiles"
+                type: array
+            application/xml:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ReportFiles"
+                type: array
+      tags: ["Reports"]
+  "/reports/files/{fileName}":
+    get:
+      description: "Download report file identified by fileName"
+      parameters:
+        - in: path
+          name: fileName
+          schema:
+            type: string
+          required: true
+          description: File name of the file to get
+      responses:
+        200:
+          description: "File identified by name"
+          content:
+            application/text:
+              schema:
+                $ref: "#/components/schemas/ReportFiles"
+      tags: ["Reports"]
+  "/reports/{identifier}":
+    get:
+      description: "Gets the list of execution reports as file"
+      parameters:
+        - in: path
+          name: identifier
+          schema:
+            type: string
+          required: true
+          description: Identifier of process to get
+      responses:
+        200:
+          description: "Reports files list"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/Report"
+      tags: ["Reports"]
+components:
+  schemas:
+    ImportProcess:
+      description: "This is the model for creating a new import process"
+      properties:
+        profileId:
+          description: "Profile used to create new import process"
+          type: string
+        importerNames: 
+          description: "List of restricted importer names to trigger"
+          type: array
+          items:
+              type: string
+          default: null
+        debug:
+          description: "If true export process will be created in debug mode"
+          type: boolean  
+          default: false
+    ExportProcess:
+      description: "This is the model for creating a new export process"
+      properties:
+        profileId:
+          description: "Profile used to create new export process"
+          type: string
+        exporterNames: 
+          description: "List of restricted exporter names to trigger"
+          type: array
+          items:
+              type: string
+          default: null
+        debug:
+          description: "If true export process will be created in debug mode"
+          type: boolean  
+          default: false
+    ExporterDescriptor:
+      description: "This is the model representation for exporter"
+      properties:
+        name:
+          description: "Unique exporter name"
+          type: string
+        description:
+          description: "Exporter description"
+          type: string
+        ranking:
+          description: "Exporter OSGI ranking"
+          type: string
+        priority:
+          description: "Exporter execution priority"
+          type: integer  
+        supportedProfilesIds:
+          description : "Profiles supported by exporter"
+          type: array
+          items:
+              type: string  
+        profiled:
+          description: "Setted to true if exporter is abble to work in profiled mode"
+          type: boolean 
+    ImporterDescriptor:
+      description: "This is the model representation for importer"
+      properties:
+        name:
+          description: "Unique importer name"
+          type: string
+        description:
+          description: "Importer description"
+          type: string
+        ranking:
+          description: "Importer OSGI ranking"
+          type: string
+        priority:
+          description: "Importer execution priority"
+          type: integer  
+        supportedProfilesIds:
+          description : "Profiles supported by importer"
+          type: array
+          items:
+              type: string  
+        profiled:
+          description: "Setted to true if importer is abble to work in profiled mode"
+          type: boolean       
+    ReportFiles:
+      description: "This is a representation for report logs files"
+      properties:
+        name:
+          description: "Name"
+          type: string
+        size:
+          description: "Size in octets"
+          type: integer
+        humanReadableSize:
+          description: "Size in octets"
+          type: string
+        lastModifiedDate:
+          description: "Date of last modification"
+          type: string
+          format: date-time
+        creationDate:
+          description: "Date of creation"
+          type: string
+          format: date-time 
+    Report:
+      description: "This is a representation for report"
+      properties:
+        identifier:
+          description: "identifier"
+          type: string
+        content:
+          description: "Report content"
+          type: string

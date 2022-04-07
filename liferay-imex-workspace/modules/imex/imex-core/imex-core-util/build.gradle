@@ -1,0 +1,9 @@
+dependencies {
+
+	compileOnly group: "org.osgi", name: "org.osgi.core"
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel"
+	compileOnly group: "com.liferay", name: "com.liferay.petra.string"
+	
+	compileInclude group: "commons-io", name: "commons-io", version: "2.4"
+	
+}

@@ -1,0 +1,5 @@
+Bundle-Name: imex-core-api
+Bundle-SymbolicName: imex.core.api
+Bundle-Version: 1.0.0
+Export-Package: \
+	com.liferay.imex.core.api.*

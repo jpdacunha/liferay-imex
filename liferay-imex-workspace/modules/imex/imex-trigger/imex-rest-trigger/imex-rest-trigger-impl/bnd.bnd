@@ -1,0 +1,3 @@
+Bundle-Name: imex-rest-trigger-impl
+Bundle-SymbolicName: imex.rest.trigger.impl
+Bundle-Version: 1.0.0

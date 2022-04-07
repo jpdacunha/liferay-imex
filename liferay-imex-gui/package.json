@@ -18,7 +18,7 @@
     "@testing-library/user-event": "^12.8.3",
     "dotenv": "^8.2.0",
     "i18next": "^20.3.2",
-    "node-sass": "^4.0.0",
+    "node-sass": "^7.0.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-error-boundary": "^3.1.3",

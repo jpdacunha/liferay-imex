@@ -1,5 +1,4 @@
 import axios from 'axios'
-import 'dotenv/config'
 
 const localClientParams = {
   // The basURL is not using FQDN in dev in order to make proxy feature available. See package.json for proxy configuration (only in dev)

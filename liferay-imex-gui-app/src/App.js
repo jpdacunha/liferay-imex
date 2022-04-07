@@ -14,11 +14,6 @@ import LoadingIndicator from '@components/LoadingIndicator/LoadingIndicator'
 import { useErrorHandler } from 'react-error-boundary'
 import AppContainer from '@components/AppContainer/AppContainer'
 
-// Don't forget to create a file '.env.local'
-// and to add keys & values that we're using in this app
-// according to your environment.
-import 'dotenv/config'
-
 function App () {
   const { t, i18n } = useTranslation()
 

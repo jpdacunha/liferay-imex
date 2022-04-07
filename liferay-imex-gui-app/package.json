@@ -1,0 +1,58 @@
+{
+  "name": "liferay-imex-gui-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@clayui/alert": "^3.26.0",
+    "@clayui/button": "^3.6.0",
+    "@clayui/card": "^3.30.0",
+    "@clayui/css": "^3.30.0",
+    "@clayui/form": "^3.29.0",
+    "@clayui/icon": "^3.1.0",
+    "@clayui/list": "^3.30.0",
+    "@clayui/loading-indicator": "^3.2.0",
+    "@clayui/sticker": "^3.3.0",
+    "@clayui/table": "^3.29.0",
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^12.1.4",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^0.26.1",
+    "i18next": "^20.3.2",
+    "node-sass": "^7.0.1",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
+    "react-error-boundary": "^3.1.4",
+    "react-i18next": "^11.16.2",
+    "react-promise-tracker": "^2.1.0",
+    "react-scripts": "5.0.0",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "react-app-rewire-alias": "^1.1.7",
+    "react-app-rewired": "^2.2.1"
+  }
+}

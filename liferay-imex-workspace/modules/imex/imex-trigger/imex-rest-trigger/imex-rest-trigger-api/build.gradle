@@ -14,3 +14,15 @@ dependencies {
 	compileOnly group: "org.osgi", name: "org.osgi.annotation.versioning"	
 }
 
+// JDA this to force the usage of com.liferay.portal.vulcan.ap 9.7.1. IF not the manifest is not properly genrated for Liferay 7.4u18 
+// with the error Unresolved requirement: Import-Package: com.liferay.portal.vulcan.util; version="[2.7.0,3.0.0)"
+configurations.all {
+        resolutionStrategy {
+            eachDependency { DependencyResolveDetails details ->
+                if (details.requested.name == 'com.liferay.portal.vulcan.api') {
+                    details.useVersion "9.7.1"
+                }
+            }
+        }
+}
+

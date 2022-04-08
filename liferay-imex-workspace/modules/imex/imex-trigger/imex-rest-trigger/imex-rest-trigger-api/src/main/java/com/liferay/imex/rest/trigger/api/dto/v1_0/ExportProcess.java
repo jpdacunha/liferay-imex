@@ -42,7 +42,7 @@ public class ExportProcess implements Serializable {
 	}
 
 	public static ExportProcess unsafeToDTO(String json) {
-		return ObjectMapperUtil.readValue(ExportProcess.class, json);
+		return ObjectMapperUtil.unsafeReadValue(ExportProcess.class, json);
 	}
 
 	@Schema(

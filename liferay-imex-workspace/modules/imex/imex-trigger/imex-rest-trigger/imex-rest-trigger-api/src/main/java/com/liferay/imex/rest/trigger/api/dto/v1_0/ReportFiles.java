@@ -46,7 +46,7 @@ public class ReportFiles implements Serializable {
 	}
 
 	public static ReportFiles unsafeToDTO(String json) {
-		return ObjectMapperUtil.readValue(ReportFiles.class, json);
+		return ObjectMapperUtil.unsafeReadValue(ReportFiles.class, json);
 	}
 
 	@Schema(description = "Date of creation")

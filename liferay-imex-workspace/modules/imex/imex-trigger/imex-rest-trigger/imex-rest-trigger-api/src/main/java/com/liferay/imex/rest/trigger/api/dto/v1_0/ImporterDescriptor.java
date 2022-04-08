@@ -42,7 +42,7 @@ public class ImporterDescriptor implements Serializable {
 	}
 
 	public static ImporterDescriptor unsafeToDTO(String json) {
-		return ObjectMapperUtil.readValue(ImporterDescriptor.class, json);
+		return ObjectMapperUtil.unsafeReadValue(ImporterDescriptor.class, json);
 	}
 
 	@Schema(description = "Importer description")

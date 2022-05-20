@@ -28,7 +28,7 @@ public class ImexCoreActivator implements BundleActivator {
 			
 			_log.info("##");
 			_log.info("## IMEX core : (IMport EXport) v" + version +  " for Liferay DXP (7.4 EE) is starting ...");
-			_log.info("## By Jean-Paul DA CUNHA");
+			_log.info("## By JP DA CUNHA (https://github.com/jpdacunha/liferay-imex)");
 			_log.info("##"); 
 			
 		} else if (state == 32 || state == 1) {

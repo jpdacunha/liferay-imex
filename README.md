@@ -24,6 +24,6 @@ Imex is a tool designed to import / export datas from Liferay portal. For furthe
 ## 1.4.3 Version
  - Compatibility with DXP 7.4u22
 
-# 1.4.3 Version
- - Implementing check all in IMEX GUI
+## 1.4.5 Version
+ - Implementing check all in IMEX GUI and passing selecxted importers and esporters to Rest API
  - Adding sort feature to /importers / exportes Rest API

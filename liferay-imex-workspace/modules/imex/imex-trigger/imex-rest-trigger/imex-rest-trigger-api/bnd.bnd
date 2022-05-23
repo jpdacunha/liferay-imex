@@ -3,4 +3,5 @@ Bundle-SymbolicName: imex.rest.trigger.api
 Bundle-Version: 1.0.0
 Export-Package: \
 	com.liferay.imex.rest.trigger.api.dto.v1_0,\
-	com.liferay.imex.rest.trigger.api.resource.v1_0
+	com.liferay.imex.rest.trigger.api.resource.v1_0,\
+	com.liferay.imex.rest.trigger.api.comparator

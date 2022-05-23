@@ -34,6 +34,8 @@ function App () {
   const [exportId, setExportId] = useState('')
   const [importId, setImportId] = useState('')
 
+  const globalErrorHandler = useErrorHandler()
+
   return (
     <AppContainer>
       {isSignedIn()
@@ -49,7 +51,7 @@ function App () {
                   <LoadingIndicator area={exportersListLoaderArea} />
                 </ClayLayout.Row>
                 <ClayLayout.Row justify='center'>
-                  <ClayButton onClick={() => ExecuteAllExporter(setExportId, exportAllButtonLoaderArea)}>
+                  <ClayButton onClick={() => ExecuteExporters(setExportId, exportAllButtonLoaderArea, selectedExporters, globalErrorHandler)}>
                     <span className='inline-item inline-item-before'>
                       <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
                       <LoadingIndicator area={exportAllButtonLoaderArea} />
@@ -67,7 +69,7 @@ function App () {
                   <LoadingIndicator area={importersListLoaderArea} />
                 </ClayLayout.Row>
                 <ClayLayout.Row justify='center'>               
-                  <ClayButton onClick={() => ExecuteAllImporter(setImportId, importAllButtonLoaderArea)}>
+                  <ClayButton onClick={() => ExecuteAllImporter(setImportId, importAllButtonLoaderArea, selectedImporters, globalErrorHandler)}>
                     <span className='inline-item inline-item-before'>
                       <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
                       <LoadingIndicator area={importAllButtonLoaderArea} />
@@ -88,32 +90,39 @@ function App () {
   )
 }
 
-function ExecuteAllExporter (updateStateSuccessCallBack, loaderArea) {
+function ExecuteExporters (updateStateSuccessCallBack, loaderArea, selectedExporters, errorHandler) {
+
+  //TODO : JDA : manage profil and debug here
   const body = {
     profileId: 'dev',
-    exporterNames: null,
+    exporterNames: selectedExporters,
     debug: false
   }
 
-  const id = ExecuteAll('/exports', body, loaderArea)
+  console.log('Executing exporters :'  + JSON.stringify(body))
+
+  const id = ExecuteAll('/exports', body, loaderArea, errorHandler)
 
   updateStateSuccessCallBack(id)
 }
 
-function ExecuteAllImporter (updateStateSuccessCallBack, loaderArea) {
+function ExecuteAllImporter (updateStateSuccessCallBack, loaderArea, selectedImporters, errorHandler) {
+  
+  //TODO : JDA : manage profil and debug here
   const body = {
     profileId: 'dev',
-    exporterNames: null,
+    importerNames: selectedImporters,
     debug: false
   }
 
-  const id = ExecuteAll('/imports', body, loaderArea)
+  console.log('Executing importers :'  + JSON.stringify(body))
+
+  const id = ExecuteAll('/imports', body, loaderArea, errorHandler)
 
   updateStateSuccessCallBack(id)
 }
 
-function ExecuteAll (endPoint, body, loaderArea) {
-  const handleError = useErrorHandler()
+function ExecuteAll (endPoint, body, loaderArea, errorHandler) {
 
   trackPromise(
     client.post(endPoint, body)
@@ -124,7 +133,7 @@ function ExecuteAll (endPoint, body, loaderArea) {
           return id
         },
         error => {
-          handleError(error)
+          errorHandler(error)
           console.log(error)
         }
       )

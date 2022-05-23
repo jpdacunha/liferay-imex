@@ -20,9 +20,8 @@ const resources = {
       'label-ranking': 'Ranking',
       'label-supported-profiles-ids': 'Profiles',
       'button-label-run': 'Run',
-      'button-import': 'Import all TO Liferay',
-      'button-import-selected': 'Import selected TO Liferay',
-      'button-export': 'Export all FROM Liferay',
+      'button-import': 'Import TO Liferay',
+      'button-export': 'Export FROM Liferay',
       'empty-datas-message': 'No elements to display'
     }
   },
@@ -41,9 +40,8 @@ const resources = {
       'label-ranking': 'Ranking',
       'label-supported-profiles-ids': 'Profiles',
       'button-label-run': 'Lancer',
-      'button-import': 'Tout importer DANS liferay',
-      'button-import-selected': 'Importer la selection DANS Liferay',
-      'button-export': 'Tout Exporter DE Liferay',
+      'button-import': 'Importer DANS liferay',
+      'button-export': 'Exporter DE Liferay',
       'empty-datas-message': 'Il n\'y a pas d\'éléments à afficher'
     }
   }

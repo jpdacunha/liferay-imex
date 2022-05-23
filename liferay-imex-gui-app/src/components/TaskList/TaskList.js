@@ -24,7 +24,7 @@ export default function TaskList (props) {
     return (
       <ClayList className={'task-list task-list-' + props.position}>
 
-        <ClayList.Item flex className='task-header'>
+        <ClayList.Item flex id="task-header">
           <ClayList.ItemField>
             <ClayCheckbox name='select' onChange={(e) => handleChange(setSelectedItemsCallBack,  arrayOfDatasNames, e)} checked={allSelected}/>
           </ClayList.ItemField>
@@ -54,9 +54,9 @@ const handleChange = (setSelectedItemsCallBack, items, event) => {
 
   if (event.target.checked === true) {
     console.log('Select ALL items')
-    {items && items.map(item => (
+    items.map(item => (
       updatedSelectedItems.push(item.name)
-    ))}
+    ))
   } else {
     console.log('Unselect ALL items')
     updatedSelectedItems = []

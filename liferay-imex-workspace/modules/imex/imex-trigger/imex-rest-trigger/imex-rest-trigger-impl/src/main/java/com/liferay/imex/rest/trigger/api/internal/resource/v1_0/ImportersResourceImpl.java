@@ -7,6 +7,7 @@ import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.importer.ImporterTracker;
 import com.liferay.imex.core.util.configuration.OSGIServicePropsKeys;
 import com.liferay.imex.core.util.statics.CollectionUtil;
+import com.liferay.imex.rest.trigger.api.comparator.ImporterDescriptorNameComparator;
 import com.liferay.imex.rest.trigger.api.dto.v1_0.ImporterDescriptor;
 import com.liferay.imex.rest.trigger.api.resource.v1_0.ImportersResource;
 import com.liferay.portal.kernel.log.Log;
@@ -14,6 +15,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.vulcan.pagination.Page;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -82,6 +84,8 @@ public class ImportersResourceImpl extends BaseImportersResourceImpl {
 				}
 				
 				descriptors.add(descriptor);
+				
+				Collections.sort(descriptors, new ImporterDescriptorNameComparator());
 				
 			}
 			

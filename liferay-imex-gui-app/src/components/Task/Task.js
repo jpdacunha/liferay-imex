@@ -38,7 +38,7 @@ const handleChange = (setSelectedItemsCallBack, selectedItems, event) => {
   } else {
     updatedSelectedItems.splice(selectedItems.indexOf(itemName), 1)
   }
-  
+
   console.log('updatedSelectedItems :' + JSON.stringify(updatedSelectedItems))
   setSelectedItemsCallBack(updatedSelectedItems)
 
@@ -53,8 +53,6 @@ export default function Task (props) {
   const profilLabelComponent = getSupportedProfilLabelComponent(props, labelSupportedProfiles)
   const setSelectedItemsCallBack = props.setSelectedItemsCallBack
   const selectedItems = props.selectedItems
-
-  const [forcedUpdateCounter, setForceUpdate] = useState(false);
 
   return (
     <ClayList.Item flex className='task'>

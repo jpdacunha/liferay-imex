@@ -1,4 +1,4 @@
-import React from 'react'
+import React , { useState } from 'react'
 import PropTypes from 'prop-types'
 import ClayList from '@clayui/list'
 import ClayLabel from '@clayui/label'
@@ -28,25 +28,24 @@ function getSupportedProfilLabelComponent (props, labelText) {
 }
 
 const handleChange = (setSelectedItemsCallBack, selectedItems, event) => {
-  // this.items = new Set()
-  const itemName = event.target.name
-  console.log('->' + itemName)
-  console.log('(>' + event.target.checked)
-  console.log('(:' + JSON.stringify(selectedItems))
 
-  const setOfSelectedItems = new Set(selectedItems)
+  const itemName = event.target.name
+  console.log('Cliqued itemName : ' + itemName)
+  var updatedSelectedItems = [...selectedItems]
 
   if (event.target.checked === true) {
-    setOfSelectedItems.add(itemName)
+    updatedSelectedItems = [...selectedItems, itemName]
   } else {
-    setOfSelectedItems.delete(itemName)
+    updatedSelectedItems.splice(selectedItems.indexOf(itemName), 1)
   }
-  console.log(setOfSelectedItems)
-  setSelectedItemsCallBack(Array.from(setOfSelectedItems))
-  console.log(selectedItems)
+  
+  console.log('updatedSelectedItems :' + JSON.stringify(updatedSelectedItems))
+  setSelectedItemsCallBack(updatedSelectedItems)
+
 }
 
 export default function Task (props) {
+
   const { t, i18n } = useTranslation()
   const labelSupportedProfiles = t('label-supported-profiles-ids')
   const labelPriority = t('label-priority')
@@ -54,10 +53,13 @@ export default function Task (props) {
   const profilLabelComponent = getSupportedProfilLabelComponent(props, labelSupportedProfiles)
   const setSelectedItemsCallBack = props.setSelectedItemsCallBack
   const selectedItems = props.selectedItems
+
+  const [forcedUpdateCounter, setForceUpdate] = useState(false);
+
   return (
     <ClayList.Item flex className='task'>
       <ClayList.ItemField>
-        <ClayCheckbox name={props.name} onChange={(e) => handleChange(setSelectedItemsCallBack, selectedItems, e)} />
+        <ClayCheckbox name={props.name} onChange={(e) => handleChange(setSelectedItemsCallBack, selectedItems, e)} checked={selectedItems.includes(props.name)} />
       </ClayList.ItemField>
       <ClayList.ItemField expand>
         <ClayList.ItemTitle>{props.name}</ClayList.ItemTitle>

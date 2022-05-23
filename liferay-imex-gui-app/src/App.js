@@ -66,7 +66,7 @@ function App () {
                   <TaskList title={t('title-importers')} position='right' datas={allImporters} selectedItems={selectedImporters} setSelectedItemsCallBack={setSelectedImporters} />
                   <LoadingIndicator area={importersListLoaderArea} />
                 </ClayLayout.Row>
-                <ClayLayout.Row justify='center'>
+                <ClayLayout.Row justify='center'>               
                   <ClayButton onClick={() => ExecuteAllImporter(setImportId, importAllButtonLoaderArea)}>
                     <span className='inline-item inline-item-before'>
                       <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />

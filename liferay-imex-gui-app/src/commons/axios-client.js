@@ -28,8 +28,11 @@ const nonDevClientParams = {
 function createCLient () {
   if (process.env.NODE_ENV === 'development') {
     console.log('Creating Rest Client for development ...')
+    console.log('Using baseUrl : ' + localClientParams.baseURL)
     return axios.create(localClientParams)
   }
+  console.log('Creating Rest Client ...')
+  console.log('Using baseUrl : ' + localClientParams.baseURL)
   return axios.create(nonDevClientParams)
 }
 

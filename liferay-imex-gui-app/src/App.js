@@ -13,28 +13,33 @@ import { useTranslation } from 'react-i18next'
 import LoadingIndicator from '@components/LoadingIndicator/LoadingIndicator'
 import { useErrorHandler } from 'react-error-boundary'
 import AppContainer from '@components/AppContainer/AppContainer'
+import ErrorMessages from './components/ErrorMessages/ErrorMessages';
 
 function App () {
   const { t, i18n } = useTranslation()
 
   // Various loader in a page. This constants declare an area for execution of eache of them
   const importersListLoaderArea = 'importers-loader-area'
+  const importAllButtonLoaderArea = 'import-all-loader-area'
   const exportersListLoaderArea = 'exporters-loader-area'
   const exportAllButtonLoaderArea = 'export-all-loader-area'
-  const importAllButtonLoaderArea = 'import-all-loader-area'
 
+  //Error handler for technical errors (global error boundary)
+  const globalErrorHandler = useErrorHandler()
+
+  //Exporters variables definitions
+  const [exportId, setExportId] = useState('')
   const [allExporters, setAllExporters] = useState([])
   const [selectedExporters, setSelectedExporters] = useState([])
-  RetrieveAllExporters(setAllExporters, exportAllButtonLoaderArea)
+  RetrieveAllExporters(setAllExporters, exportAllButtonLoaderArea, globalErrorHandler)
+  const [exportValidationErrors, setExportValidationErrors] = useState([])
 
+  //Importers variables definitions
+  const [importId, setImportId] = useState('')
   const [allImporters, setAllImporters] = useState([])
   const [selectedImporters, setSelectedImporters] = useState([])
-  RetrieveAllImporters(setAllImporters, importAllButtonLoaderArea)
-
-  const [exportId, setExportId] = useState('')
-  const [importId, setImportId] = useState('')
-
-  const globalErrorHandler = useErrorHandler()
+  RetrieveAllImporters(setAllImporters, importAllButtonLoaderArea, globalErrorHandler)
+  const [importValidationErrors, setImportValidationErrors] = useState([])
 
   return (
     <AppContainer>
@@ -42,16 +47,19 @@ function App () {
         ? (
           <ClayLayout.ContainerFluid view>
             <ClayLayout.Row justify='center'>
+
               <ClayLayout.Col size={6}>
+
                 <ClayLayout.Row justify='start'>
                   <h3 className='sheet-subtitle text-left'>{t('export-process-description')}</h3>
                 </ClayLayout.Row>
+                <ErrorMessages errorKeys={exportValidationErrors} position='left'/>   
                 <ClayLayout.Row justify='start'>
-                  <TaskList title={t('title-exporters')} position='left' datas={allExporters} selectedItems={selectedExporters} setSelectedItemsCallBack={setSelectedExporters} />
-                  <LoadingIndicator area={exportersListLoaderArea} />
+                    <TaskList title={t('title-exporters')} position='left' datas={allExporters} selectedItems={selectedExporters} setSelectedItemsCallBack={setSelectedExporters} />
+                    <LoadingIndicator area={exportersListLoaderArea} />
                 </ClayLayout.Row>
                 <ClayLayout.Row justify='center'>
-                  <ClayButton onClick={() => ExecuteExporters(setExportId, exportAllButtonLoaderArea, selectedExporters, globalErrorHandler)}>
+                  <ClayButton onClick={() => ExecuteExporters(setExportId, exportAllButtonLoaderArea, selectedExporters, globalErrorHandler, setExportValidationErrors)}>
                     <span className='inline-item inline-item-before'>
                       <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
                       <LoadingIndicator area={exportAllButtonLoaderArea} />
@@ -60,10 +68,12 @@ function App () {
                   </ClayButton>
                 </ClayLayout.Row>
               </ClayLayout.Col>
+
               <ClayLayout.Col size={6}>
                 <ClayLayout.Row justify='start'>
                   <h3 className='sheet-subtitle text-left'>{t('import-process-description')}</h3>
                 </ClayLayout.Row>
+                <ErrorMessages errorKeys={importValidationErrors} position='right'/>
                 <ClayLayout.Row justify='start'>
                   <TaskList title={t('title-importers')} position='right' datas={allImporters} selectedItems={selectedImporters} setSelectedItemsCallBack={setSelectedImporters} />
                   <LoadingIndicator area={importersListLoaderArea} />
@@ -90,25 +100,50 @@ function App () {
   )
 }
 
-function ExecuteExporters (updateStateSuccessCallBack, loaderArea, selectedExporters, errorHandler) {
+function isValidExportersExecution(selectedExporters) {
 
-  //TODO : JDA : manage profil and debug here
-  const body = {
-    profileId: 'dev',
-    exporterNames: selectedExporters,
-    debug: false
+  let exportValidationErrors = []
+
+  // At least one selected exporter
+  const selectedAtLeastOneExporter = selectedExporters && selectedExporters.length > 0;
+  if (!selectedAtLeastOneExporter) {
+    exportValidationErrors.push('at-least-one-exporter-alert-message')
   }
 
-  console.log('Executing exporters :'  + JSON.stringify(body))
+  return exportValidationErrors
 
-  const id = ExecuteAll('/exports', body, loaderArea, errorHandler)
+}
 
-  updateStateSuccessCallBack(id)
+function ExecuteExporters (updateStateSuccessCallBack, loaderArea, selectedExporters, errorHandler, updateValidationErrorsListCallBack) {
+
+  const errorsList = isValidExportersExecution(selectedExporters)
+
+  if (errorsList && errorsList.length === 0) {
+
+    //TODO : JDA : manage profil and debug here
+    const body = {
+      profileId: 'dev',
+      exporterNames: selectedExporters,
+      debug: false
+    }
+
+    console.log('Executing exporters :'  + JSON.stringify(body))
+
+    const id = ExecuteAll('/exports', body, loaderArea, errorHandler)
+
+    updateStateSuccessCallBack(id)
+
+  } else {
+    console.log("Aborting execution because form is not properly filled. Errors : " + errorsList instanceof Array)
+  }
+
+  updateValidationErrorsListCallBack(errorsList)
+
 }
 
 function ExecuteAllImporter (updateStateSuccessCallBack, loaderArea, selectedImporters, errorHandler) {
   
-  //TODO : JDA : manage profil and debug here
+  //TODO : JDA : manage profil and debug here and selected importers
   const body = {
     profileId: 'dev',
     importerNames: selectedImporters,
@@ -141,16 +176,16 @@ function ExecuteAll (endPoint, body, loaderArea, errorHandler) {
 }
 
 // Uppercase in function name is mandatory to allow using hooks in function call hierarchy (useState end useEffect)
-function RetrieveAllExporters (updateStateSuccessCallBack, loaderArea) {
+function RetrieveAllExporters (updateStateSuccessCallBack, loaderArea, errorHandler) {
   RetrieveAll('/exporters', updateStateSuccessCallBack, loaderArea)
 }
 
-function RetrieveAllImporters (updateStateSuccessCallBack, loaderArea) {
+function RetrieveAllImporters (updateStateSuccessCallBack, loaderArea, errorHandler) {
   RetrieveAll('/importers', updateStateSuccessCallBack, loaderArea)
 }
 
-function RetrieveAll (endPoint, updateStateSuccessCallBack, loaderArea) {
-  const handleError = useErrorHandler()
+const RetrieveAll = (endPoint, updateStateSuccessCallBack, loaderArea, errorHandler) => {
+
   useEffect(() => {
     // TackPromise is used to manage loader waiting for promise execution see react-promise-tracker
     trackPromise(
@@ -162,11 +197,12 @@ function RetrieveAll (endPoint, updateStateSuccessCallBack, loaderArea) {
             updateStateSuccessCallBack(allDatas)
           },
           error => {
-            handleError(error)
+            errorHandler(error)
           }
         )
       , loaderArea)
   }, [])
+
 }
 
 export function isSignedIn () {

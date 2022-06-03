@@ -11,9 +11,9 @@ const ErrorMessages = props => {
   const errors = props.errorKeys
   console.log("Receiving validation errors to display : " + errors)
   return (
-    <ClayLayout.Row justify='center' className={'errors-messages-container-' + props.position}>
+    <ClayLayout.Row justify='center'>
         {errors && errors.length > 0 && errors.map(item => (
-            <ClayAlert displayType='danger' title={t('validation-error-label')} spritemap={spritemap}>
+            <ClayAlert displayType='danger' title={t('validation-error-label')} spritemap={spritemap} className={'errors-messages-container-' + props.position}>
                 {t(item)}
             </ClayAlert>
         ))}

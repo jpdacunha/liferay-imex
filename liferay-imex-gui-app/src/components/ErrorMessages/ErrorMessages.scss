@@ -1,7 +1,9 @@
 .errors-messages-container-left {
     margin-right: 24px;
+    box-sizing: border-box;
 }
 
 .errors-messages-container-right {
-    margin-left: 24px;
+    margin-left: 0px;
+    box-sizing: border-box;
 }

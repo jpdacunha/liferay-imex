@@ -79,7 +79,7 @@ function App () {
                   <LoadingIndicator area={importersListLoaderArea} />
                 </ClayLayout.Row>
                 <ClayLayout.Row justify='center'>               
-                  <ClayButton onClick={() => ExecuteAllImporter(setImportId, importAllButtonLoaderArea, selectedImporters, globalErrorHandler)}>
+                  <ClayButton onClick={() => ExecuteImporters(setImportId, importAllButtonLoaderArea, selectedImporters, globalErrorHandler, setImportValidationErrors)}>
                     <span className='inline-item inline-item-before'>
                       <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
                       <LoadingIndicator area={importAllButtonLoaderArea} />
@@ -141,20 +141,45 @@ function ExecuteExporters (updateStateSuccessCallBack, loaderArea, selectedExpor
 
 }
 
-function ExecuteAllImporter (updateStateSuccessCallBack, loaderArea, selectedImporters, errorHandler) {
-  
-  //TODO : JDA : manage profil and debug here and selected importers
-  const body = {
-    profileId: 'dev',
-    importerNames: selectedImporters,
-    debug: false
+function isValidImportersExecution(selectedImporters) {
+
+  let importValidationErrors = []
+
+  // At least one selected exporter
+  const selectedAtLeastOneImporter = selectedImporters && selectedImporters.length > 0;
+  if (!selectedAtLeastOneImporter) {
+    importValidationErrors.push('at-least-one-importer-alert-message')
   }
 
-  console.log('Executing importers :'  + JSON.stringify(body))
+  return importValidationErrors
 
-  const id = ExecuteAll('/imports', body, loaderArea, errorHandler)
+}
 
-  updateStateSuccessCallBack(id)
+function ExecuteImporters (updateStateSuccessCallBack, loaderArea, selectedImporters, errorHandler, updateValidationErrorsListCallBack) {
+
+  const errorsList = isValidImportersExecution(selectedImporters)
+
+  if (errorsList && errorsList.length === 0) {
+
+    //TODO : JDA : manage profil and debug here
+    const body = {
+      profileId: 'dev',
+      exporterNames: selectedImporters,
+      debug: false
+    }
+
+    console.log('Executing importers :'  + JSON.stringify(body))
+
+    const id = ExecuteAll('/imports', body, loaderArea, errorHandler)
+
+    updateStateSuccessCallBack(id)
+
+  } else {
+    console.log("Aborting execution because form is not properly filled. Errors : " + errorsList instanceof Array)
+  }
+
+  updateValidationErrorsListCallBack(errorsList)
+  
 }
 
 function ExecuteAll (endPoint, body, loaderArea, errorHandler) {

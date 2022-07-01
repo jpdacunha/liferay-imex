@@ -1,3 +1,7 @@
 Bundle-Name: imex-site-exporter
 Bundle-SymbolicName: imex.site.exporter
 Bundle-Version: 1.0.0
+
+-consumer-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+-provider-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+

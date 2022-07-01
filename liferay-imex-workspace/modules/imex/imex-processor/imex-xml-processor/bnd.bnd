@@ -1,3 +1,6 @@
 Bundle-Name: imex-xml-processor
 Bundle-SymbolicName: imex.xml.processor
 Bundle-Version: 1.0.0
+
+-consumer-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+-provider-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}

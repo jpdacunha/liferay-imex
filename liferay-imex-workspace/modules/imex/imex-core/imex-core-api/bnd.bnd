@@ -3,3 +3,6 @@ Bundle-SymbolicName: imex.core.api
 Bundle-Version: 1.0.0
 Export-Package: \
 	com.liferay.imex.core.api.*
+
+-consumer-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+-provider-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}

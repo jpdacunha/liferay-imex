@@ -7,3 +7,7 @@ Import-Package: !android.*, \
 !dalvik.system.*, \
 !sun.reflect.*, \
 *
+
+-consumer-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+-provider-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+

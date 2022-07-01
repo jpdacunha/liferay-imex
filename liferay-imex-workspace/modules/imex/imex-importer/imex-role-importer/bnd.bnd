@@ -1,3 +1,6 @@
 Bundle-Name: imex-role-importer
 Bundle-SymbolicName: imex.role.importer
 Bundle-Version: 1.0.0
+
+-consumer-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+-provider-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}

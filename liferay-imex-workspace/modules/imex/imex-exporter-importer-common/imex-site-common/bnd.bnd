@@ -7,3 +7,6 @@ Export-Package: \
 	com.liferay.imex.site,\
 	com.liferay.imex.site.util,\
 	com.liferay.imex.site.service
+	
+-consumer-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+-provider-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}	

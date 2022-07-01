@@ -5,3 +5,6 @@ Export-Package: \
 	com.liferay.imex.rest.trigger.api.dto.v1_0,\
 	com.liferay.imex.rest.trigger.api.resource.v1_0,\
 	com.liferay.imex.rest.trigger.api.comparator
+
+-consumer-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+-provider-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}

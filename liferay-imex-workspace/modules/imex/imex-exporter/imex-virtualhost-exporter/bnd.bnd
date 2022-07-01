@@ -2,3 +2,5 @@ Bundle-Name: imex-virtualhost-exporter
 Bundle-SymbolicName: imex.virtualhost.exporter
 Bundle-Version: 1.0.0
 
+-consumer-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+-provider-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}

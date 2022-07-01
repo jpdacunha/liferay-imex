@@ -6,3 +6,7 @@ Export-Package: \
 	com.liferay.imex.core.util.exception,\
 	com.liferay.imex.core.util.configuration,\
 	com.liferay.imex.core.util.enums
+	
+	
+-consumer-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+-provider-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}	

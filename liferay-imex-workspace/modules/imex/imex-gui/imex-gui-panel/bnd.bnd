@@ -2,3 +2,6 @@ Bundle-Name: imex-gui-panel
 Bundle-SymbolicName: imex.gui.panel
 Bundle-Version: 1.0.0
 Export-Package: com.liferay.imex.gui.panel.constants
+
+-consumer-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+-provider-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}

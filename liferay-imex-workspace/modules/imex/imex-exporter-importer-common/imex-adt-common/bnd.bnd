@@ -4,3 +4,6 @@ Bundle-Version: 1.0.0
 Export-Package: \
 	com.liferay.imex.adt.model,\
 	com.liferay.imex.adt
+
+-consumer-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}
+-provider-policy : ${replacestring;${range;[==,==]};.*,(.*)];$1}

@@ -9,11 +9,17 @@ import './ErrorMessages.scss'
 const ErrorMessages = props => {
   const { t, i18n } = useTranslation()
   const errors = props.errorKeys
-  console.log("Receiving validation errors to display : " + errors)
+
+  if (errors.length > 0) {
+    console.log("Receiving validation errors to display : " + errors)
+  } else {
+    //console.log("No errors to display");  
+  }
+  
   return (
     <ClayLayout.Row justify='center'>
         {errors && errors.length > 0 && errors.map(item => (
-            <ClayAlert displayType='danger' title={t('validation-error-label')} spritemap={spritemap} className={'errors-messages-container-' + props.position}>
+            <ClayAlert key={'key-' + item} displayType='danger' title={t('validation-error-label')} spritemap={spritemap} className={'errors-messages-container-' + props.position}>
                 {t(item)}
             </ClayAlert>
         ))}

@@ -25,7 +25,10 @@ const resources = {
       'button-label-run': 'Run',
       'button-import': 'Import TO Liferay',
       'button-export': 'Export FROM Liferay',
-      'empty-datas-message': 'No elements to display'
+      'debug-checkbox-label': 'Launch in debug',
+      'empty-datas-message': 'No elements to display',
+      'options': 'Options',
+      'select-profile':'Select profile to apply'
     }
   },
   fr: {
@@ -48,7 +51,10 @@ const resources = {
       'button-label-run': 'Lancer',
       'button-import': 'Importer DANS liferay',
       'button-export': 'Exporter DE Liferay',
-      'empty-datas-message': 'Il n\'y a pas d\'éléments à afficher'
+      'debug-checkbox-label': 'Lancer en mode debug',
+      'empty-datas-message': 'Il n\'y a pas d\'éléments à afficher',
+      'options': 'Options',
+      'select-profile':'Selectionner le profile à utiliser'
     }
   }
 }

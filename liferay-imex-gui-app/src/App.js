@@ -13,9 +13,11 @@ import { useTranslation } from 'react-i18next'
 import LoadingIndicator from '@components/LoadingIndicator/LoadingIndicator'
 import { useErrorHandler } from 'react-error-boundary'
 import AppContainer from '@components/AppContainer/AppContainer'
-import ErrorMessages from './components/ErrorMessages/ErrorMessages';
+import ErrorMessages from '@components/ErrorMessages/ErrorMessages'
+import OptionsPanel from '@components/OptionsPanel/OptionPanel'
 
 function App () {
+
   const { t, i18n } = useTranslation()
 
   // Various loader in a page. This constants declare an area for execution of eache of them
@@ -33,6 +35,9 @@ function App () {
   const [selectedExporters, setSelectedExporters] = useState([])
   RetrieveAllExporters(setAllExporters, exportAllButtonLoaderArea, globalErrorHandler)
   const [exportValidationErrors, setExportValidationErrors] = useState([])
+  //Exporters options
+  const [exportDebug, setExportDebug] = useState(false)
+  const [selectedExportProfile, setSelectedExportProfile] = useState('')
 
   //Importers variables definitions
   const [importId, setImportId] = useState('')
@@ -49,7 +54,6 @@ function App () {
             <ClayLayout.Row justify='center'>
 
               <ClayLayout.Col size={6}>
-
                 <ClayLayout.Row justify='start'>
                   <h3 className='sheet-subtitle text-left'>{t('export-process-description')}</h3>
                 </ClayLayout.Row>
@@ -58,8 +62,11 @@ function App () {
                     <TaskList title={t('title-exporters')} position='left' datas={allExporters} selectedItems={selectedExporters} setSelectedItemsCallBack={setSelectedExporters} />
                     <LoadingIndicator area={exportersListLoaderArea} />
                 </ClayLayout.Row>
+                <ClayLayout.Row justify='start'>
+                    <OptionsPanel identifier='export-options-panel' position='left' setDebugModeCallBack={setExportDebug} selectedProfileCallBack={setSelectedExportProfile} currentProfile={selectedExportProfile} errorHandler={globalErrorHandler}/>
+                </ClayLayout.Row>
                 <ClayLayout.Row justify='center'>
-                  <ClayButton onClick={() => ExecuteExporters(setExportId, exportAllButtonLoaderArea, selectedExporters, globalErrorHandler, setExportValidationErrors)}>
+                  <ClayButton onClick={() => ExecuteExporters(setExportId, exportAllButtonLoaderArea, selectedExporters, exportDebug, selectedExportProfile, globalErrorHandler, setExportValidationErrors)}>
                     <span className='inline-item inline-item-before'>
                       <ClayIcon className='unstyled' spritemap={spritemap} symbol='play' />
                       <LoadingIndicator area={exportAllButtonLoaderArea} />
@@ -114,7 +121,7 @@ function isValidExportersExecution(selectedExporters) {
 
 }
 
-function ExecuteExporters (updateStateSuccessCallBack, loaderArea, selectedExporters, errorHandler, updateValidationErrorsListCallBack) {
+function ExecuteExporters (updateStateSuccessCallBack, loaderArea, selectedExporters, exportDebug, selectedProfile, errorHandler, updateValidationErrorsListCallBack) {
 
   const errorsList = isValidExportersExecution(selectedExporters)
 
@@ -122,14 +129,14 @@ function ExecuteExporters (updateStateSuccessCallBack, loaderArea, selectedExpor
 
     //TODO : JDA : manage profil and debug here
     const body = {
-      profileId: 'dev',
+      profileId: selectedProfile,
       exporterNames: selectedExporters,
-      debug: false
+      debug: exportDebug
     }
 
     console.log('Executing exporters :'  + JSON.stringify(body))
 
-    const id = ExecuteAll('/exports', body, loaderArea, errorHandler)
+    const id = ExecuteImex('/exports', body, loaderArea, errorHandler)
 
     updateStateSuccessCallBack(id)
 
@@ -170,7 +177,7 @@ function ExecuteImporters (updateStateSuccessCallBack, loaderArea, selectedImpor
 
     console.log('Executing importers :'  + JSON.stringify(body))
 
-    const id = ExecuteAll('/imports', body, loaderArea, errorHandler)
+    const id = ExecuteImex('/imports', body, loaderArea, errorHandler)
 
     updateStateSuccessCallBack(id)
 
@@ -182,7 +189,7 @@ function ExecuteImporters (updateStateSuccessCallBack, loaderArea, selectedImpor
   
 }
 
-function ExecuteAll (endPoint, body, loaderArea, errorHandler) {
+function ExecuteImex (endPoint, body, loaderArea, errorHandler) {
 
   trackPromise(
     client.post(endPoint, body)
@@ -202,11 +209,11 @@ function ExecuteAll (endPoint, body, loaderArea, errorHandler) {
 
 // Uppercase in function name is mandatory to allow using hooks in function call hierarchy (useState end useEffect)
 function RetrieveAllExporters (updateStateSuccessCallBack, loaderArea, errorHandler) {
-  RetrieveAll('/exporters', updateStateSuccessCallBack, loaderArea)
+  RetrieveAll('/exporters', updateStateSuccessCallBack, loaderArea, errorHandler)
 }
 
 function RetrieveAllImporters (updateStateSuccessCallBack, loaderArea, errorHandler) {
-  RetrieveAll('/importers', updateStateSuccessCallBack, loaderArea)
+  RetrieveAll('/importers', updateStateSuccessCallBack, loaderArea, errorHandler)
 }
 
 const RetrieveAll = (endPoint, updateStateSuccessCallBack, loaderArea, errorHandler) => {

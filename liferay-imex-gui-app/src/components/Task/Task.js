@@ -1,4 +1,4 @@
-import React , { useState } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import ClayList from '@clayui/list'
 import ClayLabel from '@clayui/label'
@@ -31,11 +31,12 @@ const handleChange = (setSelectedItemsCallBack, selectedItems, event) => {
 
   const itemName = event.target.name
   console.log('Cliqued itemName : ' + itemName)
-  var updatedSelectedItems = [...selectedItems]
+  let updatedSelectedItems = []
 
   if (event.target.checked === true) {
     updatedSelectedItems = [...selectedItems, itemName]
   } else {
+    updatedSelectedItems = [...selectedItems]
     updatedSelectedItems.splice(selectedItems.indexOf(itemName), 1)
   }
 

@@ -11,6 +11,7 @@
     "@clayui/icon": "^3.1.0",
     "@clayui/list": "^3.30.0",
     "@clayui/loading-indicator": "^3.2.0",
+    "@clayui/panel": "^3.70.0",
     "@clayui/sticker": "^3.3.0",
     "@clayui/table": "^3.29.0",
     "@testing-library/jest-dom": "^5.16.4",

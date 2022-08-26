@@ -90,23 +90,23 @@ Example : imex-site-exporter => imex.site.exporter
  
 You can use the same procedure as described previously for creatin an IMPORTER
 
-# How to expose an endepoint using Liferay Rest Builder
+# How to expose a new endpoint using Liferay Rest Builder
 
 ## Step 01 : Updating definition 
 
 - Open rest-openapi.yaml file in imex-rest-trigger-impl project
-- Update your definitions according OpenApi specification
+- Update your definitions according to OpenApi specification
 
-## Step 02 : Execute rest builder 
+## Step 02 : Execute Rest Builder 
 
 - Open a terminal in imex-rest-trigger-impl project root path
 - Execute 
 ```console
-imex-rest-trigger-impl project
+blade gw buildREST
 ```
-- Refresh your eclipse workspace
-- Delete imex-rest-trigger-client if necessary
+- Refresh your entire eclipse workspace
+- Delete unused imex-rest-trigger-client
 
 ## Step 03 : Service exposition implementation
 
-- Implement your Java code in file corresponding to your new endpoint (a new file is now available in imex-rest-trigger-impl)
+- Implement your Java code in resource file corresponding to your new endpoint (a new resource is now available in imex-rest-trigger-impl)

@@ -3,6 +3,7 @@ package com.liferay.imex.rest.trigger.api.internal.resource.v1_0;
 import com.liferay.imex.core.api.ImexCoreService;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
+import com.liferay.imex.core.api.profile.ImexProfileService;
 import com.liferay.imex.core.util.configuration.OSGIServicePropsKeys;
 import com.liferay.imex.rest.trigger.api.comparator.ExporterDescriptorNameComparator;
 import com.liferay.imex.rest.trigger.api.dto.v1_0.ExporterDescriptor;
@@ -40,6 +41,9 @@ public class ExportersResourceImpl extends BaseExportersResourceImpl {
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	private ImexCoreService imexCoreService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	private ImexProfileService imexProfileService;
 
 	@Override
 	public Page<ExporterDescriptor> getExportersPage() throws Exception {
@@ -72,7 +76,7 @@ public class ExportersResourceImpl extends BaseExportersResourceImpl {
 				
 				String[] supportedProfilesIds = {};
 				if (profiled) {
-					supportedProfilesIds =	imexCoreService.getSupportedProfiles();					
+					supportedProfilesIds =	imexProfileService.getSupportedProfilesIds();					
 				}
 				descriptor.setSupportedProfilesIds(supportedProfilesIds);
 				

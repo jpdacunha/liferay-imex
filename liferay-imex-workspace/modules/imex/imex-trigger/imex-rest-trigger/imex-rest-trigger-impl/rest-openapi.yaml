@@ -9,6 +9,24 @@ info:
     version: v1.0
 openapi: 3.0.1
 paths:
+  "/profiles":
+    get:
+      description: "Gets the list of supported profiles"
+      responses:
+        200:
+          description: "Profiles descriptor list"
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ProfileDescriptor"
+                type: array
+            application/xml:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ProfileDescriptor"
+                type: array
+      tags: ["Profiles"]
   "/exports":
     post:
       description: "Create new export process"
@@ -188,6 +206,24 @@ components:
           description: "If true export process will be created in debug mode"
           type: boolean  
           default: false
+    ProfileDescriptor:
+      description: "This is the model representation for profile"
+      properties:
+        name:
+          description: "Profile name"
+          type: string 
+        profileId:
+          description: "Profile unique identifier"
+          type: string
+        criticityLevel:
+          description: "Criticity of datas associated with profile. "
+          type: string
+          enum: 
+            - high
+            - medium
+            - normal
+            - low
+          default: normal
     ExporterDescriptor:
       description: "This is the model representation for exporter"
       properties:

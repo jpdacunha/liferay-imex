@@ -54,7 +54,7 @@ public class ImexPropertiesModelRolePermissionReaderImpl implements ImexModelRol
 			}
 			
 		} else {
-			_log.error("Invalid configuration : no roles are defined. Please check  [" + ImExCorePropsKeys.PERMISSIONS_SUPPORTED_ROLES + "] is correctly defined");
+			_log.error("Invalid configuration : no roles are defined. Please check [" + ImExCorePropsKeys.PERMISSIONS_SUPPORTED_ROLES + "] is correctly defined");
 		}
 		
 		return liste;

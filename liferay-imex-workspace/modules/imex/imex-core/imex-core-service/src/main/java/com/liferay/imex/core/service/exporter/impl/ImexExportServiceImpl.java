@@ -10,6 +10,7 @@ import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.api.exporter.ImexExportService;
 import com.liferay.imex.core.api.exporter.model.ExporterRawContent;
 import com.liferay.imex.core.api.identifier.ProcessIdentifierGenerator;
+import com.liferay.imex.core.api.profile.ImexProfileService;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.service.ImexServiceBaseImpl;
 import com.liferay.imex.core.service.exporter.model.ExporterProcessIdentifierGenerator;
@@ -69,6 +70,9 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	private ImexCoreService imexCoreService;
+	
+	@Reference(cardinality=ReferenceCardinality.MANDATORY)
+	private ImexProfileService imexProfileService;
 
 	@Override
 	public String doExportAll() {
@@ -288,7 +292,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			File destDir = exporterRootDir;
 			
 			//Manage Profile
-			String profileDirName = imexCoreService.getValidProfile(profileId, bundle, exporter, configAsProperties);
+			String profileDirName = imexProfileService.getValidProfileId(profileId, bundle, exporter);
 			if (Validator.isNotNull(profileDirName)) {
 				
 				File profileDir = new File(exporterRootDir, profileDirName);
@@ -451,6 +455,14 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 
 	public void setImexCoreService(ImexCoreService imexCoreService) {
 		this.imexCoreService = imexCoreService;
+	}
+
+	public ImexProfileService getImexProfileService() {
+		return imexProfileService;
+	}
+
+	public void setImexProfileService(ImexProfileService imexProfileService) {
+		this.imexProfileService = imexProfileService;
 	}
 
 }

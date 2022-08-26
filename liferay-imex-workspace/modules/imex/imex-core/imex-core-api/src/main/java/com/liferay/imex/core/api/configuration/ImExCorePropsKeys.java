@@ -14,8 +14,6 @@ public interface ImExCorePropsKeys {
 	
 	public final static String DEFAULT_PROFILE_NAME = IMEX_PREFIX + ".default.profile.name";
 	
-	public final static String MANAGES_PROFILES_LIST = IMEX_PREFIX + ".managed.profiles.list";
-	
 	public final static String ARCHIVE_HISTORY_NUMBER = IMEX_PREFIX + ".archive.history.number";
 	
 	public final static String DISPLAY_EXECUTION_IN_LIFERAY_LOGS = IMEX_PREFIX + ".display.execution.in.liferay.logs";
@@ -27,5 +25,16 @@ public interface ImExCorePropsKeys {
 	public final static String RULE_SUFIX_KEY = "actions";
 	
 	public final static String REINIT_SUFIX_KEY = "reinit";
+	
+	//Profiles
+	public final static String PROFILE_PREFIX_KEY = IMEX_PREFIX + ".managed.profiles";
+	
+	public final static String PROFILE_NAME_SUFIX_KEY = "name";
+	
+	public final static String PROFILE_DESCRIPTION_SUFIX_KEY = "description";
+	
+	public final static String PROFILE_CRITICITY_SUFIX_KEY = "criticity";
+	
+	public final static String MANAGES_PROFILES_LIST = PROFILE_PREFIX_KEY + ".list";
 
 }

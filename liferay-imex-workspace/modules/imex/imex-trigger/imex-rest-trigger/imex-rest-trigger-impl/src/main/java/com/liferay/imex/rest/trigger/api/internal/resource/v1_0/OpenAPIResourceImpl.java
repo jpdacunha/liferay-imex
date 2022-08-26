@@ -74,6 +74,8 @@ public class OpenAPIResourceImpl {
 
 			add(ImportsResourceImpl.class);
 
+			add(ProfilesResourceImpl.class);
+
 			add(ReportsResourceImpl.class);
 
 			add(OpenAPIResourceImpl.class);

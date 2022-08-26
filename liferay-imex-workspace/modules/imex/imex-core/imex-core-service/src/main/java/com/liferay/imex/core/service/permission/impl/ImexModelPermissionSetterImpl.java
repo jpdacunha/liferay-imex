@@ -98,8 +98,8 @@ public class ImexModelPermissionSetterImpl implements ImexModelPermissionSetter 
 	
 			reportService.getPropertyMessage(_log, "Selected batch", batch.getBatchId());
 			reportService.getPropertyMessage(_log, "Permissions reinitialisation", reInitOnSet + "");
-			reportService.getPropertyMessage(_log, "Resource Name", resourceName);
-			reportService.getPropertyMessage(_log, "Resource Primary Key", resourcePrimKey);
+			reportService.getPropertyMessage(_log, "Resource name", resourceName);
+			reportService.getPropertyMessage(_log, "Resource primary key", resourcePrimKey);
 			
 			if (roleActions != null && roleActions.size() > 0) {
 				//Deleting previous setted permissions

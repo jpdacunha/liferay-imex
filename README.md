@@ -29,4 +29,7 @@ Imex is a tool designed to import / export datas from Liferay portal. For furthe
  - Adding sort feature to /importers / exportes Rest API
 
 # 1.4.6 Version
- Simplification of version management using -consumer-policy and -provider-policy in bnd's
+ - Simplification of version management using -consumer-policy and -provider-policy in bnd's
+
+# 1.4.7 Version
+ - Adding getSupportedProfiles endPoint

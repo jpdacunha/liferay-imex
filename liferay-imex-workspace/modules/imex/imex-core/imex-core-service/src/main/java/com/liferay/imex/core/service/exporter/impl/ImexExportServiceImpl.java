@@ -288,7 +288,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 			File destDir = exporterRootDir;
 			
 			//Manage Profile
-			String profileDirName = getValidProfile(profileId, bundle, exporter, configAsProperties);
+			String profileDirName = imexCoreService.getValidProfile(profileId, bundle, exporter, configAsProperties);
 			if (Validator.isNotNull(profileDirName)) {
 				
 				File profileDir = new File(exporterRootDir, profileDirName);

@@ -1,12 +1,9 @@
 package com.liferay.imex.rest.trigger.api.internal.resource.v1_0;
 
-import com.liferay.imex.core.api.configuration.ImExCorePropsKeys;
-import com.liferay.imex.core.api.configuration.ImexConfigurationService;
-import com.liferay.imex.core.api.configuration.model.ImexProperties;
+import com.liferay.imex.core.api.ImexCoreService;
 import com.liferay.imex.core.api.exporter.Exporter;
 import com.liferay.imex.core.api.exporter.ExporterTracker;
 import com.liferay.imex.core.util.configuration.OSGIServicePropsKeys;
-import com.liferay.imex.core.util.statics.CollectionUtil;
 import com.liferay.imex.rest.trigger.api.comparator.ExporterDescriptorNameComparator;
 import com.liferay.imex.rest.trigger.api.dto.v1_0.ExporterDescriptor;
 import com.liferay.imex.rest.trigger.api.resource.v1_0.ExportersResource;
@@ -18,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -43,7 +39,7 @@ public class ExportersResourceImpl extends BaseExportersResourceImpl {
 	private ExporterTracker trackerService;
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
-	protected ImexConfigurationService configurationService;
+	private ImexCoreService imexCoreService;
 
 	@Override
 	public Page<ExporterDescriptor> getExportersPage() throws Exception {
@@ -68,18 +64,16 @@ public class ExportersResourceImpl extends BaseExportersResourceImpl {
 				
 				ExporterDescriptor descriptor = new ExporterDescriptor();
 				descriptor.setDescription(description);
-				
 				descriptor.setName(name);
 				descriptor.setPriority(Integer.valueOf(priority));
-				descriptor.setProfiled(profiled);
 				descriptor.setRanking(ranking);
+
+				descriptor.setProfiled(profiled);
 				
-				ImexProperties config = new ImexProperties();
-				configurationService.loadCoreConfiguration(config);
-				Properties configAsProperties = config.getProperties();
-				
-				String[] supportedProfilesIds = CollectionUtil.getArray(configAsProperties.getProperty(ImExCorePropsKeys.MANAGES_PROFILES_LIST));
-				
+				String[] supportedProfilesIds = {};
+				if (profiled) {
+					supportedProfilesIds =	imexCoreService.getSupportedProfiles();					
+				}
 				descriptor.setSupportedProfilesIds(supportedProfilesIds);
 				
 				descriptors.add(descriptor);
@@ -104,15 +98,15 @@ public class ExportersResourceImpl extends BaseExportersResourceImpl {
 	protected void unsetExporterTracker(ExporterTracker trackerService) {
 		this.trackerService = null;
 	}
-	
-	public ImexConfigurationService getConfigurationService() {
-		return configurationService;
+
+	public ImexCoreService getImexCoreService() {
+		return imexCoreService;
 	}
 
-	public void setConfigurationService(ImexConfigurationService configurationService) {
-		this.configurationService = configurationService;
+	public void setImexCoreService(ImexCoreService imexCoreService) {
+		this.imexCoreService = imexCoreService;
 	}
-	
+
 	@Activate
 	protected void start() {
 		if (trackerService == null) {

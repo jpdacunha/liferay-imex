@@ -250,7 +250,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 				if (destDir != null) {
 				
 					//Manage Profile
-					String profileDirName = getValidProfile(profileId, bundle, importer, configAsProperties);
+					String profileDirName = imexCoreService.getValidProfile(profileId, bundle, importer, configAsProperties);
 					if (Validator.isNotNull(profileDirName)) {
 						
 						File profileDir = new File(destDir, profileDirName);			

@@ -59,9 +59,9 @@ public class SiteImporter implements Importer {
 	
 	private static final String DESCRIPTION = "SITE import";
 	
-	private static final String IMPORT_SITE_PRIVATE_PAGE_PARAMETER_PREFIX = "import.site.private.page.parameter.";
+	private static final String IMPORT_SITE_PRIVATE_PAGE_PARAMETER_PREFIX = ImExSiteImporterPropsKeys.IMPORT_SITE_PRIVATE_PAGE_PARAMETER_PREFIX;
 
-	private static final String IMPORT_SITE_PUBLIC_PAGE_PARAMETER_PREFIX = "import.site.public.page.parameter.";
+	private static final String IMPORT_SITE_PUBLIC_PAGE_PARAMETER_PREFIX = ImExSiteImporterPropsKeys.IMPORT_SITE_PUBLIC_PAGE_PARAMETER_PREFIX;
 
 	private static final Log _log = LogFactoryUtil.getLog(SiteImporter.class);
 

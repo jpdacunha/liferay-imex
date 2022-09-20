@@ -7,5 +7,7 @@ public interface ImExSiteExporterPropsKeys {
 	public static final Object EXPORT_SITE_PUBLIC_PAGE_ENABLED = "export.site.public.page.enabled";
 	public final static String EXPORT_SITE_ORDER_FRIENDLYURL_LIST = "export.site.order.friendlyUrls.list";
 	public final static String EXPORT_SITE_EXCLUDE_FRIENDLYURL_LIST = "export.site.exclude.friendlyUrls.list";
+	public final static String EXPORT_SITE_EXCLUDE_PUBLIC_LAYOUT_FRIENDLYURL_LIST = "export.site.exclude.public.layout.friendlyUrls.list";
+	public final static String EXPORT_SITE_EXCLUDE_PRIVATE_LAYOUT_FRIENDLYURL_LIST = "export.site.exclude.private.layout.friendlyUrls.list";
 
 }

@@ -50,6 +50,8 @@ public interface ImexExecutionReportService {
 	
 	/* Action messages */ 
 	
+	public void getDisabled(Log logger, String name, String item);
+	
 	public void getDisabled(Log logger, String name);
 	
 	public void getSkipped(Log logger, String name);

@@ -193,6 +193,10 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 		getMessage(logger, "[" + name + "] is currently [DISABLED]", 4);
 	}
 	
+	public void getDisabled(Log logger, String name, String item) {
+		getMessage(logger, "[" + name + "] for [" + item + "] is currently [DISABLED]", 4);
+	}
+	
 	public void getSkipped(Log logger, String name) {
 		getMessage(logger, "[" +name + "] [SKIPPED]", 4);
 	}

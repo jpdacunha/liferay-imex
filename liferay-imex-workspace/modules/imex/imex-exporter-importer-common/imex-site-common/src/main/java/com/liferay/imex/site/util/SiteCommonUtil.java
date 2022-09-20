@@ -144,6 +144,27 @@ public class SiteCommonUtil {
 		}
 		
 	}
+	
+	public static boolean isExcluded(List<String> friendlyUrlsToExclude, Group group) {
+		
+		if (group != null) {
+			
+			if (friendlyUrlsToExclude != null) {
+				
+				String friendlyURL = group.getFriendlyURL();
+				return friendlyUrlsToExclude.contains(friendlyURL);
+				
+			} else {
+				_log.debug("Unable to manage exclusion for null user. Returing default value.");
+				return false;
+			}
+			
+		} else {
+			_log.debug("Unable to manage exclusion for null group. Returing default value.");
+			return false;
+		}
+		
+	}
 
 	public static List<Group> manageExclusions(List<String> friendlyUrlsToExclude, List<Group> groups) {
 		

@@ -10,5 +10,7 @@ public interface ImExSiteImporterPropsKeys {
 	public final static String IMPORT_SITE_EXCLUDE_FRIENDLYURL_LIST = "import.site.exclude.friendlyUrls.list";
 	public final static String IMPORT_SITE_ON_MISSING = "import.site.on.missing";
 	public final static String IMPORT_SITE_ON_EXISTS = "import.site.on.exists";
+	public static final String IMPORT_SITE_PRIVATE_PAGE_PARAMETER_PREFIX = "import.site.private.page.parameter.";
+	public static final String IMPORT_SITE_PUBLIC_PAGE_PARAMETER_PREFIX = "import.site.public.page.parameter.";
 	
 }

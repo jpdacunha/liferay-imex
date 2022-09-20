@@ -54,6 +54,10 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 )
 public class SiteExporter implements Exporter {
 	
+	private static final String MSG_PRIVATE_LAYOUTS_EXPORT = "Private layouts export";
+
+	private static final String MSG_PUBLIC_LAYOUTS_EXPORT = "Public layouts export";
+
 	private static final String EXPORT_SITE_PRIVATE_PAGE_PARAMETER_PREFIX = "export.site.private.page.parameter.";
 
 	private static final String EXPORT_SITE_PUBLIC_PAGE_PARAMETER_PREFIX = "export.site.public.page.parameter.";
@@ -147,7 +151,6 @@ public class SiteExporter implements Exporter {
 			
 			if (siteDir.exists()) {
 			
-				boolean privateLayout;
 				String groupName = GroupUtil.getGroupName(group, locale);
 				String parentGroupIdFriendlyUrl = null;
 				
@@ -169,15 +172,7 @@ public class SiteExporter implements Exporter {
 					}
 				}
 		
-				if (publicPagesEnabled) {
-					privateLayout = false;
-					doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
-				}
-				
-				if (privatePagesEnabled) {
-					privateLayout = true;
-					doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
-				}
+				doExportPublicAndPrivateLar(user, config, locale, debug, privatePagesEnabled, publicPagesEnabled, group, siteDir);
 				
 				reportService.getOK(_log, groupName, "SITE : "  + groupName);
 				
@@ -191,12 +186,69 @@ public class SiteExporter implements Exporter {
 		
 	}
 
+	private void doExportPublicAndPrivateLar(
+			User user, 
+			Properties config, 
+			Locale locale, 
+			boolean debug,
+			boolean privatePagesEnabled, 
+			boolean publicPagesEnabled, 
+			Group group, 
+			File siteDir) throws PortalException {
+		
+		boolean privateLayout;
+		String itemMsg = "friendlyUrl:" + group.getFriendlyURL();
+		
+		//Exporting public layouts
+		if (publicPagesEnabled) {
+			if (isExcludedPublicLar(config, group)) {
+				reportService.getDisabled(_log, MSG_PUBLIC_LAYOUTS_EXPORT, itemMsg);
+			} else {
+				privateLayout = false;
+				doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
+			}					
+		} else {
+			reportService.getDisabled(_log, MSG_PUBLIC_LAYOUTS_EXPORT);
+		}
+		
+		//Exporting private layouts
+		if (privatePagesEnabled) {
+			if (isExcludedPrivateLar(config, group)) {
+				reportService.getDisabled(_log, MSG_PRIVATE_LAYOUTS_EXPORT, itemMsg);
+			} else {
+				privateLayout = true;
+				doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
+			}
+		} else {
+			reportService.getDisabled(_log, MSG_PRIVATE_LAYOUTS_EXPORT);
+		}
+		
+	}
+	
+	private boolean isExcludedPublicLar(Properties config, Group group) {
+		
+		String stringList = GetterUtil.getString(config.get(ImExSiteExporterPropsKeys.EXPORT_SITE_EXCLUDE_PUBLIC_LAYOUT_FRIENDLYURL_LIST));
+		List<String> friendlyUrls = CollectionUtil.getList(stringList);	
+		
+		return SiteCommonUtil.isExcluded(friendlyUrls, group);
+		
+	}
+	
+	private boolean isExcludedPrivateLar(Properties config, Group group) {
+		
+		String stringList = GetterUtil.getString(config.get(ImExSiteExporterPropsKeys.EXPORT_SITE_EXCLUDE_PRIVATE_LAYOUT_FRIENDLYURL_LIST));
+		List<String> friendlyUrls = CollectionUtil.getList(stringList);	
+		
+		return SiteCommonUtil.isExcluded(friendlyUrls, group);
+		
+	}
+
 	private List<Group> manageSitesOrder(Properties config, List<Group> groups) {
 		
 		String stringList = GetterUtil.getString(config.get(ImExSiteExporterPropsKeys.EXPORT_SITE_ORDER_FRIENDLYURL_LIST));
-		List<String> friendlyUrlsToExclude = CollectionUtil.getList(stringList);
+		List<String> friendlyUrls = CollectionUtil.getList(stringList);
 		
-		return SiteCommonUtil.managePriority(friendlyUrlsToExclude, groups);
+		return SiteCommonUtil.managePriority(friendlyUrls, groups);
 		
 	}
 	

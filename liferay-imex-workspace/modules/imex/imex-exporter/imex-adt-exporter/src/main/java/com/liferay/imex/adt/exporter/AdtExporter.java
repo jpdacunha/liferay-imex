@@ -27,6 +27,7 @@ import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -86,6 +87,8 @@ public class AdtExporter implements Exporter {
 			
 			if (types != null && types.size() > 0) {
 				
+				reportService.getMessage(_log, "Registered types to export : [" + Arrays.toString(types.toArray()) + "]");
+				
 				try {
 					
 					List<Group> groups = groupLocalService.getCompanyGroups(companyId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
@@ -96,7 +99,7 @@ public class AdtExporter implements Exporter {
 						if (isSite) {
 							reportService.getStartMessage(_log, group, locale);
 							for (String classType : types) {
-									doExport(config, group, adtDir, locale, debug, classType, rawContentToExport);	
+								doExport(config, group, adtDir, locale, debug, classType, rawContentToExport);	
 							}
 							reportService.getEndMessage(_log, group, locale);
 						} else {

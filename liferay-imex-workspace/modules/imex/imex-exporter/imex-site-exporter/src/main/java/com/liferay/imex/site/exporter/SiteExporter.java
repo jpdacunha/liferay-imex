@@ -16,6 +16,7 @@ import com.liferay.imex.site.exporter.configuration.ImExSiteExporterPropsKeys;
 import com.liferay.imex.site.model.ImexSite;
 import com.liferay.imex.site.service.SiteCommonService;
 import com.liferay.imex.site.util.SiteCommonUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.NoSuchGroupException;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -31,6 +32,7 @@ import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -198,14 +200,17 @@ public class SiteExporter implements Exporter {
 		
 		boolean privateLayout;
 		String itemMsg = "friendlyUrl:" + group.getFriendlyURL();
+		String friendlyUrl = group.getFriendlyURL();
 		
 		//Exporting public layouts
 		if (publicPagesEnabled) {
 			if (isExcludedPublicLar(config, group)) {
 				reportService.getDisabled(_log, MSG_PUBLIC_LAYOUTS_EXPORT, itemMsg);
 			} else {
+				reportService.getStartMessage(_log, "exporting PUBLIC LAR for group [" + friendlyUrl + "]");
 				privateLayout = false;
 				doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
+				reportService.getEndMessage(_log, "export of PUBLIC LAR for group [" + friendlyUrl + "]");
 			}					
 		} else {
 			reportService.getDisabled(_log, MSG_PUBLIC_LAYOUTS_EXPORT);
@@ -216,8 +221,10 @@ public class SiteExporter implements Exporter {
 			if (isExcludedPrivateLar(config, group)) {
 				reportService.getDisabled(_log, MSG_PRIVATE_LAYOUTS_EXPORT, itemMsg);
 			} else {
+				reportService.getStartMessage(_log, "exporting PRIVATE LAR for group [" + friendlyUrl + "]");
 				privateLayout = true;
 				doExportLar(user, config, group, siteDir, locale, privateLayout, debug);
+				reportService.getEndMessage(_log, "export of PRIVATE LAR for group [" + friendlyUrl + "]");
 			}
 		} else {
 			reportService.getDisabled(_log, MSG_PRIVATE_LAYOUTS_EXPORT);
@@ -261,16 +268,9 @@ public class SiteExporter implements Exporter {
 		
 	}
 	
-	
 	private void doExportLar(User user, Properties config, Group group, File siteDir, Locale locale, boolean privateLayout, boolean debug) throws PortalException {
 		
 		int exportType = ExportImportConfigurationConstants.TYPE_EXPORT_LAYOUT;
-		
-		String prefix = EXPORT_SITE_PUBLIC_PAGE_PARAMETER_PREFIX;
-		if (privateLayout) {
-			prefix = EXPORT_SITE_PRIVATE_PAGE_PARAMETER_PREFIX;
-		}
-		
 		long groupId = group.getGroupId();
 		long userId = user.getUserId();
 		String name = "IMEX : site export process";
@@ -278,7 +278,8 @@ public class SiteExporter implements Exporter {
 		
 		long[] layoutIds = SiteCommonUtil.ALL_LAYOUTS;
 		
-		Map<String, String[]> parameterMap = larService.buildParameterMapFromProperties(config, prefix);
+		//Standard parameter map
+		Map<String, String[]> parameterMap = builParameterMapFromConfig(config, privateLayout, group);
 		
 		Map<String, Serializable> settingsMap = ExportImportConfigurationSettingsMapFactoryUtil.buildExportLayoutSettingsMap(user, groupId, privateLayout, layoutIds, parameterMap);
 
@@ -288,6 +289,33 @@ public class SiteExporter implements Exporter {
 		
 		larService.doExport(exportImportConfiguration, siteDir, fileName);
 			
+	}
+	
+	private Map<String, String[]> builParameterMapFromConfig(Properties config, boolean privateLayout, Group group) {
+		
+		Map<String, String[]> parameterMap = new HashMap<>();
+	
+		String standardPrefix = EXPORT_SITE_PUBLIC_PAGE_PARAMETER_PREFIX;
+		if (privateLayout) {
+			standardPrefix = EXPORT_SITE_PRIVATE_PAGE_PARAMETER_PREFIX;
+		}
+	
+		Map<String, String[]> standardParametersMap = larService.buildParameterMapFromProperties(config, standardPrefix);
+		
+		String friendlyUrl = group.getFriendlyURL();
+		String overridePrefix = friendlyUrl.replaceAll(StringPool.SLASH, StringPool.BLANK) + StringPool.PERIOD;
+		Map<String, String[]> groupOverridedParametersMap = larService.buildParameterMapFromProperties(config, overridePrefix + standardPrefix);
+		
+		if (groupOverridedParametersMap != null && groupOverridedParametersMap.size() > 0) {
+			parameterMap.putAll(groupOverridedParametersMap);
+			reportService.getMessage(_log, "group [" + friendlyUrl + "] is using SPECIFIC parameter map : [" + CollectionUtil.toString(parameterMap) + "]");
+		} else {
+			parameterMap.putAll(standardParametersMap);
+			reportService.getMessage(_log, "group [" + friendlyUrl + "] is using STANDARD parameter map : [" + CollectionUtil.toString(parameterMap) + "]");
+		}
+		
+		return parameterMap;
+		 
 	}
 	
 	@Override

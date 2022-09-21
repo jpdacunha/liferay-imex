@@ -2,7 +2,6 @@ package com.liferay.imex.core.util.statics;
 
 import com.liferay.imex.core.util.exception.MissingKeyException;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.util.PropsUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,6 +85,20 @@ public class CollectionUtil {
 	public static String[] getArray(String value) {
 		List<String> list = getList(value);
 		return list.stream().toArray(String[]::new);
+	}
+	
+	public static <K> String toString(Map<String, K[]> map) {
+		
+		String returned = "";
+		
+		if (map != null) {
+			
+			returned = map.entrySet().stream().map(e -> e.getKey() + StringPool.EQUAL + Arrays.toString(e.getValue())).collect(Collectors.joining(StringPool.COMMA));
+			
+		}
+		
+		return returned;
+		
 	}
 	
 }

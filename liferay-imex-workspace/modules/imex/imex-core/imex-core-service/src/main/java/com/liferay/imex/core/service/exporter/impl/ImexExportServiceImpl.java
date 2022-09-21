@@ -115,6 +115,7 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 					}
 					
 					Map<String, ServiceReference<Exporter>> exporters = trackerService.getFilteredExporters(bundleNames);
+					reportService.printKeys(exporters, _log);
 					
 					if (exporters == null || exporters.size() == 0) {
 						
@@ -123,7 +124,6 @@ public class ImexExportServiceImpl extends ImexServiceBaseImpl implements ImexEx
 						if (bundleNames != null) {
 							reportService.getMessage(_log, "- A registered bundle exists for each typed name [" + bundleNames + "]");
 						}
-						reportService.printKeys(trackerService.getExporters(), _log);
 						
 					} else {
 						

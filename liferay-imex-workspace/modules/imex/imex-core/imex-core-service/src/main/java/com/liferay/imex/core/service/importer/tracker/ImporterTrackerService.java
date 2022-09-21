@@ -98,7 +98,7 @@ public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer
 	}
 
 	@Override
-	public Map<String, ServiceReference<Importer>> getImporters() {
+	public Map<String, ServiceReference<Importer>> getPriorizedImporters() {
 		return _serviceReferences.getMap();
 	}
 	
@@ -107,7 +107,8 @@ public class ImporterTrackerService implements ServiceTrackerCustomizer<Importer
 		
 		Map<String, ServiceReference<Importer>> filteredServiceReferences = null;
 		try {
-			filteredServiceReferences = CollectionUtil.filterByKeys(bundleNames, getImporters());
+			Map<String, ServiceReference<Importer>> importers = getPriorizedImporters();
+			filteredServiceReferences = CollectionUtil.filterByKeys(bundleNames, importers);
 		} catch (MissingKeyException e) {
 			reportService.getMessage(_log, "There's something wrong in your syntax : " + e.getMessage());
 		}

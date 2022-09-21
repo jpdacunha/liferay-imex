@@ -36,7 +36,7 @@ public class ListImporterCommand implements ImexCommand {
 
 	public void li() {
 		
-		Map<String, ServiceReference<Importer>> importers = trackerService.getImporters();
+		Map<String, ServiceReference<Importer>> importers = trackerService.getPriorizedImporters();
 		
 		if (importers != null && importers.size() > 0) {
 			

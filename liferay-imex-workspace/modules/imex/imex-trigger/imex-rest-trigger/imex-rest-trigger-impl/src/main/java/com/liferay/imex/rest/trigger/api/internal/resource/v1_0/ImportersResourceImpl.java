@@ -46,7 +46,7 @@ public class ImportersResourceImpl extends BaseImportersResourceImpl {
 		
 		List<ImporterDescriptor> descriptors = new ArrayList<>();
 		
-		Map<String, ServiceReference<Importer>> importers = trackerService.getImporters();
+		Map<String, ServiceReference<Importer>> importers = trackerService.getPriorizedImporters();
 		
 		if (importers != null && importers.size() > 0) {
 			

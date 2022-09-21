@@ -36,7 +36,7 @@ public class ListExporterCommand implements ImexCommand {
 
 	public void le() {
 		
-		Map<String, ServiceReference<Exporter>> exporters = trackerService.getExporters();
+		Map<String, ServiceReference<Exporter>> exporters = trackerService.getPriorizedExporters();
 		
 		if (exporters != null && exporters.size() > 0) {
 			

@@ -117,6 +117,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 					}
 					
 					Map<String, ServiceReference<Importer>> importers = trackerService.getFilteredImporters(bundleNames);
+					reportService.printKeys(importers, _log);
 					
 					if (importers == null || importers.size() == 0) {
 						
@@ -125,7 +126,7 @@ public class ImexImportServiceImpl extends ImexServiceBaseImpl implements ImexIm
 						if (bundleNames != null) {
 							reportService.getMessage(_log, "- A registered bundle exists for each typed name [" + bundleNames + "]");
 						}
-						reportService.printKeys(trackerService.getImporters(), _log);
+						
 						
 					} else {
 						

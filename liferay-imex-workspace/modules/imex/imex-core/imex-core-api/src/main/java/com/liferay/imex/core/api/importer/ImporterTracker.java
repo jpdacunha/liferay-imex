@@ -7,7 +7,7 @@ import org.osgi.framework.ServiceReference;
 
 public interface ImporterTracker {
 	
-	public Map<String, ServiceReference<Importer>> getImporters();
+	public Map<String, ServiceReference<Importer>> getPriorizedImporters();
 	
 	public Map<String, ServiceReference<Importer>> getFilteredImporters(List<String> bundleNames);
 

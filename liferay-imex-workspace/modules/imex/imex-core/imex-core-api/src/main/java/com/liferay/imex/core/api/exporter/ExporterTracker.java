@@ -7,7 +7,7 @@ import org.osgi.framework.ServiceReference;
 
 public interface ExporterTracker {
 	
-	public Map<String, ServiceReference<Exporter>> getExporters();
+	public Map<String, ServiceReference<Exporter>> getPriorizedExporters();
 	
 	public Map<String, ServiceReference<Exporter>> getFilteredExporters(List<String> bundleNames);
 

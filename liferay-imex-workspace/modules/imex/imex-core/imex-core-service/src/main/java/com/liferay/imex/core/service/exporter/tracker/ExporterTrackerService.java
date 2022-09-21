@@ -100,7 +100,7 @@ public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter
 	}
 
 	@Override
-	public Map<String, ServiceReference<Exporter>> getExporters() {
+	public Map<String, ServiceReference<Exporter>> getPriorizedExporters() {
 		return _serviceReferences.getMap();
 	}
 
@@ -109,7 +109,8 @@ public class ExporterTrackerService implements ServiceTrackerCustomizer<Exporter
 		
 		Map<String, ServiceReference<Exporter>> filteredServiceReferences = null;
 		try {
-			filteredServiceReferences = CollectionUtil.filterByKeys(bundleNames, getExporters());
+			Map<String, ServiceReference<Exporter>> exporters = getPriorizedExporters();
+			filteredServiceReferences = CollectionUtil.filterByKeys(bundleNames, exporters);
 		} catch (MissingKeyException e) {
 			reportService.getMessage(_log, "There's something wrong in your syntax : " + e.getMessage());
 		}

@@ -35,4 +35,5 @@ Imex is a tool designed to import / export datas from Liferay portal. For furthe
  - Adding getSupportedProfiles endPoint
 
 # 1.4.8 Version
- - Manage LAR export options per site. 
+ - Manage LAR export options per site.
+ - Fixing bug in exporter / importer priority (not working as expected) 

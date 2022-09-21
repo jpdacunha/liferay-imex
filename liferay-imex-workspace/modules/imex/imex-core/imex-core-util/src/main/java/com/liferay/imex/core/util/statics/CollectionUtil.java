@@ -5,7 +5,7 @@ import com.liferay.petra.string.StringPool;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,7 +40,8 @@ public class CollectionUtil {
 	 */
 	public static <K> Map<String, K> filterByKeys(List<String> keys, Map<String, K> toBefiltred) throws MissingKeyException {
 		
-		Map<String,K> filteredServiceReferences = new HashMap<String, K>();
+		//Important : linked hashmap in order to keep order of Map
+		Map<String,K> filteredServiceReferences = new LinkedHashMap<String, K>();
 		
 		if (keys != null && keys.size() > 0) {
 			

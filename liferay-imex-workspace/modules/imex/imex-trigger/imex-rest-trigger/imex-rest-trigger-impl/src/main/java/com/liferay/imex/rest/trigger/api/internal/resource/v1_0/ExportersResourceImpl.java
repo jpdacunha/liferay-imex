@@ -50,7 +50,7 @@ public class ExportersResourceImpl extends BaseExportersResourceImpl {
 		
 		List<ExporterDescriptor> descriptors = new ArrayList<>();
 		
-		Map<String, ServiceReference<Exporter>> exporters = trackerService.getExporters();
+		Map<String, ServiceReference<Exporter>> exporters = trackerService.getPriorizedExporters();
 		
 		if (exporters != null && exporters.size() > 0) {
 			

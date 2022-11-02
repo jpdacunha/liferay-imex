@@ -140,7 +140,7 @@ public class AdtExporter implements Exporter {
 					
 					if (groupDir.exists()) {
 						
-						//Iterate over structures
+						//Iterate over templates (ADT)
 						for(DDMTemplate ddmTemplate : adts){
 												
 							File adtDir = initializeSingleAdtExportDirectory(groupDir, classType);

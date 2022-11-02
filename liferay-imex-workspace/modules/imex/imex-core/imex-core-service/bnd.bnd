@@ -1,7 +1,7 @@
 Bundle-Activator: com.liferay.imex.core.service.ImexCoreActivator
 Bundle-Name: imex-core-service
 Bundle-SymbolicName: imex.core.service
-Bundle-Version: 1.4.8
+Bundle-Version: 1.4.8.1
 Export-Package: com.liferay.imex.core.api.serializer
 Import-Package: !android.*, \
 !dalvik.system.*, \

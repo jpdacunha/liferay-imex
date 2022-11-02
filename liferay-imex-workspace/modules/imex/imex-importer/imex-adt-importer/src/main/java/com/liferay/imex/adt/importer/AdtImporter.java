@@ -185,7 +185,8 @@ public class AdtImporter implements Importer {
 					boolean cacheable = imexAdt.isCacheable();
 					long classPK = 0;
 					
-					serviceContextTem.setUuid(imexAdt.getUuid());
+					String uuid = imexAdt.getUuid();
+					serviceContextTem.setUuid(uuid);
 					
 					serviceContextTem.setAddGroupPermissions(false);
 					serviceContextTem.setAddGuestPermissions(false);
@@ -193,7 +194,7 @@ public class AdtImporter implements Importer {
 					try {
 						
 						//Searching for existing template
-						template = dDMTemplateLocalService.getDDMTemplateByUuidAndGroupId(imexAdt.getUuid(), group.getGroupId());
+						template = dDMTemplateLocalService.getDDMTemplateByUuidAndGroupId(uuid, group.getGroupId());
 						
 						long templateId = template.getTemplateId();
 						

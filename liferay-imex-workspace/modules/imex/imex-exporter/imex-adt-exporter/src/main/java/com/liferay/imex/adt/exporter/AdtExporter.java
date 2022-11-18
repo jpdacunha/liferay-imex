@@ -155,7 +155,9 @@ public class AdtExporter implements Exporter {
 										
 										ImExAdt imexAdt = new ImExAdt(ddmTemplate, classType);
 										
-										processor.write(imexAdt, adtDir, FileNames.getAdtFileName(ddmTemplate, locale, processor.getFileExtension()));
+										String adtFileName = FileNames.getAdtFileName(ddmTemplate, locale, processor.getFileExtension());
+										
+										processor.write(imexAdt, adtDir, adtFileName);
 										
 										String rawFileName = FileNames.getGroupAdtFileName(ddmTemplate, group, locale, StringPool.PERIOD + imexAdt.getLangType());
 										rawContentToExport.add(new ExporterRawContent(rawFileName, imexAdt.getData()));

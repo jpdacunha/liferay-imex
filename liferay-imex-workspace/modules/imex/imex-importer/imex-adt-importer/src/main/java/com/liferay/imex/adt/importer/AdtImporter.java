@@ -7,6 +7,7 @@ import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalService;
 import com.liferay.imex.adt.FileNames;
 import com.liferay.imex.adt.importer.configuration.ImExAdtImporterPropsKeys;
 import com.liferay.imex.adt.model.ImExAdt;
+import com.liferay.imex.core.api.configuration.ImExCorePropsKeys;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.permission.ImexModelPermissionSetter;
 import com.liferay.imex.core.api.processor.ImexProcessor;
@@ -15,6 +16,7 @@ import com.liferay.imex.core.api.report.model.ImexOperationEnum;
 import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.imex.core.util.statics.GroupUtil;
 import com.liferay.imex.core.util.statics.ImexNormalizer;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
@@ -203,7 +205,10 @@ public class AdtImporter implements Importer {
 					} catch (NoSuchTemplateException e) {
 												
 						long groupId = group.getGroupId();
-						String templateKey = "imex-" + imexAdt.getKey() + "-" + counterLocalService.increment();
+						
+						String key = imexAdt.getKey();
+						
+						String templateKey = createImexAdtKey(key);
 						
 						boolean smallImage = false;
 						String smallImageURL = null;
@@ -253,6 +258,18 @@ public class AdtImporter implements Importer {
 		}
 
 		return template;
+		
+	}
+
+	private String createImexAdtKey(String key) {
+		
+		if (!key.contains(ImExCorePropsKeys.IMEX_PREFIX + StringPool.MINUS)) {
+			return ImExCorePropsKeys.IMEX_PREFIX + StringPool.MINUS + key + StringPool.MINUS + counterLocalService.increment();
+			
+		} else {
+			reportService.getWarn(_log, "Possible inconsistent key", "It seems the the ADT identified by [" + key + "] was previously created per IMEX as new ADT in the origin environment.");
+			return key;
+		}
 		
 	}
 	

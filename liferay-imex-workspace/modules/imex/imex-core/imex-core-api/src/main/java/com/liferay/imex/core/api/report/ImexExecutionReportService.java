@@ -72,6 +72,9 @@ public interface ImexExecutionReportService {
 	
 	public void getOK(Log logger, String key, String name, ImexOperationEnum operation);
 	
+	/* Warning messages */
+	public void getWarn(Log logger, String name, String error);
+	
 	/* Error messages */ 
 	
 	public void getError(Log logger, String name, String error);

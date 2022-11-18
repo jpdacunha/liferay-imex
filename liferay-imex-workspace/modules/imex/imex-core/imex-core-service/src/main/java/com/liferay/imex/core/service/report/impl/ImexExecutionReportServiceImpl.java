@@ -253,6 +253,11 @@ public class ImexExecutionReportServiceImpl implements ImexExecutionReportServic
 		
 	}
 	
+	/* Warning messages */ 
+	public void getWarn(Log logger, String name, String error) {
+		getMessage(logger, "[" + name + "] [ WARN ] : " + error, 4);
+	}
+	
 	/* Error messages */ 
 	
 	public void getError(Log logger, String name, String error) {

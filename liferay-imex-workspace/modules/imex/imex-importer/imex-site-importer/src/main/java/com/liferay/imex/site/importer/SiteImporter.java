@@ -1,12 +1,15 @@
 package com.liferay.imex.site.importer;
 
 import com.liferay.counter.kernel.service.CounterLocalService;
-import com.liferay.exportimport.kernel.configuration.constants.ExportImportConfigurationConstants;
 import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationSettingsMapFactoryUtil;
+import com.liferay.exportimport.kernel.configuration.constants.ExportImportConfigurationConstants;
 import com.liferay.exportimport.kernel.exception.LARFileNameException;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
+import com.liferay.imex.core.api.importer.ImportBehaviorManagerService;
 import com.liferay.imex.core.api.importer.Importer;
 import com.liferay.imex.core.api.lar.ImexLarService;
+import com.liferay.imex.core.api.model.OnExistsMethodEnum;
+import com.liferay.imex.core.api.model.OnMissingMethodEnum;
 import com.liferay.imex.core.api.processor.ImexProcessor;
 import com.liferay.imex.core.api.report.ImexExecutionReportService;
 import com.liferay.imex.core.util.statics.CollectionUtil;
@@ -14,10 +17,7 @@ import com.liferay.imex.core.util.statics.FileUtil;
 import com.liferay.imex.core.util.statics.ImexNormalizer;
 import com.liferay.imex.site.FileNames;
 import com.liferay.imex.site.importer.configuration.ImExSiteImporterPropsKeys;
-import com.liferay.imex.site.importer.service.ImportSiteBehaviorManagerService;
 import com.liferay.imex.site.model.ImexSite;
-import com.liferay.imex.site.model.OnExistsSiteMethodEnum;
-import com.liferay.imex.site.model.OnMissingSiteMethodEnum;
 import com.liferay.imex.site.service.SiteCommonService;
 import com.liferay.imex.site.util.SiteCommonUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -78,7 +78,7 @@ public class SiteImporter implements Importer {
 	protected ImexExecutionReportService reportService;
 	
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
-	protected ImportSiteBehaviorManagerService behaviorManagerService;
+	protected ImportBehaviorManagerService behaviorManagerService;
 		
 	@Reference(cardinality=ReferenceCardinality.MANDATORY)
 	protected SiteCommonService siteCommonService;
@@ -213,16 +213,16 @@ public class SiteImporter implements Importer {
 				
 				if (group == null) {
 				
-					OnMissingSiteMethodEnum createMethod = behaviorManagerService.getOnMissingBehavior(config, groupFriendlyUrl);
+					OnMissingMethodEnum createMethod = behaviorManagerService.getOnMissingBehavior(config, groupFriendlyUrl, ImExSiteImporterPropsKeys.IMPORT_SITE_ON_MISSING);
 
-					if (createMethod.getValue().equals(OnMissingSiteMethodEnum.CREATE.getValue())) {
+					if (createMethod.getValue().equals(OnMissingMethodEnum.CREATE.getValue())) {
 						
 						String stringList = GetterUtil.getString(config.get(ImExSiteImporterPropsKeys.IMPORT_SITE_LIFERAY_SYSTEM_GROUPS_FRIENDLYURL_LIST));
 						List<String> neverCreateFriendlyURLS = CollectionUtil.getList(stringList);
 						
 						if (neverCreateFriendlyURLS.contains(groupFriendlyUrl)){
 							
-							reportService.getError(_log, groupFriendlyUrl, "is evaluated as  [" + OnMissingSiteMethodEnum.CREATE.getValue() + "] but it appears to be a system group. Skipping creation");
+							reportService.getError(_log, groupFriendlyUrl, "is evaluated as  [" + OnMissingMethodEnum.CREATE.getValue() + "] but it appears to be a system group. Skipping creation");
 							getReportService().getSkipped(_log, groupFriendlyUrl);
 							
 						} else {
@@ -244,22 +244,22 @@ public class SiteImporter implements Importer {
 					
 				} else {
 					
-					OnExistsSiteMethodEnum duplicateMethod = behaviorManagerService.getOnExistsBehavior(config, group);
+					OnExistsMethodEnum duplicateMethod = behaviorManagerService.getOnExistsBehavior(config, groupFriendlyUrl, ImExSiteImporterPropsKeys.IMPORT_SITE_ON_EXISTS);
 					
-					if (!duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.SKIP.getValue())) {
+					if (!duplicateMethod.getValue().equals(OnExistsMethodEnum.SKIP.getValue())) {
 						
-						if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.UPDATE_GROUP_ONLY.getValue())) {
+						if (duplicateMethod.getValue().equals(OnExistsMethodEnum.PATCH.getValue())) {
 							
 							updateLiferayGroup(typeSettingsProperties, serviceContext, nameMap, descriptionMap, type, friendlyURL, active, membershipRestriction, manualMembership, inheritContent, defaultParentGroupId, group);
 							
 						} else {
 
 							//Si le group existe
-							if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.UPDATE.getValue())) {
+							if (duplicateMethod.getValue().equals(OnExistsMethodEnum.UPDATE.getValue())) {
 								
 								updateLiferayGroup(typeSettingsProperties, serviceContext, nameMap, descriptionMap, type, friendlyURL, active, membershipRestriction, manualMembership, inheritContent, defaultParentGroupId, group);
 								
-							} else if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.RECREATE.getValue())) {
+							} else if (duplicateMethod.getValue().equals(OnExistsMethodEnum.RECREATE.getValue())) {
 								
 								//Reseting parent group
 								siteCommonService.eraseSiteHierarchy(group);
@@ -270,7 +270,7 @@ public class SiteImporter implements Importer {
 								//Creating site again
 								group = groupLocalService.addGroup(userId, defaultParentGroupId, className, classPK, liveGroupId, nameMap, descriptionMap, type, manualMembership, membershipRestriction, friendlyURL, site, active, serviceContext);
 								
-							} else if (duplicateMethod.getValue().equals(OnExistsSiteMethodEnum.DELETE.getValue())) {
+							} else if (duplicateMethod.getValue().equals(OnExistsMethodEnum.DELETE.getValue())) {
 								
 								//Reseting parent group
 								siteCommonService.eraseSiteHierarchy(group);
@@ -468,16 +468,6 @@ public class SiteImporter implements Importer {
 	}
 
 
-	public ImportSiteBehaviorManagerService getBehaviorManagerService() {
-		return behaviorManagerService;
-	}
-
-
-	public void setBehaviorManagerService(ImportSiteBehaviorManagerService behaviorManagerService) {
-		this.behaviorManagerService = behaviorManagerService;
-	}
-
-
 	public SiteCommonService getSiteCommonService() {
 		return siteCommonService;
 	}
@@ -495,6 +485,14 @@ public class SiteImporter implements Importer {
 
 	public void setLarService(ImexLarService larService) {
 		this.larService = larService;
+	}
+
+	public ImportBehaviorManagerService getBehaviorManagerService() {
+		return behaviorManagerService;
+	}
+
+	public void setBehaviorManagerService(ImportBehaviorManagerService behaviorManagerService) {
+		this.behaviorManagerService = behaviorManagerService;
 	}
 
 }

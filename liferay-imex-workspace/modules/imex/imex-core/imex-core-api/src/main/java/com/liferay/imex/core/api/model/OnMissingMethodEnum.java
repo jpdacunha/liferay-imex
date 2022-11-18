@@ -1,18 +1,18 @@
-package com.liferay.imex.site.model;
+package com.liferay.imex.core.api.model;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
-public enum OnMissingSiteMethodEnum {
+public enum OnMissingMethodEnum {
 
 	SKIP ("SKIP"),
 	CREATE ("CREATE");
 	
-	private static Log _log = LogFactoryUtil.getLog(OnMissingSiteMethodEnum.class);
+	private static Log _log = LogFactoryUtil.getLog(OnMissingMethodEnum.class);
 	
 	private String value;
 	
-	private OnMissingSiteMethodEnum(String value) {
+	private OnMissingMethodEnum(String value) {
 		this.value = value;
 	}
 
@@ -20,10 +20,10 @@ public enum OnMissingSiteMethodEnum {
 		return value;
 	}
 	
-	public static OnMissingSiteMethodEnum fromValue(String text) {
+	public static OnMissingMethodEnum fromValue(String text) {
 		
 		if (text != null && !text.equals("")) {
-			for (OnMissingSiteMethodEnum b : OnMissingSiteMethodEnum.values()) {
+			for (OnMissingMethodEnum b : OnMissingMethodEnum.values()) {
 				if (text.equalsIgnoreCase(b.value)) {
 					return b;
 				}

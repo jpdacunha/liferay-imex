@@ -1,21 +1,21 @@
-package com.liferay.imex.site.model;
+package com.liferay.imex.core.api.model;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
-public enum OnExistsSiteMethodEnum {
+public enum OnExistsMethodEnum {
 	
 	SKIP ("SKIP"),
 	RECREATE ("RECREATE"),
 	DELETE ("DELETE"),
-	UPDATE_GROUP_ONLY ("UPDATE_GROUP_ONLY"),
+	PATCH ("PATCH"),
 	UPDATE ("UPDATE");
 	
-	private static Log _log = LogFactoryUtil.getLog(OnExistsSiteMethodEnum.class);
+	private static Log _log = LogFactoryUtil.getLog(OnExistsMethodEnum.class);
 	
 	private String value;
 	
-	private OnExistsSiteMethodEnum(String value) {
+	private OnExistsMethodEnum(String value) {
 		this.value = value;
 	}
 
@@ -23,10 +23,10 @@ public enum OnExistsSiteMethodEnum {
 		return value;
 	}
 	
-	public static OnExistsSiteMethodEnum fromValue(String text) {
+	public static OnExistsMethodEnum fromValue(String text) {
 		
 		if (text != null && !text.equals("")) {
-			for (OnExistsSiteMethodEnum b : OnExistsSiteMethodEnum.values()) {
+			for (OnExistsMethodEnum b : OnExistsMethodEnum.values()) {
 				if (text.equalsIgnoreCase(b.value)) {
 					return b;
 				}

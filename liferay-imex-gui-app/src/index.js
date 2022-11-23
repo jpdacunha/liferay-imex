@@ -21,14 +21,31 @@ const ErrorFallbackComponent = ({ error, componentStack, resetErrorBoundary }) =
   )
 }
 
-ReactDOM.render(
-  <React.StrictMode>
-    <ErrorBoundary FallbackComponent={ErrorFallbackComponent} onError={(error, componentStack) => { console.log('CATCHED ERROR : message : ' + error + ' | stack : ' + JSON.stringify(componentStack)) }}>
-      <App />
-    </ErrorBoundary>
-  </React.StrictMode>,
-  document.getElementById('root')
-)
+const ImexGui = () => {
+	return <React.StrictMode>
+          <ErrorBoundary FallbackComponent={ErrorFallbackComponent} onError={(error, componentStack) => { console.log('CATCHED ERROR : message : ' + error + ' | stack : ' + JSON.stringify(componentStack)) }}>
+            <App />
+          </ErrorBoundary>
+        </React.StrictMode>;
+};
+
+class WebComponent extends HTMLElement {
+  connectedCallback() {
+    ReactDOM.render(
+      <ImexGui />,
+      this
+    );
+  }
+}
+
+const ELEMENT_ID = 'imex-gui-app';
+
+if (!customElements.get(ELEMENT_ID)) {
+  console.log('Registering ' + ELEMENT_ID + ' as custom element');
+	customElements.define(ELEMENT_ID, WebComponent);
+} else {
+  console.log('Skipping registration for ' + ELEMENT_ID + ' (already registered)');
+} 
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
